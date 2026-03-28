@@ -25,7 +25,7 @@ if (process.env.HMR_HOST) {
 
 export default defineConfig({
   integrations: [mdx()],
-  site: 'https://treyturner.info',
+  site: 'https://astro.treyturner.info',
   vite: {
     server: {
       allowedHosts,
