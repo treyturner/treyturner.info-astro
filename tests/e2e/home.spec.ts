@@ -32,7 +32,7 @@ test.describe('Home page', () => {
     await page.goto('/');
     const linkedinLink = page.locator('a:has-text("LinkedIn")');
     await expect(linkedinLink).toBeVisible();
-    await expect(linkedinLink).toHaveAttribute('href', 'https://linkedin.com/in/treyturner');
+    await expect(linkedinLink).toHaveAttribute('href', 'https://www.linkedin.com/in/treyeturner/');
   });
 
   test('has navigation with expected links', async ({ page }) => {
