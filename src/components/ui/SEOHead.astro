@@ -1,0 +1,23 @@
+---
+import { buildSEOMeta } from '../../utils/seo';
+import type { SEOProps } from '../../utils/seo';
+import siteData from '../../data/site.json';
+
+interface Props extends SEOProps {}
+
+const props = Astro.props;
+
+const meta = buildSEOMeta(props, {
+  siteName: siteData.name,
+  defaultDescription: siteData.tagline,
+  siteURL: Astro.site?.toString() || 'https://treyturner.info',
+});
+---
+
+<title>{meta.title}</title>
+<meta name="description" content={meta.description} />
+<link rel="canonical" href={meta.canonicalURL} />
+<meta property="og:title" content={meta.ogTitle} />
+<meta property="og:description" content={meta.ogDescription} />
+<meta property="og:type" content={meta.ogType} />
+<meta property="og:url" content={meta.canonicalURL} />

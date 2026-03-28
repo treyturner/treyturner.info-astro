@@ -1,0 +1,57 @@
+---
+import navigation from '../../data/navigation.json';
+
+const currentPath = Astro.url.pathname;
+---
+
+<nav class="site-nav" aria-label="Main navigation">
+  <div class="container">
+    <ul class="nav-list">
+      {navigation.map((item) => (
+        <li>
+          <a
+            href={item.href}
+            class:list={['nav-link', { active: currentPath === item.href }]}
+            aria-current={currentPath === item.href ? 'page' : undefined}
+          >
+            {item.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</nav>
+
+<style>
+  .site-nav {
+    padding: var(--spacing-sm) 0;
+    background-color: var(--color-bg-secondary);
+  }
+
+  .nav-list {
+    display: flex;
+    gap: var(--spacing-md);
+    list-style: none;
+    flex-wrap: wrap;
+  }
+
+  .nav-link {
+    font-size: 0.9375rem;
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    transition: color var(--transition-fast), background-color var(--transition-fast);
+  }
+
+  .nav-link:hover {
+    color: var(--color-primary);
+    background-color: var(--color-bg);
+    text-decoration: none;
+  }
+
+  .nav-link.active {
+    color: var(--color-primary);
+    font-weight: 600;
+  }
+</style>
