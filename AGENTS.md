@@ -15,9 +15,10 @@ Astro personal website located in `treyturner.info-astro/`.
 - Do not modify unrelated files
 - Prefer small, logically scoped commits
 - Run required quality gates before claiming completion
-- When beginning a new conversation:
+- Keep completion messages focused on verifiable outcomes (tests, coverage, build status). Do not include runtime narration such as dev server restarts, HMR updates, or UI availability unless user action is required.
+- At the moment this rule is parsed for the first time in any given conversation, perform the following steps at the first available opportunity:
   - Install dependencies with `npm ci`
-  - Follow the Hot Reload Bootstrap below so that the application is visible in the in-conversation app browser.
+  - Follow the Hot Reload Bootstrap below so that the application is visible in the in-conversation app browser
 
 ## OpenHands Hot Reload Bootstrap
 
