@@ -1,8 +1,15 @@
 import { defineConfig } from 'vitest/config';
+import type { Reporter } from 'vitest/reporters';
+
+const reporters: (string | [string, Record<string, unknown>])[] = ['default'];
+if (process.env.CI) {
+  reporters.push(['allure-vitest/reporter', { resultsDir: './allure-results' }]);
+}
 
 export default defineConfig({
   test: {
     include: ['tests/unit/**/*.test.ts', 'src/**/*.test.ts'],
+    reporters: reporters as Reporter[],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov', 'json-summary'],

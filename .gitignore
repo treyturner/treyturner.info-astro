@@ -5,5 +5,7 @@ coverage/
 test-results/
 playwright-report/
 blob-report/
+allure-results/
+allure-report/
 .DS_Store
 *.log

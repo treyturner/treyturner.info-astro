@@ -67,6 +67,16 @@ jobs:
             /tmp/base-coverage/coverage-summary.json \
             coverage/coverage-summary.json
 
+      - name: Generate Allure HTML report
+        if: always()
+        shell: bash -euo pipefail {0}
+        run: |
+          if [ -d allure-results ]; then
+            npx allure generate allure-results -o allure-report --clean
+          else
+            echo "::warning::allure-results/ directory not found — skipping report generation"
+          fi
+
       - name: Upload coverage report
         if: always()
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
@@ -83,12 +93,21 @@ jobs:
           path: playwright-report/
           retention-days: 7
 
+      - name: Upload Allure report artifact
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        with:
+          name: allure-report
+          path: allure-report/
+          retention-days: 7
+
       # --- S3 report uploads (MinIO-backed) ---
       # Upload path format:
       #   s3://test-reports/treyturner.info-astro/<YYYY-mm-DD-HH-MM-SS>/<report-type>/...
       # Example:
       #   s3://test-reports/treyturner.info-astro/2026-03-28-05-43-00/coverage/...
       #   s3://test-reports/treyturner.info-astro/2026-03-28-05-43-00/playwright/...
+      #   s3://test-reports/treyturner.info-astro/2026-03-28-05-43-00/allure/...
 
       - name: Set report timestamp
         if: always()
@@ -126,6 +145,21 @@ jobs:
             echo "::warning::playwright-report/ directory not found — skipping S3 upload"
           fi
 
+      - name: Upload Allure report to S3
+        if: always()
+        shell: bash -euo pipefail {0}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ vars.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
+        run: |
+          S3_PREFIX="s3://test-reports/treyturner.info-astro/${{ steps.report-ts.outputs.ts }}/allure"
+          if [ -d allure-report ]; then
+            aws s3 cp --recursive --endpoint-url "${{ vars.S3_URL }}" allure-report/ "${S3_PREFIX}/"
+          else
+            echo "::warning::allure-report/ directory not found — skipping S3 upload"
+          fi
+
       - name: Add report links to job summary
         if: always()
         shell: bash -euo pipefail {0}
@@ -134,9 +168,11 @@ jobs:
           BASE="${{ vars.S3_URL }}/test-reports/treyturner.info-astro/${TS}"
           COV_URL="${BASE}/coverage/lcov-report/index.html"
           PW_URL="${BASE}/playwright/index.html"
+          ALLURE_URL="${BASE}/allure/index.html"
           {
             echo "## 📋 Test Reports"
             echo ""
             echo "- Coverage: [${COV_URL}](${COV_URL})"
             echo "- Playwright: [${PW_URL}](${PW_URL})"
+            echo "- Allure: [${ALLURE_URL}](${ALLURE_URL})"
           } >> "$GITHUB_STEP_SUMMARY"
