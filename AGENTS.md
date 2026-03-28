@@ -4,11 +4,20 @@
 
 Astro personal website located in `treyturner.info-astro/`.
 
-- Framework: Astro (latest) with MDX
+- Framework: Astro with MDX
 - Package manager: npm
 - Node: >=22.12.0
 
----
+## Agent Working Rules
+
+- Work only within the currently assigned iteration
+- Do not begin the next iteration unless explicitly instructed
+- Do not modify unrelated files
+- Prefer small, logically scoped commits
+- Run required quality gates before claiming completion
+- When beginning a new conversation:
+  - Install dependencies with `npm ci`
+  - Follow the Hot Reload Bootstrap below so that the application is visible in the in-conversation app browser.
 
 ## OpenHands Hot Reload Bootstrap
 
@@ -16,77 +25,56 @@ This repository is commonly developed inside OpenHands using the App tab with ho
 
 To enable this, the Astro dev server must be started in the background and configured to work through the OpenHands reverse proxy.
 
----
-
 ## External Host Model (Critical)
 
-OpenHands exposes container ports using the pattern:
+OpenHands exposes sandbox services using a public host derived from the externally assigned sandbox port, not the container's internal port.
 
-    https://{port}.openhands.treyturner.info
+- Astro dev server listens internally on `0.0.0.0:8011`
+- OpenHands maps that to an external URL such as:
 
-Example:
+    <https://33053.openhands.treyturner.info>
 
-- Dev server runs on container port `8011`
-- It is exposed as:
+We refer to this externally routable hostname as:
 
-    <https://8011.openhands.treyturner.info>
+    <work-host> = <external-port>.openhands.treyturner.info
 
-We refer to this as:
+This value must be used for:
 
-    <work-host> = {port}.openhands.treyturner.info
-
-This value must be used consistently for host validation, CORS, and HMR.
-
----
+- `ALLOWED_HOSTS`
+- `HMR_HOST`
+- derived CORS origins
 
 ## Required Configuration Invariants
-
-These must all be true for hot reload to work:
 
 ### 1. Dev server binding
 
     --host 0.0.0.0 --port 8011
 
-- Required so the reverse proxy can reach the server
-
----
-
 ### 2. Allowed hosts (Vite security)
 
     ALLOWED_HOSTS = <work-host>,openhands.treyturner.info
 
-Why:
+Both hosts must be allowed:
 
 - `<work-host>` serves the app
-- `openhands.treyturner.info` is the App tab origin (iframe)
+- `openhands.treyturner.info` is the App tab origin
 
 Both must be allowed or requests will be blocked.
 
----
-
-### 3. HMR configuration (critical)
+### 3. HMR configuration
 
     HMR_HOST = <work-host>
     HMR_PORT = 443
 
-Why:
-
-- Browser connects via HTTPS → must use WSS (port 443)
-- Must use the externally routable hostname, not localhost
-
----
+HMR must use the externally routable host over WSS, not localhost.
 
 ### 4. CORS behavior
 
-- CORS origins should be derived from `ALLOWED_HOSTS`
-- Prefix with `https://`
-- Do NOT use wildcard (`*`)
-
----
+- derive allowed origins from `ALLOWED_HOSTS`
+- prefix with `https://`
+- do not use wildcard `*`
 
 ## Startup Pattern (Known Good)
-
-Start the dev server in the background so the agent can continue working while hot reload updates the UI.
 
     nohup env \
       ALLOWED_HOSTS="<work-host>,openhands.treyturner.info" \
@@ -94,17 +82,12 @@ Start the dev server in the background so the agent can continue working while h
       HMR_PORT=443 \
       npx astro dev --host 0.0.0.0 --port 8011 > /tmp/astro-dev.log 2>&1 &
 
----
+## Quality Gates
 
-## Determining `<work-host>`
+Before claiming an iteration complete, run:
 
-- `<work-host>` corresponds to the externally exposed port
-- Format: `<port>.openhands.treyturner.info`
-
----
-
-## Notes
-
-- This setup is **environment-specific to OpenHands**
-- It is not required for local development
-- This is operational guidance for agents, not application logic
+- `npm run lint`
+- `npm run typecheck`
+- `npm run test:coverage`
+- `npm run build`
+- `npm run test:e2e`
