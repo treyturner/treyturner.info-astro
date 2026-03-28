@@ -15,7 +15,13 @@ export default defineConfig({
       reporter: ['text', 'lcov', 'json-summary'],
       reportsDirectory: './coverage',
       include: ['src/**/*.ts'],
-      exclude: ['src/**/*.astro', 'src/content/**', 'src/pages/**'],
+      exclude: [
+        'src/**/*.astro',
+        'src/content/**',
+        'src/pages/**',
+        // Declarative Astro collection wiring; meaningful coverage belongs on the imported schemas/logic
+        'src/content.config.ts',
+      ],
       thresholds: {
         lines: 80,
         branches: 80,
