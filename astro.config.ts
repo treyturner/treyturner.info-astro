@@ -9,6 +9,10 @@ if (process.env.ALLOWED_HOSTS) {
   );
 }
 
+const corsOrigins = allowedHosts
+  .filter((h) => h !== 'localhost')
+  .map((h) => `https://${h}`);
+
 let hmr: HmrOptions | undefined;
 if (process.env.HMR_HOST) {
   hmr = {
@@ -23,6 +27,10 @@ export default defineConfig({
   integrations: [mdx()],
   site: 'https://treyturner.info',
   vite: {
-    server: { allowedHosts, hmr },
+    server: {
+      allowedHosts,
+      hmr,
+      cors: corsOrigins.length ? { origin: corsOrigins } : undefined,
+    },
   },
 });
