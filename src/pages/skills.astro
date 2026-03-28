@@ -1,0 +1,77 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import skillsData from '../data/skills.json';
+---
+
+<BaseLayout title="Skills" description="Technical skills and areas of expertise spanning test automation, CI/CD, cloud infrastructure, and quality engineering.">
+  <section class="skills-page">
+    <h1>Skills</h1>
+    <p class="skills-intro">
+      Core competencies built over a decade of quality engineering, test automation, and infrastructure work.
+    </p>
+    <div class="skills-grid">
+      {skillsData.categories.map((category) => (
+        <div class="skill-category">
+          <h2>{category.name}</h2>
+          <ul class="skill-list">
+            {category.skills.map((skill) => (
+              <li class="skill-item">{skill}</li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .skills-page {
+    max-width: var(--content-width);
+    margin-inline: auto;
+  }
+
+  .skills-page h1 {
+    margin-bottom: var(--spacing-md);
+  }
+
+  .skills-intro {
+    color: var(--color-text-secondary);
+    font-size: 1.125rem;
+    margin-bottom: var(--spacing-2xl);
+  }
+
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+    gap: var(--spacing-xl);
+  }
+
+  .skill-category {
+    background-color: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-lg);
+  }
+
+  .skill-category h2 {
+    font-size: 1.125rem;
+    margin-bottom: var(--spacing-md);
+    color: var(--color-primary);
+  }
+
+  .skill-list {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+  }
+
+  .skill-item {
+    background-color: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    padding: var(--spacing-xs) var(--spacing-md);
+    font-size: 0.875rem;
+    color: var(--color-text);
+  }
+</style>

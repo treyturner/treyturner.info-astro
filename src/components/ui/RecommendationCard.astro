@@ -1,0 +1,99 @@
+---
+import type { Recommendation } from '../../schemas/recommendations';
+
+interface Props {
+  recommendation: Recommendation;
+}
+
+const { recommendation } = Astro.props;
+---
+
+<article class="recommendation-card">
+  <blockquote class="recommendation-text">
+    <p>{recommendation.text}</p>
+  </blockquote>
+  <footer class="recommendation-footer">
+    <div class="recommendation-author">
+      <strong>{recommendation.author}</strong>
+      <span class="recommendation-role">{recommendation.role} at {recommendation.company}</span>
+    </div>
+    <span class="recommendation-relationship">{recommendation.relationship}</span>
+  </footer>
+</article>
+
+<style>
+  .recommendation-card {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-xl);
+    background-color: var(--color-surface);
+  }
+
+  .recommendation-card + .recommendation-card {
+    margin-top: var(--spacing-xl);
+  }
+
+  .recommendation-text {
+    margin: 0 0 var(--spacing-lg) 0;
+    padding: 0;
+    border: none;
+  }
+
+  .recommendation-text p {
+    font-size: 1.0625rem;
+    line-height: 1.7;
+    color: var(--color-text);
+    font-style: italic;
+    margin-bottom: 0;
+  }
+
+  .recommendation-text p::before {
+    content: '\201C';
+    font-size: 1.5em;
+    color: var(--color-primary);
+    font-weight: 700;
+    margin-right: 0.1em;
+  }
+
+  .recommendation-text p::after {
+    content: '\201D';
+    font-size: 1.5em;
+    color: var(--color-primary);
+    font-weight: 700;
+    margin-left: 0.1em;
+  }
+
+  .recommendation-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .recommendation-author {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+
+  .recommendation-author strong {
+    font-size: 1rem;
+    color: var(--color-text);
+  }
+
+  .recommendation-role {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+  }
+
+  .recommendation-relationship {
+    font-size: 0.8125rem;
+    color: var(--color-text-secondary);
+    background-color: var(--color-bg-secondary);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-full);
+  }
+</style>
