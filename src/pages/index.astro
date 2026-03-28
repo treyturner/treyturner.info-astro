@@ -1,14 +1,75 @@
 ---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import siteData from '../data/site.json';
 ---
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Trey Turner</title>
-  </head>
-  <body>
-    <h1>Trey Turner</h1>
-    <p>Software Quality Architect / Staff SDET</p>
-  </body>
-</html>
+<BaseLayout>
+  <section class="vcard">
+    <h1 class="vcard-name">{siteData.name}</h1>
+    <p class="vcard-title">{siteData.title}</p>
+    <p class="vcard-tagline">{siteData.tagline}</p>
+    <div class="vcard-social">
+      <a href={siteData.social.github} target="_blank" rel="noopener noreferrer" class="social-link">
+        GitHub
+      </a>
+      <a href={siteData.social.linkedin} target="_blank" rel="noopener noreferrer" class="social-link">
+        LinkedIn
+      </a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .vcard {
+    max-width: var(--content-width);
+    margin-inline: auto;
+    text-align: center;
+    padding: var(--spacing-3xl) 0;
+  }
+
+  .vcard-name {
+    font-size: 3rem;
+    margin-bottom: var(--spacing-sm);
+    color: var(--color-text);
+  }
+
+  .vcard-title {
+    font-size: 1.25rem;
+    color: var(--color-text-secondary);
+    margin-bottom: var(--spacing-lg);
+    font-weight: 500;
+  }
+
+  .vcard-tagline {
+    font-size: 1.125rem;
+    color: var(--color-text-secondary);
+    max-width: 40rem;
+    margin-inline: auto;
+    margin-bottom: var(--spacing-2xl);
+    line-height: 1.7;
+  }
+
+  .vcard-social {
+    display: flex;
+    gap: var(--spacing-md);
+    justify-content: center;
+  }
+
+  .social-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text);
+    font-weight: 500;
+    transition: border-color var(--transition-fast), color var(--transition-fast);
+  }
+
+  .social-link:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    text-decoration: none;
+  }
+</style>
