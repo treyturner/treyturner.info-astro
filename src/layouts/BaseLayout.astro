@@ -1,0 +1,39 @@
+---
+import SEOHead from '../components/ui/SEOHead.astro';
+import Header from '../components/shell/Header.astro';
+import Nav from '../components/shell/Nav.astro';
+import Footer from '../components/shell/Footer.astro';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <SEOHead title={title} description={description} />
+  </head>
+  <body>
+    <Header />
+    <Nav />
+    <main class="container main-content">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>
+
+<style>
+  .main-content {
+    padding-top: var(--spacing-2xl);
+    padding-bottom: var(--spacing-2xl);
+    flex: 1;
+  }
+</style>

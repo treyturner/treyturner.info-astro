@@ -1,0 +1,8 @@
+[
+  { "label": "Home", "href": "/" },
+  { "label": "Skills", "href": "/skills" },
+  { "label": "Experience", "href": "/experience" },
+  { "label": "Recommendations", "href": "/recommendations" },
+  { "label": "Homelab", "href": "/homelab" },
+  { "label": "Blog", "href": "/blog" }
+]

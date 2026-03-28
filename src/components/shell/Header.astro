@@ -1,0 +1,28 @@
+---
+import siteData from '../../data/site.json';
+---
+
+<header class="site-header">
+  <div class="container">
+    <a href="/" class="site-title">{siteData.name}</a>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    padding: var(--spacing-md) 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .site-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-text);
+    text-decoration: none;
+  }
+
+  .site-title:hover {
+    color: var(--color-primary);
+    text-decoration: none;
+  }
+</style>
