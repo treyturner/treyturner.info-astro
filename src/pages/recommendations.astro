@@ -1,0 +1,40 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import RecommendationCard from '../components/ui/RecommendationCard.astro';
+import { getCollection } from 'astro:content';
+import { sortByOrder } from '../utils/content';
+
+const recommendationEntries = await getCollection('recommendations');
+const sorted = sortByOrder(recommendationEntries);
+---
+
+<BaseLayout title="Recommendations" description="Professional endorsements and recommendations from colleagues and managers.">
+  <section class="recommendations-page">
+    <h1>Recommendations</h1>
+    <p class="recommendations-intro">
+      What colleagues and managers have said about working together.
+    </p>
+    <div class="recommendations-list">
+      {sorted.map((entry) => (
+        <RecommendationCard recommendation={entry.data} />
+      ))}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .recommendations-page {
+    max-width: var(--content-width);
+    margin-inline: auto;
+  }
+
+  .recommendations-page h1 {
+    margin-bottom: var(--spacing-md);
+  }
+
+  .recommendations-intro {
+    color: var(--color-text-secondary);
+    font-size: 1.125rem;
+    margin-bottom: var(--spacing-2xl);
+  }
+</style>

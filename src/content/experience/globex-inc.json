@@ -1,0 +1,14 @@
+{
+  "company": "Globex Inc",
+  "role": "Senior SDET",
+  "startDate": "2017-06",
+  "endDate": "2021-02",
+  "description": "Designed and maintained end-to-end test suites for a cloud-native SaaS platform, collaborating closely with development teams to integrate quality into the SDLC.",
+  "highlights": [
+    "Built a Selenium-based test framework supporting parallel execution across 3 browser targets",
+    "Implemented API contract testing with Pact, catching 30+ integration issues pre-deployment",
+    "Created performance test suites using k6, establishing baseline metrics for critical user flows",
+    "Drove adoption of Docker-based test environments, eliminating 'works on my machine' failures"
+  ],
+  "order": 1
+}

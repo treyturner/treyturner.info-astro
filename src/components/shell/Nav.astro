@@ -1,7 +1,8 @@
 ---
 import navigation from '../../data/navigation.json';
 
-const currentPath = Astro.url.pathname;
+const rawPath = Astro.url.pathname;
+const currentPath = rawPath.endsWith('/') && rawPath !== '/' ? rawPath.slice(0, -1) : rawPath;
 ---
 
 <nav class="site-nav" aria-label="Main navigation">

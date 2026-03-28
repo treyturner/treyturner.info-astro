@@ -1,0 +1,9 @@
+{
+  "author": "Marcus Johnson",
+  "role": "Principal Software Engineer",
+  "company": "Acme Corp",
+  "relationship": "Colleague",
+  "text": "Working alongside Trey fundamentally changed how I think about software quality. He doesn't just find bugs — he builds systems that prevent them. His test automation frameworks are as well-engineered as any production code I've seen, and his mentorship helped our entire team level up their testing practices.",
+  "date": "2024-06",
+  "order": 1
+}

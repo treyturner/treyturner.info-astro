@@ -1,0 +1,113 @@
+---
+import { formatDateRange } from '../../schemas/experience';
+import type { Experience } from '../../schemas/experience';
+
+interface Props {
+  experience: Experience;
+}
+
+const { experience } = Astro.props;
+const dateRange = formatDateRange(experience.startDate, experience.endDate);
+const isCurrent = !experience.endDate;
+---
+
+<article class="experience-card">
+  <div class="experience-header">
+    <div>
+      <h2 class="experience-role">{experience.role}</h2>
+      <p class="experience-company">{experience.company}</p>
+    </div>
+    <div class="experience-meta">
+      <time class="experience-dates">{dateRange}</time>
+      {isCurrent && <span class="experience-badge">Current</span>}
+    </div>
+  </div>
+  <p class="experience-description">{experience.description}</p>
+  <ul class="experience-highlights">
+    {experience.highlights.map((highlight) => (
+      <li>{highlight}</li>
+    ))}
+  </ul>
+</article>
+
+<style>
+  .experience-card {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-xl);
+    background-color: var(--color-surface);
+  }
+
+  .experience-card + .experience-card {
+    margin-top: var(--spacing-xl);
+  }
+
+  .experience-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+  }
+
+  .experience-role {
+    font-size: 1.25rem;
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .experience-company {
+    color: var(--color-primary);
+    font-weight: 500;
+    margin-bottom: 0;
+  }
+
+  .experience-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    flex-shrink: 0;
+  }
+
+  .experience-dates {
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
+  }
+
+  .experience-badge {
+    background-color: var(--color-primary);
+    color: var(--color-bg);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-full);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .experience-description {
+    color: var(--color-text-secondary);
+    margin-bottom: var(--spacing-md);
+  }
+
+  .experience-highlights {
+    list-style: none;
+    padding: 0;
+  }
+
+  .experience-highlights li {
+    position: relative;
+    padding-left: var(--spacing-lg);
+    margin-bottom: var(--spacing-sm);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+  }
+
+  .experience-highlights li::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: var(--color-primary);
+    font-weight: 700;
+  }
+</style>

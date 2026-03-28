@@ -1,0 +1,40 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ExperienceCard from '../components/ui/ExperienceCard.astro';
+import { getCollection } from 'astro:content';
+import { sortByOrder } from '../utils/content';
+
+const experienceEntries = await getCollection('experience');
+const sorted = sortByOrder(experienceEntries);
+---
+
+<BaseLayout title="Experience" description="Professional experience in software quality engineering, test automation, and CI/CD across enterprise and SaaS environments.">
+  <section class="experience-page">
+    <h1>Work Experience</h1>
+    <p class="experience-intro">
+      A track record of building quality into software through automation, tooling, and engineering culture.
+    </p>
+    <div class="experience-list">
+      {sorted.map((entry) => (
+        <ExperienceCard experience={entry.data} />
+      ))}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .experience-page {
+    max-width: var(--content-width);
+    margin-inline: auto;
+  }
+
+  .experience-page h1 {
+    margin-bottom: var(--spacing-md);
+  }
+
+  .experience-intro {
+    color: var(--color-text-secondary);
+    font-size: 1.125rem;
+    margin-bottom: var(--spacing-2xl);
+  }
+</style>
