@@ -74,3 +74,65 @@ jobs:
           name: coverage-report
           path: coverage/
           retention-days: 7
+
+      - name: Upload Playwright report artifact
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+      # --- S3 report uploads (MinIO-backed) ---
+      # Upload path format:
+      #   s3://test-reports/treyturner.info-astro/<YYYY-mm-DD-HH-MM-SS>/<report-type>/...
+      # Example:
+      #   s3://test-reports/treyturner.info-astro/2026-03-28-05-43-00/coverage/...
+      #   s3://test-reports/treyturner.info-astro/2026-03-28-05-43-00/playwright/...
+
+      - name: Set report timestamp
+        if: always()
+        id: report-ts
+        shell: bash -euo pipefail {0}
+        run: echo "ts=$(date -u +'%Y-%m-%d-%H-%M-%S')" >> "$GITHUB_OUTPUT"
+
+      - name: Upload coverage report to S3
+        if: always()
+        shell: bash -euo pipefail {0}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ vars.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
+        run: |
+          S3_PREFIX="s3://test-reports/treyturner.info-astro/${{ steps.report-ts.outputs.ts }}/coverage"
+          if [ -d coverage ]; then
+            aws s3 cp --recursive --endpoint-url "${{ vars.S3_URL }}" coverage/ "${S3_PREFIX}/"
+            echo "::notice::Coverage report uploaded to ${S3_PREFIX}/"
+          else
+            echo "::warning::coverage/ directory not found — skipping S3 upload"
+          fi
+
+      - name: Upload Playwright report to S3
+        if: always()
+        shell: bash -euo pipefail {0}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ vars.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
+        run: |
+          S3_PREFIX="s3://test-reports/treyturner.info-astro/${{ steps.report-ts.outputs.ts }}/playwright"
+          if [ -d playwright-report ]; then
+            aws s3 cp --recursive --endpoint-url "${{ vars.S3_URL }}" playwright-report/ "${S3_PREFIX}/"
+            echo "::notice::Playwright report uploaded to ${S3_PREFIX}/"
+          else
+            echo "::warning::playwright-report/ directory not found — skipping S3 upload"
+          fi
+
+      - name: Annotate run with report links
+        if: always()
+        shell: bash -euo pipefail {0}
+        run: |
+          TS="${{ steps.report-ts.outputs.ts }}"
+          BASE_URL="${{ vars.S3_URL }}/test-reports/treyturner.info-astro/${TS}"
+          echo "::notice title=📊 Coverage Report::${BASE_URL}/coverage/lcov-report/index.html"
+          echo "::notice title=🎭 Playwright Report::${BASE_URL}/playwright/index.html"
