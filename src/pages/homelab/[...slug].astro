@@ -1,0 +1,25 @@
+---
+import HomelabPostLayout from '../../layouts/HomelabPostLayout.astro';
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import { filterDrafts } from '../../utils/content';
+
+export async function getStaticPaths() {
+  const allPosts = await getCollection('homelab');
+  const posts = filterDrafts(allPosts, import.meta.env.PROD);
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+}
+
+interface Props {
+  post: CollectionEntry<'homelab'>;
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+---
+
+<HomelabPostLayout frontmatter={post.data}>
+  <Content />
+</HomelabPostLayout>

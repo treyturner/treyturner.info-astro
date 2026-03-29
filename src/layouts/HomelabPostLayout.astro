@@ -1,0 +1,163 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import { formatHomelabDate } from '../schemas/homelab';
+import type { HomelabFrontmatter } from '../schemas/homelab';
+
+interface Props {
+  frontmatter: HomelabFrontmatter;
+}
+
+const { frontmatter } = Astro.props;
+---
+
+<BaseLayout title={frontmatter.title} description={frontmatter.description}>
+  <article class="homelab-post">
+    <header class="homelab-post-header">
+      <h1 class="homelab-post-title">{frontmatter.title}</h1>
+      <div class="homelab-post-meta">
+        <time class="homelab-post-date" datetime={frontmatter.date.toISOString()}>
+          {formatHomelabDate(frontmatter.date)}
+        </time>
+        <span class="homelab-post-category">{frontmatter.category}</span>
+        {frontmatter.tags.length > 0 && (
+          <ul class="homelab-post-tags">
+            {frontmatter.tags.map((tag) => (
+              <li class="homelab-post-tag">{tag}</li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </header>
+    <div class="homelab-post-content">
+      <slot />
+    </div>
+    <footer class="homelab-post-footer">
+      <a href="/homelab" class="back-link">&larr; Back to Homelab</a>
+    </footer>
+  </article>
+</BaseLayout>
+
+<style>
+  .homelab-post {
+    max-width: var(--content-width);
+    margin-inline: auto;
+  }
+
+  .homelab-post-header {
+    margin-bottom: var(--spacing-2xl);
+    padding-bottom: var(--spacing-lg);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .homelab-post-title {
+    margin-bottom: var(--spacing-md);
+  }
+
+  .homelab-post-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+    flex-wrap: wrap;
+  }
+
+  .homelab-post-date {
+    color: var(--color-text-secondary);
+    font-size: 0.9375rem;
+  }
+
+  .homelab-post-category {
+    font-size: 0.8125rem;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background-color: var(--color-primary);
+    color: white;
+    border-radius: var(--radius-full);
+    font-weight: 600;
+    text-transform: capitalize;
+  }
+
+  .homelab-post-tags {
+    display: flex;
+    gap: var(--spacing-sm);
+    list-style: none;
+    flex-wrap: wrap;
+  }
+
+  .homelab-post-tag {
+    font-size: 0.8125rem;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background-color: var(--color-bg-secondary);
+    border-radius: var(--radius-full);
+    color: var(--color-text-secondary);
+  }
+
+  .homelab-post-content {
+    line-height: 1.8;
+  }
+
+  .homelab-post-content :global(h2) {
+    margin-top: var(--spacing-2xl);
+    margin-bottom: var(--spacing-md);
+  }
+
+  .homelab-post-content :global(h3) {
+    margin-top: var(--spacing-xl);
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .homelab-post-content :global(p) {
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .homelab-post-content :global(ul),
+  .homelab-post-content :global(ol) {
+    margin-bottom: var(--spacing-lg);
+    padding-left: var(--spacing-xl);
+  }
+
+  .homelab-post-content :global(li) {
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .homelab-post-content :global(pre) {
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .homelab-post-content :global(blockquote) {
+    border-left: 3px solid var(--color-primary);
+    padding-left: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+    color: var(--color-text-secondary);
+    font-style: italic;
+  }
+
+  .homelab-post-content :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .homelab-post-content :global(th),
+  .homelab-post-content :global(td) {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 1px solid var(--color-border);
+    text-align: left;
+  }
+
+  .homelab-post-content :global(th) {
+    background-color: var(--color-bg-secondary);
+    font-weight: 600;
+  }
+
+  .homelab-post-footer {
+    margin-top: var(--spacing-2xl);
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-weight: 500;
+  }
+</style>

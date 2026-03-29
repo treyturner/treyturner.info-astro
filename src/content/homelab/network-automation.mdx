@@ -1,0 +1,49 @@
+---
+title: "Automating Home Network Management with Ansible"
+date: 2024-07-10
+description: "Using Ansible to manage VLANs, firewall rules, and DNS across a UniFi and pfSense homelab network."
+tags: ["ansible", "networking", "automation"]
+category: "networking"
+---
+
+Managing a homelab network manually gets tedious fast, especially once VLANs, firewall rules, and DNS records start piling up. Ansible brings repeatability to the process.
+
+## Network Topology
+
+The network is built around two core components:
+
+- **pfSense** — router and firewall running on a dedicated mini PC
+- **UniFi switches and APs** — managed layer-2 switching and wireless
+
+All configuration changes flow through Ansible playbooks stored in a Git repository, giving me version control and a clear audit trail.
+
+## VLAN Segmentation
+
+I maintain several VLANs for isolation:
+
+| VLAN | Name       | Purpose                       |
+|------|------------|-------------------------------|
+| 10   | Management | Infrastructure devices        |
+| 20   | Servers    | Proxmox nodes and VMs         |
+| 30   | IoT        | Smart home devices            |
+| 40   | Guest      | Visitor Wi-Fi                 |
+
+## DNS and DHCP
+
+Internal DNS runs on a pair of Pi-hole instances behind keepalived for failover. Ansible manages the custom DNS entries:
+
+```yaml
+# roles/pihole/tasks/custom-dns.yml
+- name: Deploy custom DNS records
+  ansible.builtin.template:
+    src: custom.list.j2
+    dest: /etc/pihole/custom.list
+    owner: pihole
+    group: pihole
+    mode: '0644'
+  notify: restart pihole-FTL
+```
+
+## Results
+
+Since automating the network configuration, recovery from hardware failures has dropped from hours to minutes. A full network rebuild from scratch takes under 30 minutes with a single `ansible-playbook site.yml` command.

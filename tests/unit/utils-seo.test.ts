@@ -73,6 +73,7 @@ describe('buildSEOMeta', () => {
     expect(meta.ogType).toBe('website');
     expect(meta.ogTitle).toBe(meta.title);
     expect(meta.ogDescription).toBe(meta.description);
+    expect(meta.ogSiteName).toBe('Trey Turner');
   });
 
   it('uses defaults when props are empty', () => {

@@ -1,0 +1,52 @@
+---
+title: "Building a Proxmox Cluster for Development and Testing"
+date: 2024-08-15
+description: "How I set up a three-node Proxmox cluster to run VMs and containers for CI runners, integration testing, and service development."
+tags: ["proxmox", "virtualization", "infrastructure"]
+category: "compute"
+---
+
+Running a local Proxmox cluster has been one of the most impactful additions to my homelab. It gives me a dedicated environment for spinning up VMs and containers on demand.
+
+## Why Proxmox?
+
+Proxmox VE is a free, open-source virtualization platform based on Debian. It combines KVM for VMs and LXC for containers in a single management interface.
+
+### Key Benefits
+
+- **No licensing costs** — full-featured hypervisor at zero cost
+- **Web UI and API** — manage everything from a browser or automate with scripts
+- **Clustering** — built-in high availability across multiple nodes
+- **ZFS support** — enterprise-grade storage with snapshots and replication
+
+## Cluster Layout
+
+My cluster consists of three nodes:
+
+1. **pve-01** — primary node, 64 GB RAM, Ryzen 7 5700G
+2. **pve-02** — secondary node, 32 GB RAM, Ryzen 5 5600G
+3. **pve-03** — lightweight node, 16 GB RAM, Intel N100
+
+Each node runs ZFS on mirrored NVMe drives for local storage, with a shared NFS mount for ISOs and backups.
+
+## Typical Workloads
+
+```bash
+# Create a new LXC container for a CI runner
+pct create 200 local:vztmpl/debian-12-standard_12.2-1_amd64.tar.zst \
+  --hostname ci-runner-01 \
+  --memory 4096 \
+  --cores 4 \
+  --net0 name=eth0,bridge=vmbr0,ip=dhcp
+```
+
+I run a mix of workloads across the cluster:
+
+- **GitLab Runners** for CI/CD pipelines
+- **MinIO** for S3-compatible object storage
+- **Postgres and Redis** instances for integration testing
+- **Development VMs** with full desktop environments for manual testing
+
+## Lessons Learned
+
+The biggest takeaway from running Proxmox at home is that infrastructure-as-code principles apply just as well in a homelab as they do in the cloud. Automating VM provisioning with Ansible playbooks and Terraform providers has made the whole setup reproducible and easy to maintain.
