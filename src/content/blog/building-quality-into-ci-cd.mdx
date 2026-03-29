@@ -1,0 +1,40 @@
+---
+title: "Building Quality Into CI/CD Pipelines"
+date: 2024-08-15
+description: "Practical strategies for embedding quality gates, test automation, and coverage enforcement into your CI/CD workflows."
+tags: ["ci-cd", "testing", "automation"]
+---
+
+Quality cannot be tested in at the end — it must be built into every stage of the delivery pipeline.
+
+## Start With Fast Feedback
+
+The first principle of a healthy pipeline is fast feedback. Developers should know within minutes whether their change breaks something.
+
+### Layered Test Strategy
+
+A well-structured pipeline runs tests in layers:
+
+1. **Static analysis** — lint and type checks catch issues before runtime.
+2. **Unit tests** — fast, isolated, and covering core logic.
+3. **Integration tests** — verify component interactions.
+4. **E2E tests** — confirm critical user flows in a real browser.
+
+## Coverage as a Safety Net
+
+Coverage thresholds prevent erosion over time. A minimum of 80% across lines, branches, functions, and statements is a reasonable baseline for most projects.
+
+```yaml
+coverage:
+  thresholds:
+    lines: 80
+    branches: 80
+    functions: 80
+    statements: 80
+```
+
+## Fail Fast, Fix Fast
+
+If a check fails, the pipeline should stop immediately. No point running E2E tests if the build is broken.
+
+The goal is a green pipeline that gives the team confidence to ship.

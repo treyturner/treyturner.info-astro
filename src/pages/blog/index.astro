@@ -1,0 +1,59 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import BlogCard from '../../components/ui/BlogCard.astro';
+import { getCollection } from 'astro:content';
+import { sortByDate, filterDrafts } from '../../utils/content';
+
+const allPosts = await getCollection('blog');
+const published = filterDrafts(allPosts, import.meta.env.PROD);
+const sorted = sortByDate(published);
+---
+
+<BaseLayout title="Blog" description="Articles on software quality, test automation, CI/CD, and engineering culture.">
+  <section class="blog-page">
+    <h1>Blog</h1>
+    <p class="blog-intro">
+      Writing about software quality, test automation, and the tools and practices that make teams ship with confidence.
+    </p>
+    {sorted.length > 0 ? (
+      <ul class="blog-list">
+        {sorted.map((post) => (
+          <li>
+            <BlogCard post={post} />
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p class="blog-empty">No posts yet. Check back soon!</p>
+    )}
+  </section>
+</BaseLayout>
+
+<style>
+  .blog-page {
+    max-width: var(--content-width);
+    margin-inline: auto;
+  }
+
+  .blog-page h1 {
+    margin-bottom: var(--spacing-md);
+  }
+
+  .blog-intro {
+    color: var(--color-text-secondary);
+    font-size: 1.125rem;
+    margin-bottom: var(--spacing-2xl);
+  }
+
+  .blog-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+  }
+
+  .blog-empty {
+    color: var(--color-text-secondary);
+    font-style: italic;
+  }
+</style>
