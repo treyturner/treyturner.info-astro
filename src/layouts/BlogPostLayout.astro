@@ -1,0 +1,134 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import { formatBlogDate } from '../schemas/blog';
+import type { BlogFrontmatter } from '../schemas/blog';
+
+interface Props {
+  frontmatter: BlogFrontmatter;
+}
+
+const { frontmatter } = Astro.props;
+---
+
+<BaseLayout title={frontmatter.title} description={frontmatter.description}>
+  <article class="blog-post">
+    <header class="blog-post-header">
+      <h1 class="blog-post-title">{frontmatter.title}</h1>
+      <div class="blog-post-meta">
+        <time class="blog-post-date" datetime={frontmatter.date.toISOString()}>
+          {formatBlogDate(frontmatter.date)}
+        </time>
+        {frontmatter.tags.length > 0 && (
+          <ul class="blog-post-tags">
+            {frontmatter.tags.map((tag) => (
+              <li class="blog-post-tag">{tag}</li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </header>
+    <div class="blog-post-content">
+      <slot />
+    </div>
+    <footer class="blog-post-footer">
+      <a href="/blog" class="back-link">&larr; Back to Blog</a>
+    </footer>
+  </article>
+</BaseLayout>
+
+<style>
+  .blog-post {
+    max-width: var(--content-width);
+    margin-inline: auto;
+  }
+
+  .blog-post-header {
+    margin-bottom: var(--spacing-2xl);
+    padding-bottom: var(--spacing-lg);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .blog-post-title {
+    margin-bottom: var(--spacing-md);
+  }
+
+  .blog-post-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+    flex-wrap: wrap;
+  }
+
+  .blog-post-date {
+    color: var(--color-text-secondary);
+    font-size: 0.9375rem;
+  }
+
+  .blog-post-tags {
+    display: flex;
+    gap: var(--spacing-sm);
+    list-style: none;
+    flex-wrap: wrap;
+  }
+
+  .blog-post-tag {
+    font-size: 0.8125rem;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background-color: var(--color-bg-secondary);
+    border-radius: var(--radius-full);
+    color: var(--color-text-secondary);
+  }
+
+  .blog-post-content {
+    line-height: 1.8;
+  }
+
+  .blog-post-content :global(h2) {
+    margin-top: var(--spacing-2xl);
+    margin-bottom: var(--spacing-md);
+  }
+
+  .blog-post-content :global(h3) {
+    margin-top: var(--spacing-xl);
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .blog-post-content :global(p) {
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .blog-post-content :global(ul),
+  .blog-post-content :global(ol) {
+    margin-bottom: var(--spacing-lg);
+    padding-left: var(--spacing-xl);
+  }
+
+  .blog-post-content :global(li) {
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .blog-post-content :global(pre) {
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .blog-post-content :global(blockquote) {
+    border-left: 3px solid var(--color-primary);
+    padding-left: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+    color: var(--color-text-secondary);
+    font-style: italic;
+  }
+
+  .blog-post-footer {
+    margin-top: var(--spacing-2xl);
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-weight: 500;
+  }
+</style>

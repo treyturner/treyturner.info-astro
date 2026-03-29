@@ -1,0 +1,35 @@
+---
+title: "Why I Chose Astro for My Personal Site"
+date: 2024-09-20
+description: "A look at why Astro's content-first architecture makes it an excellent choice for personal and portfolio websites."
+tags: ["astro", "web-development"]
+---
+
+After years of running a WordPress site, I decided to rebuild from scratch with Astro. Here's why.
+
+## Content First, JavaScript Second
+
+Astro ships zero JavaScript by default. For a content-driven personal site, that's exactly what you want — fast pages with no unnecessary client-side runtime.
+
+## File-Based Content Collections
+
+Astro's content collections let you keep blog posts as MDX files alongside your code. Each collection gets a schema, which means your frontmatter is validated at build time.
+
+```typescript
+const blogSchema = z.object({
+  title: z.string().min(1),
+  date: z.coerce.date(),
+  description: z.string().min(1),
+  tags: z.array(z.string()).default([]),
+});
+```
+
+## Static Generation
+
+The entire site compiles to static HTML. No server runtime, no database, no cold starts. GitHub Pages handles hosting for free.
+
+## Built-In MDX Support
+
+With the `@astrojs/mdx` integration, you get full MDX support out of the box — meaning you can embed components directly in your markdown when needed.
+
+The result is a fast, maintainable site that's easy to extend.

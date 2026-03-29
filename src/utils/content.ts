@@ -17,7 +17,7 @@ export interface ContentEntry<T> {
 /**
  * Sort content entries by date field, newest first.
  */
-export function sortByDate<T extends Dated>(entries: ContentEntry<T>[]): ContentEntry<T>[] {
+export function sortByDate<E extends ContentEntry<Dated>>(entries: E[]): E[] {
   return [...entries].sort((a, b) => {
     const dateA = new Date(a.data.date).getTime();
     const dateB = new Date(b.data.date).getTime();
@@ -28,10 +28,10 @@ export function sortByDate<T extends Dated>(entries: ContentEntry<T>[]): Content
 /**
  * Filter out draft entries. In production, drafts are excluded.
  */
-export function filterDrafts<T extends Draftable>(
-  entries: ContentEntry<T>[],
+export function filterDrafts<E extends ContentEntry<Draftable>>(
+  entries: E[],
   isProduction = true,
-): ContentEntry<T>[] {
+): E[] {
   if (!isProduction) return entries;
   return entries.filter((entry) => !entry.data.draft);
 }
@@ -39,6 +39,6 @@ export function filterDrafts<T extends Draftable>(
 /**
  * Sort content entries by an explicit order field, ascending.
  */
-export function sortByOrder<T extends Ordered>(entries: ContentEntry<T>[]): ContentEntry<T>[] {
+export function sortByOrder<E extends ContentEntry<Ordered>>(entries: E[]): E[] {
   return [...entries].sort((a, b) => a.data.order - b.data.order);
 }
