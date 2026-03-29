@@ -18,6 +18,7 @@ export interface SEOMeta {
   ogType: string;
   ogTitle: string;
   ogDescription: string;
+  ogSiteName: string;
 }
 
 const MAX_TITLE_LENGTH = 70;
@@ -54,5 +55,6 @@ export function buildSEOMeta(props: SEOProps, defaults: SEODefaults): SEOMeta {
     ogType,
     ogTitle: title,
     ogDescription: description,
+    ogSiteName: defaults.siteName,
   };
 }

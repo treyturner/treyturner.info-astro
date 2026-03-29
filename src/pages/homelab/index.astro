@@ -1,0 +1,59 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import HomelabCard from '../../components/ui/HomelabCard.astro';
+import { getCollection } from 'astro:content';
+import { sortByDate, filterDrafts } from '../../utils/content';
+
+const allPosts = await getCollection('homelab');
+const published = filterDrafts(allPosts, import.meta.env.PROD);
+const sorted = sortByDate(published);
+---
+
+<BaseLayout title="Homelab" description="Exploring infrastructure, automation, and self-hosted services in my homelab environment.">
+  <section class="homelab-page">
+    <h1>Homelab</h1>
+    <p class="homelab-intro">
+      Documenting the hardware, software, and automation behind my home infrastructure — from virtualization clusters to network management.
+    </p>
+    {sorted.length > 0 ? (
+      <ul class="homelab-list">
+        {sorted.map((post) => (
+          <li>
+            <HomelabCard post={post} />
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p class="homelab-empty">No homelab posts yet. Check back soon!</p>
+    )}
+  </section>
+</BaseLayout>
+
+<style>
+  .homelab-page {
+    max-width: var(--content-width);
+    margin-inline: auto;
+  }
+
+  .homelab-page h1 {
+    margin-bottom: var(--spacing-md);
+  }
+
+  .homelab-intro {
+    color: var(--color-text-secondary);
+    font-size: 1.125rem;
+    margin-bottom: var(--spacing-2xl);
+  }
+
+  .homelab-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+  }
+
+  .homelab-empty {
+    color: var(--color-text-secondary);
+    font-style: italic;
+  }
+</style>
