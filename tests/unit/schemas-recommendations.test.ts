@@ -47,8 +47,28 @@ describe('recommendationSchema', () => {
     expect(result.success).toBe(true);
   });
 
-  it('rejects invalid date format', () => {
+  it('rejects date with single digit month', () => {
     const result = recommendationSchema.safeParse({ ...validEntry, date: '2024-8' });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects date with month outside lower boundary', () => {
+    const result = recommendationSchema.safeParse({ ...validEntry, date: '2024-00' });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects date with month outside upper boundary', () => {
+    const result = recommendationSchema.safeParse({ ...validEntry, date: '2024-13' });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects date with year outside lower boundary', () => {
+    const result = recommendationSchema.safeParse({ ...validEntry, date: '1999-12' });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects date with year outside upper boundary', () => {
+    const result = recommendationSchema.safeParse({ ...validEntry, date: '2080-01' });
     expect(result.success).toBe(false);
   });
 
