@@ -16,8 +16,13 @@ Astro personal website located in `treyturner.info-astro/`.
 - Prefer small, logically scoped commits
 - Run required quality gates before claiming completion
 - Keep completion messages focused on verifiable outcomes (tests, coverage, build status). Do not include runtime narration such as dev server restarts, HMR updates, or UI availability unless user action is required.
-- At the moment this rule is parsed for the first time in any given conversation, perform the following steps at the first available opportunity:
+- The moment this rule is parsed for the first time:
   - Install dependencies with `npm ci`
+  - Parse PLAN.md lines 3-13 (Objective), then the lines describing the iteration on which you've been assigned:
+    - Iteration 1: 75-90
+    - Iteration 2: 94-101
+    - Iteration 3: 105-110
+    - Iteration 4: 114-119
   - Follow the Hot Reload Bootstrap below so that the application is visible in the in-conversation app browser
 
 ## OpenHands Hot Reload Bootstrap
@@ -92,3 +97,10 @@ Before claiming an iteration complete, run:
 - `npm run test:coverage`
 - `npm run build`
 - `npm run test:e2e`
+
+## In-Repo Reference Materials
+
+Only as needed, additionally refer to:
+
+- ARCHITECTURE.md
+- DEPLOYMENT.md
