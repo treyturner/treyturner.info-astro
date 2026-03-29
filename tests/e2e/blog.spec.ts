@@ -85,6 +85,22 @@ test.describe('Blog index page', () => {
   });
 });
 
+test.describe('Blog draft filtering', () => {
+  test('draft posts are not accessible as detail pages', async ({ request }) => {
+    const response = await request.get('/blog/draft-post');
+    expect(response.status()).toBe(404);
+  });
+
+  test('draft posts do not appear in the blog index', async ({ page }) => {
+    await page.goto('/blog');
+    const titles = page.locator('.blog-card-title');
+    const count = await titles.count();
+    for (let i = 0; i < count; i++) {
+      await expect(titles.nth(i)).not.toContainText('Upcoming: Test Automation Patterns');
+    }
+  });
+});
+
 test.describe('Blog detail page', () => {
   test('renders post title as h1', async ({ page }) => {
     await page.goto('/blog/building-quality-into-ci-cd');
