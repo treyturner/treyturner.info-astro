@@ -34,8 +34,28 @@ describe('experienceSchema', () => {
     expect(result.success).toBe(false);
   });
 
-  it('rejects invalid startDate format', () => {
+  it('rejects startDate with single digit month', () => {
     const result = experienceSchema.safeParse({ ...validEntry, startDate: '2021-3' });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects startDate with month outside lower boundary', () => {
+    const result = experienceSchema.safeParse({ ...validEntry, startDate: '2021-00' });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects startDate with month outside upper boundary', () => {
+    const result = experienceSchema.safeParse({ ...validEntry, startDate: '2021-13' });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects startDate with year outside lower boundary', () => {
+    const result = experienceSchema.safeParse({ ...validEntry, startDate: '1994-01' });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects startDate with year outside upper boundary', () => {
+    const result = experienceSchema.safeParse({ ...validEntry, startDate: '2080-01' });
     expect(result.success).toBe(false);
   });
 
