@@ -3,10 +3,10 @@ import { z } from 'zod';
 export const experienceSchema = z.object({
   company: z.string().min(1),
   role: z.string().min(1),
-  startDate: z.string().regex(/^\d{4}-\d{2}$/, 'Must be YYYY-MM format'),
+  startDate: z.string().regex(/^(199[5-9]|20[0-7]\d)-(0[1-9]|1[0-2])$/, 'Must be YYYY-MM with year 1995–2079 and month 01–12'),
   endDate: z
     .string()
-    .regex(/^\d{4}-\d{2}$/, 'Must be YYYY-MM format')
+    .regex(/^(199[5-9]|20[0-7]\d)-(0[1-9]|1[0-2])$/, 'Must be YYYY-MM with year 1995–2079 and month 01–12')
     .optional(),
   description: z.string().min(1),
   highlights: z.array(z.string().min(1)).min(1),

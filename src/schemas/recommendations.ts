@@ -6,7 +6,7 @@ export const recommendationSchema = z.object({
   company: z.string().min(1),
   relationship: z.string().min(1),
   text: z.string().min(10),
-  date: z.string().regex(/^\d{4}-\d{2}$/, 'Must be YYYY-MM format'),
+  date: z.string().regex(/^(20[0-7]\d)-(0[1-9]|1[0-2])$/, 'Must be YYYY-MM with year 2000–2079 and month 01–12'),
   order: z.number().int().nonnegative(),
 });
 
