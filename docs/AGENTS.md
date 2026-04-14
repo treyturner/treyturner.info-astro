@@ -10,26 +10,18 @@ Astro personal website located in `treyturner.info-astro/`.
 
 ## Agent Working Rules
 
-- Work only within the currently assigned iteration
-- Do not begin the next iteration unless explicitly instructed
+- Work only within the defined scope
 - Do not modify unrelated files
 - Prefer small, logically scoped commits
 - Run required quality gates before claiming completion
 - Keep completion messages focused on verifiable outcomes (tests, coverage, build status). Do not include runtime narration such as dev server restarts, HMR updates, or UI availability unless user action is required.
-- The moment this rule is parsed for the first time:
+- To boostrap the environment:
   - Install dependencies with `npm ci`
-  - Parse PLAN.md lines 3-13 (Objective), then the lines describing the iteration on which you've been assigned:
-    - Iteration 1: 75-90
-    - Iteration 2: 94-101
-    - Iteration 3: 105-110
-    - Iteration 4: 114-119
-  - Follow the Hot Reload Bootstrap below so that the application is visible in the in-conversation app browser
+  - If `OH_SECRET_KEY` is defined in the environment, follow the Hot Reload Bootstrap below.
 
 ## OpenHands Hot Reload Bootstrap
 
-This repository is commonly developed inside OpenHands using the App tab with hot reload.
-
-To enable this, the Astro dev server must be started in the background and configured to work through the OpenHands reverse proxy.
+When `OH_SECRET_KEY` is defined in the environment, this repository is being developed inside OpenHands using the App tab with hot reload. To enable this, the Astro dev server must be started in the background and configured to work through the OpenHands reverse proxy.
 
 ## External Host Model (Critical)
 
