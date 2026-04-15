@@ -1,0 +1,31 @@
+version: 2
+updates:
+  # npm — Astro site dependencies
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    groups:
+      # Bundle all minor/patch updates into a single PR to reduce noise.
+      # Major versions are excluded and will open individual PRs so breaking
+      # changes can be reviewed one at a time.
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+
+  # GitHub Actions — keeps SHA-pinned actions current
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    groups:
+      # Bundle all action updates together; each SHA bump is low-risk since
+      # the workflows already pin by commit hash with a version comment.
+      github-actions:
+        patterns:
+          - "*"
