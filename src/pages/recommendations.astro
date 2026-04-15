@@ -3,9 +3,30 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import RecommendationCard from '../components/ui/RecommendationCard.astro';
 import { getCollection } from 'astro:content';
 import { sortByDate } from '../utils/content';
+import type { Recommendation } from '../schemas/recommendations';
+
+const RELATIONSHIP_ORDER = ['Direct manager', 'Direct report', 'Colleague'];
 
 const recommendationEntries = await getCollection('recommendations');
 const sorted = sortByDate(recommendationEntries);
+
+function effectiveRelationship(data: Recommendation): string {
+  return data.roles
+    .map(r => r.relationship)
+    .reduce((best, rel) => {
+      const bestIdx = RELATIONSHIP_ORDER.indexOf(best);
+      const relIdx = RELATIONSHIP_ORDER.indexOf(rel);
+      if (relIdx !== -1 && (bestIdx === -1 || relIdx < bestIdx)) return rel;
+      return best;
+    });
+}
+
+const groups = RELATIONSHIP_ORDER
+  .map(rel => ({
+    relationship: rel,
+    entries: sorted.filter(e => effectiveRelationship(e.data) === rel),
+  }))
+  .filter(g => g.entries.length > 0);
 ---
 
 <BaseLayout title="Recommendations" description="Professional endorsements and recommendations from colleagues and managers.">
@@ -14,9 +35,16 @@ const sorted = sortByDate(recommendationEntries);
     <p class="recommendations-intro">
       What colleagues and managers have said about working together.
     </p>
-    <div class="recommendations-list">
-      {sorted.map((entry) => (
-        <RecommendationCard recommendation={entry.data} />
+    <div class="recommendations-groups">
+      {groups.map(group => (
+        <section class="recommendation-group">
+          <h2 class="group-heading">From {group.relationship.toLowerCase()}s</h2>
+          <div class="recommendations-list">
+            {group.entries.map(entry => (
+              <RecommendationCard recommendation={entry.data} />
+            ))}
+          </div>
+        </section>
       ))}
     </div>
   </section>
@@ -36,5 +64,28 @@ const sorted = sortByDate(recommendationEntries);
     color: var(--color-text-secondary);
     font-size: 1.125rem;
     margin-bottom: var(--spacing-2xl);
+  }
+
+  .recommendation-group + .recommendation-group {
+    margin-top: var(--spacing-3xl);
+  }
+
+  .group-heading {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-secondary);
+    margin-bottom: var(--spacing-xl);
+  }
+
+  .group-heading::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background-color: var(--color-border);
   }
 </style>
