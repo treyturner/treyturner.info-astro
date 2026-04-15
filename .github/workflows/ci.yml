@@ -7,10 +7,13 @@ on:
     branches: [main]
     types: [opened, reopened, synchronize]
 
+defaults:
+  run:
+    shell: bash -euo pipefail {0}
+
 jobs:
   ci:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
@@ -71,7 +74,6 @@ jobs:
 
       - name: Generate Allure HTML report
         if: always()
-        shell: bash -euo pipefail {0}
         run: |
           if [ -d allure-results ]; then
             npx allure generate allure-results -o allure-report --clean
@@ -112,14 +114,12 @@ jobs:
       #   s3://test-reports/treyturner.info-astro/2026-03-28-05-43-00/allure/...
 
       - name: Set report timestamp
-        if: always()
+        if: always() && github.actor != 'dependabot[bot]'
         id: report-ts
-        shell: bash -euo pipefail {0}
         run: echo "ts=$(date -u +'%Y-%m-%d-%H-%M-%S')" >> "$GITHUB_OUTPUT"
 
       - name: Upload coverage report to S3
-        if: always()
-        shell: bash -euo pipefail {0}
+        if: always() && github.actor != 'dependabot[bot]'
         env:
           AWS_ACCESS_KEY_ID: ${{ vars.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -133,8 +133,7 @@ jobs:
           fi
 
       - name: Upload Playwright report to S3
-        if: always()
-        shell: bash -euo pipefail {0}
+        if: always() && github.actor != 'dependabot[bot]'
         env:
           AWS_ACCESS_KEY_ID: ${{ vars.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -148,8 +147,7 @@ jobs:
           fi
 
       - name: Upload Allure report to S3
-        if: always()
-        shell: bash -euo pipefail {0}
+        if: always() && github.actor != 'dependabot[bot]'
         env:
           AWS_ACCESS_KEY_ID: ${{ vars.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -163,8 +161,7 @@ jobs:
           fi
 
       - name: Add report links to job summary
-        if: always()
-        shell: bash -euo pipefail {0}
+        if: always() && github.actor != 'dependabot[bot]'
         run: |
           TS="${{ steps.report-ts.outputs.ts }}"
           BASE="${{ vars.S3_URL }}/test-reports/treyturner.info-astro/${TS}"
