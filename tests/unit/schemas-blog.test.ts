@@ -93,7 +93,7 @@ describe('formatBlogDate', () => {
   it('uses lowercase am/pm and comma separator', () => {
     const date = new Date('2024-06-15T17:00:00.000Z');
     const formatted = formatBlogDate(date);
-    const commaCount = formatted.split(',').length - 1
+    const commaCount = formatted.split(',').length - 1;
     expect(commaCount).toEqual(2);
     expect(formatted).toMatch(/[ap]m/);
     expect(formatted).not.toMatch(/[AP]M/);
