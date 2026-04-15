@@ -1,0 +1,12 @@
+{
+  "company": "Wayport",
+  "role": "Software Support & QA Engineer",
+  "startDate": "2006-05",
+  "endDate": "2008-05",
+  "description": "Lorem ipsum",
+  "highlights": [
+    "Hired into a newly created role to assist the Software Engineering team in supporting various groups within Operations including NOC, call center, provisioning, and sales",
+    "Responsible for drafting and implementing new support processes which minimized the number of interrupts to the development team",
+    "Tasked with standard QA processes to handle incoming bug reports as well as the development of workarounds where possible"
+  ]
+}

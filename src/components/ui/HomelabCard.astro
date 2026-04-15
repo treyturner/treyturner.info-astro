@@ -23,7 +23,7 @@ const { post } = Astro.props;
     <h2 class="homelab-card-title">{post.data.title}</h2>
   </a>
   <div class="homelab-card-meta">
-    <time class="homelab-card-date" datetime={post.data.date.toISOString()}>
+    <time class="homelab-card-date" datetime={new Date(post.data.date).toISOString()}>
       {formatHomelabDate(post.data.date)}
     </time>
     <span class="homelab-card-category">{post.data.category}</span>

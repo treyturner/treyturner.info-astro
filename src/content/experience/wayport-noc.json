@@ -1,0 +1,13 @@
+{
+  "company": "Wayport",
+  "role": "NOC Engineer I-III",
+  "startDate": "2004-05",
+  "endDate": "2006-05",
+  "description": "Lorem ipsum",
+  "highlights": [
+    "Repaired and maintained 13,000 Linux routers and their uplinks on a 24/7 basis with pager rotation between a small team",
+    "Managed and troubleshot Cisco 7200 at the core, including DS3 and T1 testing and configuration",
+    "Responded to escalations from outside groups requiring thorough understanding of proprietary network design, diagnostic tools, sand processes",
+    "Seamlessly administered hardware and software updates in a large production environment, ensuring low failure percentages and minimizing client downtime"
+  ]
+}

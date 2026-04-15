@@ -1,5 +1,6 @@
 ---
 import type { Recommendation } from '../../schemas/recommendations';
+import { formatRecommendationDate } from '../../schemas/recommendations';
 
 interface Props {
   recommendation: Recommendation;
@@ -15,9 +16,16 @@ const { recommendation } = Astro.props;
   <footer class="recommendation-footer">
     <div class="recommendation-author">
       <strong>{recommendation.author}</strong>
-      <span class="recommendation-role">{recommendation.role} at {recommendation.company}</span>
+      <time class="recommendation-date">{formatRecommendationDate(recommendation.date)}</time>
     </div>
-    <span class="recommendation-relationship">{recommendation.relationship}</span>
+    <div class={`recommendation-roles ${recommendation.roles.length > 1 ? 'recommendation-roles--multi' : ''}`}>
+      {recommendation.roles.map((r) => (
+        <div class="recommendation-role-entry">
+          <span class="recommendation-role">{r.role} at {r.company}</span>
+          <span class="recommendation-relationship">{r.relationship}</span>
+        </div>
+      ))}
+    </div>
   </footer>
 </article>
 
@@ -87,6 +95,31 @@ const { recommendation } = Astro.props;
   .recommendation-role {
     font-size: 0.875rem;
     color: var(--color-text-secondary);
+  }
+
+  .recommendation-date {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+  }
+
+  .recommendation-roles {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    align-items: flex-end;
+  }
+
+  .recommendation-role-entry {
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: flex-end;
+    gap: var(--spacing-xs);
+  }
+
+  .recommendation-roles--multi .recommendation-role-entry {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--spacing-sm);
   }
 
   .recommendation-relationship {

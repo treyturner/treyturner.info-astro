@@ -1,0 +1,14 @@
+{
+  "company": "Civitas Learning",
+  "role": "Data Quality Engineer",
+  "startDate": "2015-10",
+  "endDate": "2016-06",
+  "description": "Lorem ipsum",
+  "highlights": [
+    "Developed front and back end functional test frameworks using Geb, Spock, Groovy, and Gradle",
+    "Created comprehensive Selenium page and module objects for a variety of front end applications and a database-connected framework for validating data processing and ETL",
+    "Created and executed JMeter and Gatling performance tests",
+    "Implemented tests and environment management tasks into Gradle and Jenkins",
+    "Established performance test environments and used AWS CloudWatch and DataDog to pinpoint bottlenecks"
+  ]
+}

@@ -2,10 +2,10 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ExperienceCard from '../components/ui/ExperienceCard.astro';
 import { getCollection } from 'astro:content';
-import { sortByOrder } from '../utils/content';
+import { sortByStartDate } from '../utils/content';
 
 const experienceEntries = await getCollection('experience');
-const sorted = sortByOrder(experienceEntries);
+const sorted = sortByStartDate(experienceEntries);
 ---
 
 <BaseLayout title="Experience" description="Professional experience in software quality engineering, test automation, and CI/CD across enterprise and SaaS environments.">

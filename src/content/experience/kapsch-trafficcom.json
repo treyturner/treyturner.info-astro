@@ -1,0 +1,14 @@
+{
+  "company": "Kapsch TrafficCom",
+  "role": "Test Engineer Manager",
+  "startDate": "2019-08",
+  "endDate": "2022-05",
+  "description": "Led automation, tooling, and quality engineering improvements across multiple products by building modular frameworks, CI-integrated reporting, and reusable infrastructure.",
+  "highlights": [
+    "Designed and implemented a modular test automation framework covering frontend, backend, database, and performance testing across multiple products",
+    "Built CI/CD-integrated test pipelines and reporting systems, publishing results to shared platforms and enabling visibility into quality metrics",
+    "Developed reusable tooling and infrastructure to support cross-project test automation and data-driven quality analysis",
+    "Reviewed and guided automation and feature code, improving test design, reliability, and maintainability across the codebase",
+    "Collaborated with engineering teams to integrate testing into development workflows and improve overall system quality"
+  ]
+}

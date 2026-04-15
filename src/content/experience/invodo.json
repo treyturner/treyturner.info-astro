@@ -1,0 +1,14 @@
+{
+  "company": "Invodo",
+  "role": "QA Automation Engineer / Tech Stack Lead",
+  "startDate": "2015-10",
+  "endDate": "2016-06",
+  "description": "Lorem ipsum",
+  "highlights": [
+    "Authored, executed, and reviewed WebDriver code leveraging cloud infrastructure and mobile platform coverage to target HTML5 and Flash media players and an Angular CMS",
+    "Automated tests around the analytics, reporting, and ETL portions of the business",
+    "Created and administered synthetic tests using Dynatrace APM",
+    "Created a BDD test framework used across all products, a dynamic JavaScript test page which obsolesced a library of static test pages, and Ant and Gradle build scripts for dependency management and threaded execution of tests",
+    "Implemented a visual tool for tracking relational and constraint data in the database and created a browsable archive of page-load waterfall charts produced by performance tests"
+  ]
+}

@@ -8,13 +8,18 @@ const validEntry = {
   endDate: '2024-01',
   description: 'Led quality engineering.',
   highlights: ['Built test framework'],
-  order: 0,
 };
 
 describe('experienceSchema', () => {
   it('accepts a valid entry with endDate', () => {
     const result = experienceSchema.safeParse(validEntry);
     expect(result.success).toBe(true);
+  });
+
+  it('produces Date objects for startDate and endDate', () => {
+    const result = experienceSchema.parse(validEntry);
+    expect(result.startDate).toBeInstanceOf(Date);
+    expect(result.endDate).toBeInstanceOf(Date);
   });
 
   it('accepts a valid entry without endDate (current role)', () => {
@@ -84,16 +89,6 @@ describe('experienceSchema', () => {
     expect(result.success).toBe(false);
   });
 
-  it('rejects negative order', () => {
-    const result = experienceSchema.safeParse({ ...validEntry, order: -1 });
-    expect(result.success).toBe(false);
-  });
-
-  it('rejects non-integer order', () => {
-    const result = experienceSchema.safeParse({ ...validEntry, order: 1.5 });
-    expect(result.success).toBe(false);
-  });
-
   it('rejects missing required fields', () => {
     const result = experienceSchema.safeParse({});
     expect(result.success).toBe(false);
@@ -102,25 +97,26 @@ describe('experienceSchema', () => {
 
 describe('formatDateRange', () => {
   it('formats a range with both dates', () => {
-    const result = formatDateRange('2021-03', '2024-01');
-    expect(result).toContain('Mar 2021');
-    expect(result).toContain('Jan 2024');
-    expect(result).toContain('–');
+    const start = new Date('2021-03-01T12:00:00.000Z');
+    const end = new Date('2024-01-01T12:00:00.000Z');
+    expect(formatDateRange(start, end)).toBe('March 2021 – January 2024');
   });
 
   it('formats a range ending with Present when no endDate', () => {
-    const result = formatDateRange('2021-03');
-    expect(result).toContain('Mar 2021');
+    const start = new Date('2021-03-01T12:00:00.000Z');
+    const result = formatDateRange(start);
+    expect(result).toContain('March 2021');
     expect(result).toContain('Present');
   });
 
-  it('formats month names correctly', () => {
-    expect(formatDateRange('2020-01', '2020-12')).toContain('Jan 2020');
-    expect(formatDateRange('2020-01', '2020-12')).toContain('Dec 2020');
+  it('formats boundary months correctly', () => {
+    const jan = new Date('2020-01-01T12:00:00.000Z');
+    const dec = new Date('2020-12-01T12:00:00.000Z');
+    expect(formatDateRange(jan, dec)).toBe('January 2020 – December 2020');
   });
 
   it('handles undefined endDate explicitly', () => {
-    const result = formatDateRange('2023-06', undefined);
-    expect(result).toContain('Present');
+    const start = new Date('2023-06-01T12:00:00.000Z');
+    expect(formatDateRange(start, undefined)).toContain('Present');
   });
 });

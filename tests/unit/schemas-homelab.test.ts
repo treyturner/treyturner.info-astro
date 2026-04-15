@@ -87,18 +87,30 @@ describe('homelabSchema', () => {
 });
 
 describe('formatHomelabDate', () => {
-  it('formats a date in US long format with UTC timezone', () => {
-    const date = new Date('2024-08-15T00:00:00Z');
-    expect(formatHomelabDate(date)).toBe('August 15, 2024');
+  it('formats a date with month, day, year, time, and timezone', () => {
+    // UTC 15:00 = 10:00am CDT (summer)
+    const date = new Date('2024-08-15T15:00:00.000Z');
+    expect(formatHomelabDate(date)).toMatch(/^August 15, 2024, \d+:\d{2}[ap]m C[SD]T$/);
   });
 
-  it('formats January 1 correctly', () => {
-    const date = new Date('2024-01-01T00:00:00Z');
-    expect(formatHomelabDate(date)).toBe('January 1, 2024');
+  it('formats January correctly', () => {
+    // UTC 18:00 = noon CST (winter)
+    const date = new Date('2024-01-15T18:00:00.000Z');
+    expect(formatHomelabDate(date)).toContain('January 15, 2024');
   });
 
-  it('formats December 31 correctly', () => {
-    const date = new Date('2024-12-31T00:00:00Z');
-    expect(formatHomelabDate(date)).toBe('December 31, 2024');
+  it('formats December correctly', () => {
+    // UTC 18:00 = noon CST (winter)
+    const date = new Date('2024-12-31T18:00:00.000Z');
+    expect(formatHomelabDate(date)).toContain('December 31, 2024');
+  });
+
+  it('uses lowercase am/pm and comma separator', () => {
+    const date = new Date('2024-08-15T15:00:00.000Z');
+    const formatted = formatHomelabDate(date);
+    const commaCount = formatted.split(',').length - 1;
+    expect(formatted).toContain(',');
+    expect(formatted).toMatch(/[ap]m/);
+    expect(formatted).not.toMatch(/[AP]M/);
   });
 });

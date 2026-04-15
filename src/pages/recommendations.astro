@@ -2,10 +2,10 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import RecommendationCard from '../components/ui/RecommendationCard.astro';
 import { getCollection } from 'astro:content';
-import { sortByOrder } from '../utils/content';
+import { sortByDate } from '../utils/content';
 
 const recommendationEntries = await getCollection('recommendations');
-const sorted = sortByOrder(recommendationEntries);
+const sorted = sortByDate(recommendationEntries);
 ---
 
 <BaseLayout title="Recommendations" description="Professional endorsements and recommendations from colleagues and managers.">

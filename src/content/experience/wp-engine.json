@@ -1,0 +1,11 @@
+{
+  "company": "WP Engine",
+  "role": "SDET II",
+  "startDate": "2016-09",
+  "endDate": "2017-09",
+  "description": "Improved end-to-end test infrastructure, CI stability, and reporting across multiple services and environments, with a focus on reliability, debuggability, and developer adoption.",
+  "highlights": [
+    "Automated and maintained functional tests as part of a feature delivery team",
+    "Responsible for code and architecture reviews and authoring/executing test plans across the stack, including a customer-facing account management portal and platform code distributed across a variety of cloud providers"
+  ]
+}
