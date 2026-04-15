@@ -57,10 +57,13 @@ test.describe('Experience page', () => {
     }
   });
 
-  test('first card shows Current badge for present role', async ({ page }) => {
+  test('any Current badge labels a present role', async ({ page }) => {
     await page.goto('/experience');
-    const badge = page.locator('.experience-badge').first();
-    await expect(badge).toContainText('Current');
+    const badges = page.locator('.experience-badge');
+    const count = await badges.count();
+    for (let i = 0; i < count; i++) {
+      await expect(badges.nth(i)).toContainText('Current');
+    }
   });
 
   test('has SEO meta description', async ({ page }) => {

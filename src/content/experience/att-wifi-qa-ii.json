@@ -1,0 +1,13 @@
+{
+  "company": "AT&T Wi-Fi",
+  "role": "QA Engineer II",
+  "startDate": "2010-05",
+  "endDate": "2013-05",
+  "description": "Lorem ipsum",
+  "highlights": [
+    "Designed and executed functional and performance tests of SOAP and REST services",
+    "Implemented and monitored test jobs in Jenkins",
+    "Onboarded new testers, teaching processes and best practices",
+    "Provided ongoing support for other testers"
+  ]
+}

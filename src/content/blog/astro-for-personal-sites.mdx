@@ -1,6 +1,6 @@
 ---
 title: "Why I Chose Astro for My Personal Site"
-date: 2024-09-20
+date: "2024-09-20T12:00:00.000Z"
 description: "A look at why Astro's content-first architecture makes it an excellent choice for personal and portfolio websites."
 tags: ["astro", "web-development"]
 ---
@@ -18,7 +18,7 @@ Astro's content collections let you keep blog posts as MDX files alongside your 
 ```typescript
 const blogSchema = z.object({
   title: z.string().min(1),
-  date: z.coerce.date(),
+  date: z.iso.datetime(),
   description: z.string().min(1),
   tags: z.array(z.string()).default([]),
 });

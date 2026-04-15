@@ -15,7 +15,7 @@ const { frontmatter } = Astro.props;
     <header class="homelab-post-header">
       <h1 class="homelab-post-title">{frontmatter.title}</h1>
       <div class="homelab-post-meta">
-        <time class="homelab-post-date" datetime={frontmatter.date.toISOString()}>
+        <time class="homelab-post-date" datetime={new Date(frontmatter.date).toISOString()}>
           {formatHomelabDate(frontmatter.date)}
         </time>
         <span class="homelab-post-category">{frontmatter.category}</span>

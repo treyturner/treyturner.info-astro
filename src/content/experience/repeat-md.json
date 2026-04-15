@@ -1,0 +1,13 @@
+{
+  "company": "RepeatMD",
+  "role": "Senior SDET",
+  "startDate": "2023-12",
+  "endDate": "2024-06",
+  "description": "Led test automation architecture and modernization efforts for a multi-tenant platform, improving maintainability, CI integration, and overall test reliability.",
+  "highlights": [
+    "Architected and implemented a Playwright-based test automation framework for a multi-tenant platform supporting both B2B and B2C interfaces",
+    "Designed reusable page objects, fixtures, and data access patterns to support scalable, maintainable test development",
+    "Integrated automated testing into CI pipelines using GitHub Actions, improving consistency and reducing manual validation effort",
+    "Diagnosed and corrected systemic issues in an existing Cypress test suite, including test design, selector strategy, and environment configuration"
+  ]
+}

@@ -22,7 +22,7 @@ const { post } = Astro.props;
     <h2 class="blog-card-title">{post.data.title}</h2>
   </a>
   <div class="blog-card-meta">
-    <time class="blog-card-date" datetime={post.data.date.toISOString()}>
+    <time class="blog-card-date" datetime={new Date(post.data.date).toISOString()}>
       {formatBlogDate(post.data.date)}
     </time>
     {post.data.draft && <span class="blog-card-draft">Draft</span>}

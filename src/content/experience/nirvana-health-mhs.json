@@ -1,0 +1,14 @@
+{
+  "company": "Nirvana Health (M.H.S.)",
+  "role": "Senior Software Engineer",
+  "startDate": "2024-12",
+  "endDate": "2026-01",
+  "description": "Worked across services, infrastructure, and delivery systems to improve local development, system testing, CI/CD reliability, and cross-team platform capabilities in a complex multi-service environment.",
+  "highlights": [
+    "Designed and implemented a containerized local development and system test platform using Docker and Tilt, enabling consistent multi-service environments for development and testing",
+    "Built system-level testing capabilities in a fragmented architecture with inconsistent configurations and limited existing test coverage",
+    "Refactored CI/CD pipelines, GitHub Actions, and Terraform to improve reliability, reduce failure modes, and streamline deployment processes",
+    "Deployed and maintained a Kubernetes-hosted API tooling solution (Hoppscotch) to securely proxy requests across environments and support cross-team workflows",
+    "Diagnosed and resolved systemic issues across services, infrastructure, and build pipelines in a complex and evolving codebase"
+  ]
+}

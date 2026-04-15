@@ -65,8 +65,8 @@ test.describe('Homelab index page', () => {
 
     const dateTexts: string[] = [];
     for (let i = 0; i < count; i++) {
-      const text = await dates.nth(i).textContent();
-      dateTexts.push(text!.trim());
+      const datetime = await dates.nth(i).getAttribute('datetime');
+      dateTexts.push(datetime!);
     }
 
     const timestamps = dateTexts.map((d) => new Date(d).getTime());

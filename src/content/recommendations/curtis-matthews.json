@@ -1,0 +1,18 @@
+{
+  "author": "Curtis Matthews",
+  "roles": [
+    {
+      "role": "QA Manager",
+      "company": "Stoplight.io",
+      "relationship": "Direct manager"
+    },
+    {
+      "role": "QA Manager",
+      "company": "RepeatMD",
+      "relationship": "Direct manager"
+    }
+  ],
+  "text": "I was Trey's manager in his two most recent roles - first, at Stoplight for 1+ years, and then when we were both downsized in 2023 I brought him on to anchor a new automation team at RepeatMD.\n\nTrey is one of the best developers of any capacity I\u2019ve ever had the pleasure to work with. As an SDET, his knowledge of Playwright and Cypress is unmatched, but his broad knowledge of TypeScript, Node, databases, etc. allows him to contribute to software quality at a much deeper level (examples: testability of software and development of test tooling; performance; improving dev experience).\n\nAbove all that, Trey really deeply cares about his work and the mission of improving the quality of software. He\u2019s a great team player and I\u2019ve had so many of the developers and QA engineers he\u2019s paired with say how much they appreciate his contributions and his willingness to help.\n\nI strongly recommend him to anyone looking for an automation rockstar.",
+  "date": "2024-07-08",
+  "profilePhotoFilename": "curtis_matthews.jpg"
+}

@@ -1,0 +1,14 @@
+{
+  "company": "Live Earth",
+  "role": "SDET",
+  "startDate": "2017-10",
+  "endDate": "2019-06",
+  "description": "Owned quality and automation for a GIS platform, supporting regular releases through broad UI/backend coverage, CI execution, visual regression testing, and deployment support.",
+  "highlights": [
+    "Owned quality and test automation for a multi-platform GIS application, supporting monthly releases across web and backend systems",
+    "Built and maintained a Selenium-based BDD test suite (1,300+ tests) covering critical application workflows and data validation",
+    "Designed and operated a Selenium Grid with Jenkins-based CI jobs executing across multiple environments, browsers, and operating systems",
+    "Implemented visual regression testing to validate UI integrity and ensure availability of rendered geospatial data",
+    "Developed CI/CD pipelines for the web client and managed production deployments and hotfix releases"
+  ]
+}

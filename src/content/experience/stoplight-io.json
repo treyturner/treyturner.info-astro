@@ -1,0 +1,14 @@
+{
+  "company": "Stoplight.io",
+  "role": "Senior SDET, Infrastructure",
+  "startDate": "2022-05",
+  "endDate": "2023-10",
+  "description": "Improved end-to-end test infrastructure, CI stability, and reporting across multiple services and environments, with a focus on reliability, debuggability, and developer adoption.",
+  "highlights": [
+    "Re-architected end-to-end test infrastructure and tooling to improve reliability, debuggability, and developer adoption across multiple services and environments",
+    "Identified and resolved systemic CI instability, isolating sources of flakiness and reducing intermittent test failures impacting delivery pipelines",
+    "Led migration from Cypress to Playwright, designing reusable fixtures and page object models that improved test maintainability and execution consistency",
+    "Developed custom TestRail integrations and reporting pipelines to aggregate results, surface trends, and enable data-driven quality decisions",
+    "Served as escalation point for complex test and CI issues, debugging failures across application code, test frameworks, and infrastructure layers"
+  ]
+}

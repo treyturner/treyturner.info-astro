@@ -15,7 +15,7 @@ const { frontmatter } = Astro.props;
     <header class="blog-post-header">
       <h1 class="blog-post-title">{frontmatter.title}</h1>
       <div class="blog-post-meta">
-        <time class="blog-post-date" datetime={frontmatter.date.toISOString()}>
+        <time class="blog-post-date" datetime={new Date(frontmatter.date).toISOString()}>
           {formatBlogDate(frontmatter.date)}
         </time>
         {frontmatter.tags.length > 0 && (

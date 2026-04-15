@@ -1,13 +1,13 @@
 export interface Dated {
-  date: Date | string;
+  date: Date;
 }
 
 export interface Draftable {
   draft?: boolean;
 }
 
-export interface Ordered {
-  order: number;
+export interface HasStartDate {
+  startDate: Date;
 }
 
 export interface ContentEntry<T> {
@@ -18,11 +18,9 @@ export interface ContentEntry<T> {
  * Sort content entries by date field, newest first.
  */
 export function sortByDate<E extends ContentEntry<Dated>>(entries: E[]): E[] {
-  return [...entries].sort((a, b) => {
-    const dateA = new Date(a.data.date).getTime();
-    const dateB = new Date(b.data.date).getTime();
-    return dateB - dateA;
-  });
+  return [...entries].sort((a, b) =>
+    new Date(b.data.date).getTime() - new Date(a.data.date).getTime()
+  );
 }
 
 /**
@@ -37,8 +35,10 @@ export function filterDrafts<E extends ContentEntry<Draftable>>(
 }
 
 /**
- * Sort content entries by an explicit order field, ascending.
+ * Sort content entries by startDate field, newest first.
  */
-export function sortByOrder<E extends ContentEntry<Ordered>>(entries: E[]): E[] {
-  return [...entries].sort((a, b) => a.data.order - b.data.order);
+export function sortByStartDate<E extends ContentEntry<HasStartDate>>(entries: E[]): E[] {
+  return [...entries].sort((a, b) =>
+    new Date(b.data.startDate).getTime() - new Date(a.data.startDate).getTime()
+  );
 }

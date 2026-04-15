@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { formatDatetime } from './common';
 
 export const homelabSchema = z.object({
   title: z.string().min(1),
@@ -12,10 +13,5 @@ export const homelabSchema = z.object({
 export type HomelabFrontmatter = z.infer<typeof homelabSchema>;
 
 export function formatHomelabDate(date: Date): string {
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    timeZone: 'UTC',
-  });
+  return formatDatetime(date);
 }
