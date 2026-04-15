@@ -4,6 +4,7 @@ const pages = ['/', '/skills', '/experience', '/blog'];
 
 test.describe('Dark mode toggle', () => {
   test.beforeEach(async ({ page }) => {
+    await page.goto('/');
     await page.evaluate(() => localStorage.clear());
   });
 
