@@ -4,10 +4,11 @@
     {
       "role": "QA Engineer",
       "company": "AT&T Wi-Fi",
-      "relationship": "Colleague"
+      "relationship": "Colleague",
+      "logo": "att-wifi.png"
     }
   ],
   "text": "Trey is able to understand an entire ecosystem of software to investigate and isolate bugs and recognize risk. A strong developer and intelligent test engineer, he is well spoken, friendly, thorough yet concise - he is an excellent teacher and eager to share knowledge as well as expand his own understanding.",
   "date": "2016-09-09",
-  "profilePhotoFilename": "amelia_wilson.jpg"
+  "linkedIn": "https://www.linkedin.com/in/ameliachristinewilson"
 }

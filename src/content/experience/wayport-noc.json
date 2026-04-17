@@ -9,5 +9,6 @@
     "Managed and troubleshot Cisco 7200 at the core, including DS3 and T1 testing and configuration",
     "Responded to escalations from outside groups requiring thorough understanding of proprietary network design, diagnostic tools, sand processes",
     "Seamlessly administered hardware and software updates in a large production environment, ensuring low failure percentages and minimizing client downtime"
-  ]
+  ],
+  "logo": "wayport.jpg"
 }

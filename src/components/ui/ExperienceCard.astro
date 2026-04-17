@@ -1,4 +1,5 @@
 ---
+import { Image } from 'astro:assets';
 import { formatDateRange } from '../../schemas/experience';
 import type { Experience } from '../../schemas/experience';
 
@@ -9,6 +10,10 @@ interface Props {
 const { experience } = Astro.props;
 const dateRange = formatDateRange(experience.startDate, experience.endDate);
 const isCurrent = !experience.endDate;
+
+const allLogos = import.meta.glob<{ default: ImageMetadata }>('../../assets/logos/*', { eager: true });
+const logoKey  = `../../assets/logos/${experience.logo}`;
+const logoSrc  = allLogos[logoKey]?.default;
 ---
 
 <article class="experience-card">
@@ -18,6 +23,9 @@ const isCurrent = !experience.endDate;
       <p class="experience-company">{experience.company}</p>
     </div>
     <div class="experience-meta">
+      {logoSrc && (
+        <Image class="experience-logo" src={logoSrc} alt={experience.company} height={36} />
+      )}
       <time class="experience-dates">{dateRange}</time>
       {isCurrent && <span class="experience-badge">Current</span>}
     </div>
@@ -67,6 +75,13 @@ const isCurrent = !experience.endDate;
     align-items: center;
     gap: var(--spacing-sm);
     flex-shrink: 0;
+  }
+
+  .experience-logo {
+    height: 2.25rem;
+    width: auto;
+    max-width: 6rem;
+    object-fit: contain;
   }
 
   .experience-dates {

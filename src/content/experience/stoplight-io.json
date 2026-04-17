@@ -10,5 +10,6 @@
     "Led migration from Cypress to Playwright, designing reusable fixtures and page object models that improved test maintainability and execution consistency",
     "Developed custom TestRail integrations and reporting pipelines to aggregate results, surface trends, and enable data-driven quality decisions",
     "Served as escalation point for complex test and CI issues, debugging failures across application code, test frameworks, and infrastructure layers"
-  ]
+  ],
+  "logo": "stoplight-io.png"
 }

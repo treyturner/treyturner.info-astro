@@ -4,15 +4,17 @@
     {
       "role": "Test Engineer II",
       "company": "Kapsch",
-      "relationship": "Direct report"
+      "relationship": "Direct report",
+      "logo": "kapsch-trafficcom.svg"
     },
     {
       "role": "SDET",
       "company": "Stoplight",
-      "relationship": "Colleague"
+      "relationship": "Colleague",
+      "logo": "stoplight-io.png"
     }
   ],
   "text": "I reported to Trey at Kapsch, and we worked as colleagues at Stoplight. I hadn't finished interviewing at Kapsch before something stuck out about him. He asked a question I couldn't answer, but rather than hold it over my head, he included the answer and some helpful documentation in a follow-up email thanking me for my time.\n\nAnd I think that sums Trey up perfectly: he genuinely cares about people. He's incredibly knowledgeable, and always uses it to help others in any way. He'll drop whatever he's working on to help resolve an issue that threatens the mission. He puts everything into his craft, and it shows in the quality of work produced.\n\nHe set a standard to which I hold my coworkers, and I wouldn't hesitate to work with him again.",
   "date": "2024-07-11",
-  "profilePhotoFilename": "chad_johnson.jpg"
+  "linkedIn": "https://www.linkedin.com/in/chad-johnson-5061a8153"
 }

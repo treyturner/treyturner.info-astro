@@ -9,5 +9,6 @@
     "Designed reusable page objects, fixtures, and data access patterns to support scalable, maintainable test development",
     "Integrated automated testing into CI pipelines using GitHub Actions, improving consistency and reducing manual validation effort",
     "Diagnosed and corrected systemic issues in an existing Cypress test suite, including test design, selector strategy, and environment configuration"
-  ]
+  ],
+  "logo": "repeatmd.png"
 }

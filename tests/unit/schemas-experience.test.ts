@@ -8,6 +8,7 @@ const validEntry = {
   endDate: '2024-01',
   description: 'Led quality engineering.',
   highlights: ['Built test framework'],
+  logo: 'acme-corp.png',
 };
 
 describe('experienceSchema', () => {
@@ -91,6 +92,43 @@ describe('experienceSchema', () => {
 
   it('rejects missing required fields', () => {
     const result = experienceSchema.safeParse({});
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts logo with .png extension', () => {
+    const result = experienceSchema.safeParse({ ...validEntry, logo: 'company.png' });
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts logo with .svg extension', () => {
+    const result = experienceSchema.safeParse({ ...validEntry, logo: 'company.svg' });
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts logo with .jpg extension', () => {
+    const result = experienceSchema.safeParse({ ...validEntry, logo: 'company.jpg' });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects logo with disallowed extension', () => {
+    const result = experienceSchema.safeParse({ ...validEntry, logo: 'company.gif' });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects logo with uppercase extension', () => {
+    const result = experienceSchema.safeParse({ ...validEntry, logo: 'company.PNG' });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects logo with no extension', () => {
+    const result = experienceSchema.safeParse({ ...validEntry, logo: 'company' });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects missing logo', () => {    
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { logo: _logo, ...withoutLogo } = validEntry;    
+    const result = experienceSchema.safeParse(withoutLogo);
     expect(result.success).toBe(false);
   });
 });
