@@ -77,4 +77,15 @@ test.describe('Experience page', () => {
     const activeLink = page.locator('nav a.active');
     await expect(activeLink).toContainText('Experience');
   });
+
+  test('each card has a company logo', async ({ page }) => {
+    await page.goto('/experience');
+    const cards = page.locator('.experience-card');
+    const count = await cards.count();
+    expect(count).toBeGreaterThan(0);
+    for (let i = 0; i < count; i++) {
+      const logo = cards.nth(i).locator('.experience-logo');
+      await expect(logo).toBeVisible();
+    }
+  });
 });

@@ -8,6 +8,7 @@ export const experienceSchema = z.object({
   endDate: yyyyMmToDateSchema.optional(),
   description: z.string().min(1),
   highlights: z.array(z.string().min(1)).min(1),
+  logo: z.string().regex(/^.+\.(jpg|svg|png)$/, "Must be a filename ending in .jpg, .svg, or .png"),
 });
 
 export type Experience = z.infer<typeof experienceSchema>;

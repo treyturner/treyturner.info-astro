@@ -6,5 +6,6 @@
   "description": "Lorem ipsum",
   "highlights": [
     "Responsible for functional and performance testing a variety of software components including a customized Linux distribution with proprietary packages and web applications written in .NET, Java, and PHP, backended by Oracle and postgresql"
-  ]
+  ],
+  "logo": "att-wifi.png"
 }

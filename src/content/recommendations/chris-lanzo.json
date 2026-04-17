@@ -4,10 +4,11 @@
     {
       "role": "Senior SDET",
       "company": "Stoplight.io",
-      "relationship": "Colleague"
+      "relationship": "Colleague",
+      "logo": "stoplight-io.png"
     }
   ],
   "text": "I worked with Trey at Stoplight. Trey is an extremely sharp SDET (and developer, in general) who has a real passion for quality. He can do it all - from setting up testing infrastructure, integrating testing into CI/CD pipelines, hooking up test reporting, debugging complex product bugs, and developing tooling to make the developer experience better. He's also a great mentor, and I really valued his feedback while working with him.\n\nI can't think of anyone I'd recommend higher if you're ready to level up your quality.",
   "date": "2024-07-09",
-  "profilePhotoFilename": "chris_lanzo.jpg"
+  "linkedIn": "https://www.linkedin.com/in/chris-lanzo-025377b9"
 }

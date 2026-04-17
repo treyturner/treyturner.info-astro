@@ -10,5 +10,6 @@
     "Created and executed JMeter and Gatling performance tests",
     "Implemented tests and environment management tasks into Gradle and Jenkins",
     "Established performance test environments and used AWS CloudWatch and DataDog to pinpoint bottlenecks"
-  ]
+  ],
+  "logo": "civitas-learning.png"
 }

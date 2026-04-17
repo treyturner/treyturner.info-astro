@@ -7,5 +7,6 @@
   "highlights": [
     "Automated and maintained functional tests as part of a feature delivery team",
     "Responsible for code and architecture reviews and authoring/executing test plans across the stack, including a customer-facing account management portal and platform code distributed across a variety of cloud providers"
-  ]
+  ],
+  "logo": "wp-engine.png"
 }

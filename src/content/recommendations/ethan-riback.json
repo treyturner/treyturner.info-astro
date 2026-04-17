@@ -4,10 +4,11 @@
     {
       "role": "Eng. Manager",
       "company": "RepeatMD",
-      "relationship": "Colleague"
+      "relationship": "Colleague",
+      "logo": "repeatmd.png"
     }
   ],
   "text": "I worked with Trey for a few months at RepeatMD. Trey is a wonderful personality to work with and I wish I had more chances to work closer with him just to hang out. He is approachable, excited to collaborate and either learn from others or educate others. He is never afraid to ask questions to help drive best practices for our automated test environments. Any quality-driven organization has a lot to gain from hiring Trey.",
   "date": "2024-07-01",
-  "profilePhotoFilename": "ethan_riback.jpg"
+  "linkedIn": "https://www.linkedin.com/in/ethanriback"
 }

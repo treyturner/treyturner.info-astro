@@ -4,10 +4,11 @@
     {
       "role": "SysAdmin",
       "company": "Invodo",
-      "relationship": "Colleague"
+      "relationship": "Colleague",
+      "logo": "invodo.png"
     }
   ],
   "text": "I worked with Trey at Invodo. He has a very real passion for technology, QA, and automation, and it shows in everything he does. When I first met Trey I was immediately impressed with his skillset and wide breadth of technical knowledge. His work ethic is incredible. When he came on board we had almost zero QA automation, and he worked long hours building out our automation infrastructure. On top of all that he is a genuinely great guy, easy to get along with, and works very well in teams. I highly recommend Trey to anyone seeking someone with his skillset.",
   "date": "2016-06-28",
-  "profilePhotoFilename": "josh_fontenot.jpg"
+  "linkedIn": "https://www.linkedin.com/in/matthew-spell-065b9483"
 }

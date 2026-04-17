@@ -10,5 +10,6 @@
     "Created and administered synthetic tests using Dynatrace APM",
     "Created a BDD test framework used across all products, a dynamic JavaScript test page which obsolesced a library of static test pages, and Ant and Gradle build scripts for dependency management and threaded execution of tests",
     "Implemented a visual tool for tracking relational and constraint data in the database and created a browsable archive of page-load waterfall charts produced by performance tests"
-  ]
+  ],
+  "logo": "invodo.png"
 }

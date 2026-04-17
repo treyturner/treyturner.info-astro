@@ -10,5 +10,6 @@
     "Designed and operated a Selenium Grid with Jenkins-based CI jobs executing across multiple environments, browsers, and operating systems",
     "Implemented visual regression testing to validate UI integrity and ensure availability of rendered geospatial data",
     "Developed CI/CD pipelines for the web client and managed production deployments and hotfix releases"
-  ]
+  ],
+  "logo": "live-earth.png"
 }

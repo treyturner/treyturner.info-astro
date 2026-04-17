@@ -10,5 +10,6 @@
     "Refactored CI/CD pipelines, GitHub Actions, and Terraform to improve reliability, reduce failure modes, and streamline deployment processes",
     "Deployed and maintained a Kubernetes-hosted API tooling solution (Hoppscotch) to securely proxy requests across environments and support cross-team workflows",
     "Diagnosed and resolved systemic issues across services, infrastructure, and build pipelines in a complex and evolving codebase"
-  ]
+  ],
+  "logo": "nirvana-health-mhs.jpg"
 }

@@ -69,4 +69,27 @@ test.describe('Recommendations page', () => {
     const activeLink = page.locator('nav a.active');
     await expect(activeLink).toContainText('Recommendations');
   });
+
+  test('each card author name is a LinkedIn link', async ({ page }) => {
+    await page.goto('/recommendations');
+    const links = page.locator('.recommendation-author-link');
+    const count = await links.count();
+    expect(count).toBeGreaterThan(0);
+    for (let i = 0; i < count; i++) {
+      const href = await links.nth(i).getAttribute('href');
+      expect(href).toMatch(/^https:\/\/www\.linkedin\.com\/in\//);
+    }
+  });
+
+  test('most cards have a profile photo', async ({ page }) => {
+    await page.goto('/recommendations');
+    const photos = page.locator('.recommendation-photo');
+    await expect(photos).not.toHaveCount(0);
+  });
+
+  test('most role entries have a company logo', async ({ page }) => {
+    await page.goto('/recommendations');
+    const logos = page.locator('.recommendation-role-logo');
+    await expect(logos).not.toHaveCount(0);
+  });
 });

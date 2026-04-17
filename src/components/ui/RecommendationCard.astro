@@ -1,4 +1,5 @@
 ---
+import { Image } from 'astro:assets';
 import type { Recommendation } from '../../schemas/recommendations';
 import { formatRecommendationDate } from '../../schemas/recommendations';
 
@@ -7,6 +8,12 @@ interface Props {
 }
 
 const { recommendation } = Astro.props;
+
+const allPeople = import.meta.glob<{ default: ImageMetadata }>('../../assets/people/*.jpg', { eager: true });
+const allLogos  = import.meta.glob<{ default: ImageMetadata }>('../../assets/logos/*',      { eager: true });
+
+const photoKey = `../../assets/people/${recommendation.author.toLowerCase().replace(/\s+/g, '-')}.jpg`;
+const photoSrc = allPeople[photoKey]?.default;
 ---
 
 <article class="recommendation-card">
@@ -14,17 +21,34 @@ const { recommendation } = Astro.props;
     <p>{recommendation.text}</p>
   </blockquote>
   <footer class="recommendation-footer">
-    <div class="recommendation-author">
-      <strong>{recommendation.author}</strong>
-      <time class="recommendation-date">{formatRecommendationDate(recommendation.date)}</time>
+    <div class="recommendation-author-block">
+      {photoSrc && (
+        <Image class="recommendation-photo" src={photoSrc} alt="" height={44} width={44} />
+      )}
+      <div class="recommendation-author">
+        <a href={recommendation.linkedIn} class="recommendation-author-link"
+           target="_blank" rel="noopener noreferrer">
+          <strong>{recommendation.author}</strong>
+        </a>
+        <time class="recommendation-date">{formatRecommendationDate(recommendation.date)}</time>
+      </div>
     </div>
-    <div class={`recommendation-roles ${recommendation.roles.length > 1 ? 'recommendation-roles--multi' : ''}`}>
-      {recommendation.roles.map((r) => (
-        <div class="recommendation-role-entry">
-          <span class="recommendation-role">{r.role} at {r.company}</span>
-          <span class="recommendation-relationship">{r.relationship}</span>
-        </div>
-      ))}
+    <div class="recommendation-roles">
+      {recommendation.roles.map((r) => {
+        const logoKey = `../../assets/logos/${r.logo}`;
+        const roleLogo = allLogos[logoKey]?.default;
+        return (
+          <div class="recommendation-role-entry">
+            <div class="recommendation-role-text">
+              <span class="recommendation-role">{r.role} at {r.company}</span>
+              <span class="recommendation-relationship">{r.relationship}</span>
+            </div>
+            {roleLogo && (
+              <Image class="recommendation-role-logo" src={roleLogo} alt={r.company} height={40} />
+            )}
+          </div>
+        );
+      })}
     </div>
   </footer>
 </article>
@@ -81,20 +105,39 @@ const { recommendation } = Astro.props;
     border-top: 1px solid var(--color-border);
   }
 
+  /* Left: photo + author info */
+  .recommendation-author-block {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+  }
+
+  .recommendation-photo {
+    height: 2.75rem;
+    width: 2.75rem;
+    border-radius: var(--radius-full);
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+
   .recommendation-author {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-xs);
   }
 
-  .recommendation-author strong {
-    font-size: 1rem;
-    color: var(--color-text);
+  .recommendation-author-link {
+    color: inherit;
+    text-decoration: none;
   }
 
-  .recommendation-role {
-    font-size: 0.875rem;
-    color: var(--color-text-secondary);
+  .recommendation-author-link:hover {
+    text-decoration: underline;
+  }
+
+  .recommendation-author-link strong {
+    font-size: 1rem;
+    color: var(--color-text);
   }
 
   .recommendation-date {
@@ -102,24 +145,34 @@ const { recommendation } = Astro.props;
     color: var(--color-text-secondary);
   }
 
+  /* Right: role entries laid out horizontally */
   .recommendation-roles {
     display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
-    align-items: flex-end;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+    align-items: flex-start;
+    justify-content: flex-end;
   }
 
+  /* Each entry: two-line text column + logo to the right spanning both lines */
   .recommendation-role-entry {
     display: flex;
-    flex-direction: column-reverse;
-    align-items: flex-end;
-    gap: var(--spacing-xs);
-  }
-
-  .recommendation-roles--multi .recommendation-role-entry {
     flex-direction: row;
     align-items: center;
     gap: var(--spacing-sm);
+  }
+
+  .recommendation-role-text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+
+  .recommendation-role {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
   }
 
   .recommendation-relationship {
@@ -128,5 +181,14 @@ const { recommendation } = Astro.props;
     background-color: var(--color-bg-secondary);
     padding: var(--spacing-xs) var(--spacing-sm);
     border-radius: var(--radius-full);
+    align-self: flex-end;
+  }
+
+  .recommendation-role-logo {
+    height: 2.5rem;
+    width: auto;
+    max-width: 5rem;
+    object-fit: contain;
+    flex-shrink: 0;
   }
 </style>
