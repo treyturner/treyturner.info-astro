@@ -8,9 +8,12 @@ updates:
       day: "monday"
     open-pull-requests-limit: 10
     groups:
-      # Bundle all minor/patch updates into a single PR to reduce noise.
-      # Major versions are excluded and will open individual PRs so breaking
-      # changes can be reviewed one at a time.
+      astro-major:
+        patterns:
+          - "astro"
+          - "@astrojs/*"
+        update-types:
+          - "major"
       minor-and-patch:
         update-types:
           - "minor"
