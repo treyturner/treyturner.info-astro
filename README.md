@@ -13,7 +13,7 @@ Personal site built with [Astro](https://astro.build/). Deployed as a static sit
 | E2E tests       | [Playwright](https://playwright.dev/) (Chromium)                                         |
 | Test reporting  | [Allure](https://allurereport.org/) (CI only)                                            |
 | Linting         | ESLint with `eslint-plugin-astro` and `@typescript-eslint`                               |
-| Node            | >=24.14.1                                                                                |
+| Node            | >=24.16.0                                                                                |
 | Package manager | npm                                                                                      |
 
 ## Configuration
