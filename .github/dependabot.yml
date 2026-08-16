@@ -8,6 +8,10 @@ updates:
       day: "monday"
     open-pull-requests-limit: 10
     groups:
+      security-updates:
+        applies-to: security-updates
+        patterns:
+          - "*"
       astro-major:
         patterns:
           - "astro"
@@ -18,6 +22,10 @@ updates:
         update-types:
           - "minor"
           - "patch"
+    ignore:
+      - dependency-name: "@types/node"
+        update-types:
+          - "version-update:semver-major"
 
   # GitHub Actions — keeps SHA-pinned actions current
   - package-ecosystem: "github-actions"
