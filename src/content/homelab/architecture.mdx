@@ -1,0 +1,23 @@
+---
+title: "Homelab Architecture"
+date: 2026-04-28
+description: "An evergreen post describing my home infrastructure, dev environments, and supporting cloud services"
+tags: ["architecture", "pfsense", "unraid", "docker"]
+category: "architecture"
+
+---
+
+I've been lucky enough in 20+ years of professional software QA to work with a diverse and evolving landscape of languages and technologies. Some are obvious evolutions of what came before, while others are novel enough to warrant research and exploration beyond opportunities regularly available on the job. I've found the practice of maintaining an active homelab to be a core component of keeping up with the state of the art in development and testing tools, providing not only a place but also practical reasons to explore and understand how they can be effectively leveraged.
+
+## Overview
+
+### Gateway router: pfSense Community Ediition
+
+The gateway is one of the most critical pieces of any network-connected infrastructure. I must have bought half a dozen wireless-enabled residential gateways from Linksys and D-Link throughout the late 90s and early 00s. Their bugs, limited configurability, poor UI/UX, and limited lifespan of the wireless chips or standards left room for little but disappointment.
+
+Around this time I was working at Wayport, a wireless internet service provider primarily targeting hotels and airports. As it was a years out from the first iPhone, most WiFi users were business travelers connecting laptops. As I took on new work that brought me closer to the proprietary Debian boxes serving as each service location's gateway, solving these sorts of needs using the available Linux software and tooling became second nature. When I then stumbled on pfSense, I knew I'd bought my last commercial residential gateway.
+
+pfSense puts an extremely comprehensive yet usable UI on top of a lean Linux base, focusing on exactly the scope warranted from a residential or small business gateway.
+
+There's an extensive feature set even in the community edition, and what isn't bundled is probably available or possible via the extensible [package system](https://docs.netgate.com/pfsense/en/latest/packages).
+
