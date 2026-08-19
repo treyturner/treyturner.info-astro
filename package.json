@@ -34,7 +34,7 @@
     "allure-commandline": "^2.43.0",
     "allure-vitest": "^3.10.2",
     "eslint": "^10.8.1",
-    "eslint-plugin-astro": "^2.1.1",
+    "eslint-plugin-astro": "^3.1.0",
     "vitest": "^4.1.2"
   }
 }
