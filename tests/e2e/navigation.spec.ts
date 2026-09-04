@@ -5,7 +5,6 @@ const navItems = [
   { label: 'Skills', href: '/skills' },
   { label: 'Experience', href: '/experience' },
   { label: 'Recommendations', href: '/recommendations' },
-  { label: 'Homelab', href: '/homelab' },
 ];
 
 test.describe('Site navigation', () => {
@@ -28,6 +27,11 @@ test.describe('Site navigation', () => {
     await expect(page.locator('nav a[href="/blog"]')).toHaveCount(0);
   });
 
+  test('hides Homelab when there are no published posts', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('nav a[href="/homelab"]')).toHaveCount(0);
+  });
+
   test('highlights the active page in navigation', async ({ page }) => {
     for (const item of navItems) {
       await page.goto(item.href);
@@ -48,7 +52,7 @@ test.describe('Site navigation', () => {
   });
 
   test('header site title links to home', async ({ page }) => {
-    await page.goto('/homelab');
+    await page.goto('/recommendations');
     const siteTitle = page.locator('.site-title');
     await expect(siteTitle).toBeVisible();
     await siteTitle.click();
