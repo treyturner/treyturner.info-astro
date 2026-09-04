@@ -1,6 +1,6 @@
 import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
-import type { HmrOptions } from 'vite';
+import type { WsOptions } from 'vite';
 
 const allowedHosts = ['localhost'];
 if (process.env.ALLOWED_HOSTS) {
@@ -13,9 +13,9 @@ const corsOrigins = allowedHosts
   .filter((h) => h !== 'localhost')
   .map((h) => `https://${h}`);
 
-let hmr: HmrOptions | undefined;
+let ws: WsOptions | undefined;
 if (process.env.HMR_HOST) {
-  hmr = {
+  ws = {
     protocol: 'wss',
     host: process.env.HMR_HOST,
     clientPort: Number(process.env.HMR_PORT || 443),
@@ -29,7 +29,7 @@ export default defineConfig({
   vite: {
     server: {
       allowedHosts,
-      hmr,
+      ws,
       cors: corsOrigins.length ? { origin: corsOrigins } : undefined,
     },
   },
