@@ -1,14 +1,18 @@
 ---
 import navigation from '../../data/navigation.json';
+import { getCollection } from 'astro:content';
 
 const rawPath = Astro.url.pathname;
 const currentPath = rawPath.endsWith('/') && rawPath !== '/' ? rawPath.slice(0, -1) : rawPath;
+const blogPosts = await getCollection('blog');
+const hasPublishedPosts = blogPosts.some((post) => !post.data.draft);
+const visibleNavigation = navigation.filter((item) => item.href !== '/blog' || hasPublishedPosts);
 ---
 
 <nav class="site-nav" aria-label="Main navigation">
   <div class="container">
     <ul class="nav-list">
-      {navigation.map((item) => (
+      {visibleNavigation.map((item) => (
         <li>
           <a
             href={item.href}
