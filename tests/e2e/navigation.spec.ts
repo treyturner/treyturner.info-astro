@@ -6,7 +6,6 @@ const navItems = [
   { label: 'Experience', href: '/experience' },
   { label: 'Recommendations', href: '/recommendations' },
   { label: 'Homelab', href: '/homelab' },
-  { label: 'Blog', href: '/blog' },
 ];
 
 test.describe('Site navigation', () => {
@@ -22,6 +21,11 @@ test.describe('Site navigation', () => {
         await expect(navLink).toContainText(link.label);
       }
     }
+  });
+
+  test('hides Blog when there are no published posts', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('nav a[href="/blog"]')).toHaveCount(0);
   });
 
   test('highlights the active page in navigation', async ({ page }) => {
@@ -44,7 +48,7 @@ test.describe('Site navigation', () => {
   });
 
   test('header site title links to home', async ({ page }) => {
-    await page.goto('/blog');
+    await page.goto('/homelab');
     const siteTitle = page.locator('.site-title');
     await expect(siteTitle).toBeVisible();
     await siteTitle.click();

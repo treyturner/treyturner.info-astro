@@ -15,12 +15,12 @@ test.describe('RSS feed', () => {
     expect(body).toContain('Trey Turner');
   });
 
-  test('contains blog post items', async ({ request }) => {
+  test('contains no items when all posts are drafts', async ({ request }) => {
     const response = await request.get('/rss.xml');
     const body = await response.text();
-    expect(body).toContain('<item>');
-    expect(body).toContain('Building Quality Into CI/CD Pipelines');
-    expect(body).toContain('Why I Chose Astro for My Personal Site');
+    expect(body).not.toContain('<item>');
+    expect(body).not.toContain('Building Quality Into CI/CD Pipelines');
+    expect(body).not.toContain('Why I Chose Astro for My Personal Site');
   });
 
   test('does not include draft posts', async ({ request }) => {
@@ -29,12 +29,11 @@ test.describe('RSS feed', () => {
     expect(body).not.toContain('Upcoming: Test Automation Patterns');
   });
 
-  test('items contain required RSS elements', async ({ request }) => {
+  test('channel contains required RSS elements', async ({ request }) => {
     const response = await request.get('/rss.xml');
     const body = await response.text();
     expect(body).toContain('<link>');
     expect(body).toContain('<description>');
-    expect(body).toContain('<pubDate>');
   });
 
   test('RSS link is discoverable from pages', async ({ page }) => {

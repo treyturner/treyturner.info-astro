@@ -31,8 +31,6 @@ test.describe('Broken link detection', () => {
 
   test('known detail pages return 200', async ({ request }) => {
     const detailPages = [
-      '/blog/astro-for-personal-sites',
-      '/blog/building-quality-into-ci-cd',
       '/homelab/proxmox-cluster',
       '/homelab/network-automation',
     ];
