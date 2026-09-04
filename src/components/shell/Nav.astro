@@ -5,8 +5,14 @@ import { getCollection } from 'astro:content';
 const rawPath = Astro.url.pathname;
 const currentPath = rawPath.endsWith('/') && rawPath !== '/' ? rawPath.slice(0, -1) : rawPath;
 const blogPosts = await getCollection('blog');
+const homelabPosts = await getCollection('homelab');
 const hasPublishedPosts = blogPosts.some((post) => !post.data.draft);
-const visibleNavigation = navigation.filter((item) => item.href !== '/blog' || hasPublishedPosts);
+const hasPublishedHomelabPosts = homelabPosts.some((post) => !post.data.draft);
+const visibleNavigation = navigation.filter((item) => {
+  if (item.href === '/blog') return hasPublishedPosts;
+  if (item.href === '/homelab') return hasPublishedHomelabPosts;
+  return true;
+});
 ---
 
 <nav class="site-nav" aria-label="Main navigation">

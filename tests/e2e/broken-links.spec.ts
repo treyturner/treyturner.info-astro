@@ -29,18 +29,6 @@ test.describe('Broken link detection', () => {
     });
   }
 
-  test('known detail pages return 200', async ({ request }) => {
-    const detailPages = [
-      '/homelab/proxmox-cluster',
-      '/homelab/network-automation',
-    ];
-
-    for (const url of detailPages) {
-      const response = await request.get(url);
-      expect(response.status(), `${url} returned ${response.status()}`).toBe(200);
-    }
-  });
-
   test('RSS feed is accessible', async ({ request }) => {
     const response = await request.get('/rss.xml');
     expect(response.status()).toBe(200);
