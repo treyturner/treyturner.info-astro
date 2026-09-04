@@ -9,3 +9,4 @@ allure-results/
 allure-report/
 .DS_Store
 *.log
+mise.toml
