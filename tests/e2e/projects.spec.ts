@@ -20,6 +20,8 @@ const publishedProjects = [
     logoImage: frontmatter.logoImage as string | undefined,
     role: frontmatter.role as keyof typeof projectRoleLabels,
     status: frontmatter.status as keyof typeof projectStatusLabels,
+    liveUrl: frontmatter.liveUrl as string | undefined,
+    endDate: frontmatter.endDate as string | undefined,
   };
 });
 
@@ -119,7 +121,7 @@ test.describe('Projects page', () => {
 });
 
 test.describe('Project detail pages', () => {
-  for (const { id, title, logoImage } of publishedProjects) {
+  for (const { id, title, logoImage, role, status, liveUrl, endDate } of publishedProjects) {
     test(`renders the ${id} logo according to its content`, async ({ page }) => {
       const response = await page.goto(`/projects/${id}`);
       expect(response?.status()).toBe(200);
@@ -134,7 +136,20 @@ test.describe('Project detail pages', () => {
       await expect(page).toHaveTitle(`${title} | Trey Turner`);
       await expect(page.locator('.project-description')).not.toBeEmpty();
       await expect(page.locator('.project-goal dd')).not.toBeEmpty();
-      await expect(page.locator('.project-facts')).toContainText('Solo developer');
+      await expect(page.locator('.project-facts')).toContainText(projectRoleLabels[role]);
+      await expect(page.locator('.project-facts dt')).toHaveText([
+        'Goal', 'My role', 'Status', 'Started', ...(endDate ? ['Ended'] : []),
+      ]);
+      await expect(page.locator('.project-facts .project-status')).toHaveText(projectStatusLabels[status]);
+      await expect(page.locator('.project-status')).toHaveCount(1);
+      await expect(page.locator('.project-status')).toHaveCSS('border-top-width', '0px');
+      const visitLink = page.locator('.project-links').getByRole('link', { name: /^Visit / });
+      if (liveUrl) {
+        await expect(visitLink).toHaveAccessibleName(`Visit ${liveUrl}`);
+        await expect(visitLink).toHaveAttribute('href', liveUrl);
+      } else {
+        await expect(visitLink).toHaveCount(0);
+      }
       await expect(page.locator('.project-facts time').first()).toHaveAttribute('datetime', /\d{4}-\d{2}-\d{2}T/);
       await expect(page.locator('.project-content > p')).toHaveCount(5);
       await expect(page.locator('.project-content > ul > li')).toHaveCount(5);
@@ -166,16 +181,16 @@ test.describe('Project detail pages', () => {
     const links = page.getByRole('list', { name: 'Project links' });
     await expect(links.getByRole('link', { name: 'Repository 1', exact: true })).toHaveAttribute('href', 'https://github.com/treyturner/wled-builds');
     await expect(links.getByRole('link', { name: 'Repository 2', exact: true })).toHaveAttribute('href', 'https://github.com/treyturner/wled-mm-builds');
-    await expect(links.getByRole('link', { name: 'Visit project' })).toHaveCount(0);
+    await expect(links.getByRole('link', { name: /^Visit / })).toHaveCount(0);
     await expect(page.locator('.project-featured-image')).toHaveCount(0);
-    await expect(page.locator('.project-facts dt')).toHaveText(['Goal', 'My role', 'Started']);
+    await expect(page.locator('.project-facts dt')).toHaveText(['Goal', 'My role', 'Status', 'Started']);
   });
 
   test('renders a single repository and live link with the supplied dates', async ({ page }) => {
     await page.goto('/projects/code-doodles');
     const links = page.getByRole('list', { name: 'Project links' });
     await expect(links.getByRole('link', { name: 'Repository', exact: true })).toHaveAttribute('href', 'https://github.com/treyturner/codedoodl.es/tree/feat/containerize');
-    await expect(links.getByRole('link', { name: 'Visit project', exact: true })).toHaveAttribute('href', 'https://doodles.treyturner.info');
+    await expect(links.getByRole('link', { name: 'Visit https://doodles.treyturner.info', exact: true })).toHaveAttribute('href', 'https://doodles.treyturner.info');
     await expect(page.locator('.project-facts time')).toHaveText(['April 27, 2026', 'April 27, 2026']);
     await expect(page.locator('.project-facts dt')).toContainText(['Started', 'Ended']);
   });
@@ -196,7 +211,7 @@ test.describe('Project detail pages', () => {
 });
 
 for (const width of [1280, 820, 390, 320]) {
-  test.describe(`Project card layout at ${width}px`, () => {
+  test.describe(`Project layout at ${width}px`, () => {
     test.use({ viewport: { width, height: 900 } });
 
     test('keeps role and status on one line beneath the logo and title', async ({ page }) => {
@@ -247,6 +262,38 @@ for (const width of [1280, 820, 390, 320]) {
         expect(Math.abs(footerBox.y + footerBox.height - contentBottom)).toBeLessThan(1);
       }
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+    });
+
+    test('aligns detail logos and titles and orders the project facts', async ({ page }) => {
+      for (const { id, logoImage } of publishedProjects) {
+        await page.goto(`/projects/${id}`);
+        const heading = page.locator('.project-title-row');
+        const titleBox = (await heading.locator('h1').boundingBox())!;
+        const headingBox = (await heading.boundingBox())!;
+        if (logoImage) {
+          const logoBox = (await heading.locator('.project-logo').boundingBox())!;
+          expect(titleBox.x).toBeGreaterThan(logoBox.x + logoBox.width);
+          expect(Math.abs(titleBox.y + titleBox.height / 2 - logoBox.y - logoBox.height / 2)).toBeLessThan(1);
+        } else {
+          await expect(heading.locator('.project-logo')).toHaveCount(0);
+          expect(Math.abs(titleBox.x - headingBox.x)).toBeLessThan(1);
+        }
+
+        const facts = page.locator('.project-facts > div');
+        const roleBox = (await facts.filter({ has: page.getByText('My role', { exact: true }) }).boundingBox())!;
+        const statusBox = (await facts.filter({ has: page.getByText('Status', { exact: true }) }).boundingBox())!;
+        const startedBox = (await facts.filter({ has: page.getByText('Started', { exact: true }) }).boundingBox())!;
+        if (width > 576) {
+          expect(statusBox.x).toBeGreaterThan(roleBox.x + roleBox.width);
+          expect(startedBox.x).toBeGreaterThan(statusBox.x + statusBox.width);
+          expect(Math.abs(roleBox.y - statusBox.y)).toBeLessThan(1);
+          expect(Math.abs(statusBox.y - startedBox.y)).toBeLessThan(1);
+        } else {
+          expect(statusBox.y).toBeGreaterThan(roleBox.y + roleBox.height);
+          expect(startedBox.y).toBeGreaterThan(statusBox.y + statusBox.height);
+        }
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+      }
     });
   });
 }
