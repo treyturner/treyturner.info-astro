@@ -2,10 +2,9 @@
 import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
 import BaseLayout from './BaseLayout.astro';
-import ProjectStatus from '../components/ui/ProjectStatus.astro';
 import ProjectTechnologies from '../components/ui/ProjectTechnologies.astro';
 import { formatYearMonthDay } from '../schemas/common';
-import { projectRoleLabels } from '../utils/projects';
+import { projectRoleLabels, projectStatusLabels } from '../utils/projects';
 
 interface Props {
   project: CollectionEntry<'projects'>['data'];
@@ -19,13 +18,14 @@ const repositories = project.repositoryUrls ?? [];
   <article class="project-page">
     <a href="/projects" class="project-back-link">&larr; Back to Projects</a>
     <header class="project-header">
-      {project.logoImage && (
-        <Image class="project-logo" src={project.logoImage} alt="" height={64} />
-      )}
-      <h1>{project.title}</h1>
-      <ProjectStatus status={project.status} />
+      <div class="project-title-row">
+        {project.logoImage && (
+          <Image class="project-logo" src={project.logoImage} alt="" height={64} />
+        )}
+        <h1>{project.title}</h1>
+      </div>
       <p class="project-description">{project.description}</p>
-      <dl class="project-facts">
+      <dl class:list={['project-facts', { 'has-end-date': project.endDate }]}>
         <div class="project-goal">
           <dt>Goal</dt>
           <dd>{project.goal}</dd>
@@ -33,6 +33,10 @@ const repositories = project.repositoryUrls ?? [];
         <div>
           <dt>My role</dt>
           <dd>{projectRoleLabels[project.role]}</dd>
+        </div>
+        <div>
+          <dt>Status</dt>
+          <dd class="project-status">{projectStatusLabels[project.status]}</dd>
         </div>
         <div>
           <dt>Started</dt>
@@ -48,7 +52,7 @@ const repositories = project.repositoryUrls ?? [];
       <ProjectTechnologies technologies={project.technologyStack} />
       {(project.liveUrl || repositories.length > 0) && (
         <ul class="project-links" aria-label="Project links">
-          {project.liveUrl && <li><a href={project.liveUrl}>Visit project <span aria-hidden="true">&nearr;</span></a></li>}
+          {project.liveUrl && <li><a href={project.liveUrl}>Visit {project.liveUrl} <span aria-hidden="true">&nearr;</span></a></li>}
           {repositories.map((url, index) => (
             <li>
               <a href={url}>
@@ -95,11 +99,23 @@ const repositories = project.repositoryUrls ?? [];
     border-bottom: 1px solid var(--color-border);
   }
 
+  .project-title-row {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    width: 100%;
+  }
+
+  .project-title-row h1 {
+    min-width: 0;
+  }
+
   .project-logo {
     height: 4rem;
     width: auto;
-    max-width: 12rem;
+    max-width: min(25%, 12rem);
     object-fit: contain;
+    flex-shrink: 0;
   }
 
   .project-description {
@@ -119,6 +135,10 @@ const repositories = project.repositoryUrls ?? [];
     grid-column: 1 / -1;
   }
 
+  .project-facts.has-end-date {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
   .project-facts dt {
     margin-bottom: var(--spacing-xs);
     color: var(--color-text-secondary);
@@ -130,6 +150,12 @@ const repositories = project.repositoryUrls ?? [];
     flex-wrap: wrap;
     gap: var(--spacing-sm) var(--spacing-lg);
     list-style: none;
+    max-width: 100%;
+  }
+
+  .project-links li {
+    min-width: 0;
+    max-width: 100%;
   }
 
   .project-links a {
@@ -213,7 +239,8 @@ const repositories = project.repositoryUrls ?? [];
   }
 
   @media (max-width: 36rem) {
-    .project-facts {
+    .project-facts,
+    .project-facts.has-end-date {
       grid-template-columns: minmax(0, 1fr);
     }
   }
