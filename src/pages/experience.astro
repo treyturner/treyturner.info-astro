@@ -3,9 +3,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import ExperienceCard from '../components/ui/ExperienceCard.astro';
 import { getCollection } from 'astro:content';
 import { sortByStartDate } from '../utils/content';
+import { linkRecommendations } from '../utils/recommendations';
 
-const experienceEntries = await getCollection('experience');
+const [experienceEntries, recommendationEntries] = await Promise.all([
+  getCollection('experience'),
+  getCollection('recommendations'),
+]);
 const sorted = sortByStartDate(experienceEntries);
+const { byExperience } = linkRecommendations(recommendationEntries, experienceEntries);
 ---
 
 <BaseLayout title="Experience" description="Professional experience in software quality engineering, test automation, and CI/CD across enterprise and SaaS environments.">
@@ -16,7 +21,7 @@ const sorted = sortByStartDate(experienceEntries);
     </p>
     <div class="experience-list">
       {sorted.map((entry) => (
-        <ExperienceCard experience={entry.data} />
+        <ExperienceCard id={entry.id} experience={entry.data} recommendations={byExperience.get(entry.id)!} />
       ))}
     </div>
   </section>

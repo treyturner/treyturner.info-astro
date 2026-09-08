@@ -5,7 +5,8 @@
       "role": "QA Engineer",
       "company": "AT&T Wi-Fi",
       "relationship": "Colleague",
-      "logo": "att-wifi.png"
+      "logo": "att-wifi.png",
+      "experiences": ["att-wifi-qa-ii"]
     }
   ],
   "text": "Trey is able to understand an entire ecosystem of software to investigate and isolate bugs and recognize risk. A strong developer and intelligent test engineer, he is well spoken, friendly, thorough yet concise - he is an excellent teacher and eager to share knowledge as well as expand his own understanding.",

@@ -2,12 +2,16 @@
 import { Image } from 'astro:assets';
 import { formatDateRange } from '../../schemas/experience';
 import type { Experience } from '../../schemas/experience';
+import type { ExperienceRecommendation } from '../../utils/recommendations';
+import RecommendationPreview from './RecommendationPreview.astro';
 
 interface Props {
   experience: Experience;
+  id: string;
+  recommendations: ExperienceRecommendation[];
 }
 
-const { experience } = Astro.props;
+const { experience, id, recommendations } = Astro.props;
 const dateRange = formatDateRange(experience.startDate, experience.endDate);
 const isCurrent = !experience.endDate;
 
@@ -16,10 +20,10 @@ const logoKey  = `../../assets/logos/companies/${experience.logo}`;
 const logoSrc  = allLogos[logoKey]?.default;
 ---
 
-<article class="experience-card">
+<article class="experience-card" id={id} tabindex="-1" aria-labelledby={`${id}-role`}>
   <div class="experience-header">
     <div>
-      <h2 class="experience-role">{experience.role}</h2>
+      <h2 class="experience-role" id={`${id}-role`}>{experience.role}</h2>
       <p class="experience-company">{experience.company}</p>
     </div>
     <div class="experience-meta">
@@ -36,6 +40,16 @@ const logoSrc  = allLogos[logoKey]?.default;
       <li>{highlight}</li>
     ))}
   </ul>
+  {recommendations.length > 0 && (
+    <section class="experience-recommendations" aria-labelledby={`${id}-recommendations`}>
+      <h3 id={`${id}-recommendations`}>Recommendations</h3>
+      <ul class="experience-recommendation-list">
+        {recommendations.map((recommendation) => (
+          <li><RecommendationPreview recommendation={recommendation} /></li>
+        ))}
+      </ul>
+    </section>
+  )}
 </article>
 
 <style>
@@ -44,6 +58,16 @@ const logoSrc  = allLogos[logoKey]?.default;
     border-radius: var(--radius-md);
     padding: var(--spacing-xl);
     background-color: var(--color-surface);
+    scroll-margin-top: var(--spacing-lg);
+  }
+
+  .experience-card:target {
+    border-color: var(--color-primary);
+  }
+
+  .experience-card:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 3px;
   }
 
   .experience-card + .experience-card {
@@ -124,5 +148,31 @@ const logoSrc  = allLogos[logoKey]?.default;
     left: 0;
     color: var(--color-primary);
     font-weight: 700;
+  }
+
+  .experience-recommendations {
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .experience-recommendations h3 {
+    font-size: 0.875rem;
+    margin-bottom: var(--spacing-sm);
+    color: var(--color-text-secondary);
+  }
+
+  .experience-recommendation-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--spacing-sm);
+    list-style: none;
+    padding: 0;
+  }
+
+  @media (max-width: 600px) {
+    .experience-recommendation-list {
+      grid-template-columns: minmax(0, 1fr);
+    }
   }
 </style>

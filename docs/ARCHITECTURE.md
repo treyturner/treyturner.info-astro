@@ -23,6 +23,15 @@ Stored in `src/content/`:
 - `recommendations/` — JSON
 - `homelab/` — MDX
 
+### Experience and Recommendation Links
+
+- Each recommendation role can include `experiences`, an array of experience entry IDs (the JSON filenames without `.json`). Omitted arrays default to empty.
+- These are Astro collection references, resolved by `src/utils/recommendations.ts`. Missing destinations fail page generation with the recommendation and experience IDs in the error.
+- Recommendation roles link to `/experience#<experience-id>`; roles spanning multiple experiences show separate links labeled with the corresponding job titles. Roles without references remain plain text.
+- Experience cards derive compact recommendation links automatically, newest first, using only the roles associated with that experience. Each recommendation appears once per experience, even when multiple roles match.
+- Compact cards link back to `/recommendations#<recommendation-id>`. Experiences without recommendations omit the section.
+- Recommender titles and company wording remain independent from the site's experience titles; links are never inferred from names or recommendation dates.
+
 ### Logo Assets
 
 - `src/assets/logos/companies/` — company logos used by Experience and Recommendations.

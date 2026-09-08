@@ -5,7 +5,8 @@
       "role": "Software Engineer",
       "company": "Invodo",
       "relationship": "Colleague",
-      "logo": "invodo.png"
+      "logo": "invodo.png",
+      "experiences": ["invodo"]
     }
   ],
   "text": "Trey has proven himself as an invaluable asset time and time again by bringing new QA technologies in and implementing them. His expertise extends far beyond QA, and I would jump at the chance to work with him again.",

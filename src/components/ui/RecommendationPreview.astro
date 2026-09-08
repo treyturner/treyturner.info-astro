@@ -1,0 +1,79 @@
+---
+import { Image } from 'astro:assets';
+import type { ExperienceRecommendation } from '../../utils/recommendations';
+
+interface Props {
+  recommendation: ExperienceRecommendation;
+}
+
+const { recommendation } = Astro.props;
+const allPeople = import.meta.glob<{ default: ImageMetadata }>('../../assets/people/*.jpg', { eager: true });
+const photoKey = `../../assets/people/${recommendation.author.toLowerCase().replace(/\s+/g, '-')}.jpg`;
+const photoSrc = allPeople[photoKey]?.default;
+---
+
+<a class="recommendation-preview" href={`/recommendations#${recommendation.id}`}
+   aria-label={`Read recommendation from ${recommendation.author}`}>
+  {photoSrc && <Image class="preview-photo" src={photoSrc} alt="" width={32} height={32} />}
+  <span class="preview-details">
+    <strong class="preview-author">{recommendation.author}</strong>
+    {recommendation.roles.map((role) => (
+      <span class="preview-role">{role.role} · {role.relationship}</span>
+    ))}
+    <span class="preview-link">Read recommendation <span aria-hidden="true">→</span></span>
+  </span>
+</a>
+
+<style>
+  .recommendation-preview {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-bg-secondary);
+    color: var(--color-text);
+    height: 100%;
+    text-decoration: none;
+  }
+
+  .recommendation-preview:hover {
+    border-color: var(--color-primary);
+  }
+
+  .recommendation-preview:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 3px;
+  }
+
+  .preview-photo {
+    width: 2rem;
+    height: 2rem;
+    border-radius: var(--radius-full);
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+
+  .preview-details {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .preview-author {
+    font-size: 0.875rem;
+  }
+
+  .preview-role {
+    font-size: 0.8125rem;
+    color: var(--color-text-secondary);
+  }
+
+  .preview-link {
+    font-size: 0.875rem;
+    color: var(--color-primary);
+    margin-top: var(--spacing-xs);
+  }
+</style>

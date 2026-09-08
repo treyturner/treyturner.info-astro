@@ -25,6 +25,7 @@ export const collections = {
   }),
   recommendations: defineCollection({
     loader: glob({ pattern: '**/*.json', base: './src/content/recommendations' }),
+    // Roles reference experience entries; both pages derive their links from these references.
     schema: recommendationSchema,
   }),
 };
