@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { basename, extname } from 'node:path';
 import { parseFrontmatter } from 'astro/markdown';
 import { test, expect, type Locator } from '@playwright/test';
+import { projectRoleLabels, projectStatusLabels } from '../../src/utils/projects';
 
 const publishedProjects = [
   { id: 'wled-builds', title: 'Custom WLED and WLED-MM builds' },
@@ -14,7 +15,12 @@ const publishedProjects = [
 ].map((project) => {
   const source = readFileSync(new URL(`../../src/content/projects/${project.id}.mdx`, import.meta.url), 'utf8');
   const { frontmatter } = parseFrontmatter(source);
-  return { ...project, logoImage: frontmatter.logoImage as string | undefined };
+  return {
+    ...project,
+    logoImage: frontmatter.logoImage as string | undefined,
+    role: frontmatter.role as keyof typeof projectRoleLabels,
+    status: frontmatter.status as keyof typeof projectStatusLabels,
+  };
 });
 
 async function expectProjectLogo(logo: Locator, logoImage: string | undefined) {
@@ -68,12 +74,16 @@ test.describe('Projects page', () => {
     await expect(page.locator('.project-content')).toHaveCount(0);
   });
 
-  test('cards include summaries, readable statuses, technologies, and optional logos', async ({ page }) => {
+  test('cards include summaries, roles, labeled statuses, technologies, and optional logos', async ({ page }) => {
     await page.goto('/projects');
-    for (const { id, logoImage } of publishedProjects) {
+    for (const { id, logoImage, role, status } of publishedProjects) {
       const card = page.locator(`.project-card-link[href="/projects/${id}"]`);
       await expect(card.locator('.project-card-description')).not.toBeEmpty();
-      await expect(card.locator('.project-status')).toHaveText(id === 'lower-duck-pond' ? 'Pre-alpha' : 'Active');
+      await expect(card.locator('.project-card-role')).toHaveText(projectRoleLabels[role]);
+      await expect(card.locator('.project-status')).toHaveText(`Status: ${projectStatusLabels[status]}`);
+      await expect(card.locator('.project-status')).toHaveCSS('border-top-width', '0px');
+      await expect(card.locator('.project-status')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+      await expect(card.locator('.project-card-separator')).toHaveAttribute('aria-hidden', 'true');
       await expect(card.getByRole('list', { name: 'Technology stack' })).toBeVisible();
       await expect(card.locator('.project-card-more')).toContainText('Read about this project');
       await expectProjectLogo(card.locator('.project-card-logo'), logoImage);
@@ -189,17 +199,22 @@ for (const width of [1280, 820, 390, 320]) {
   test.describe(`Project card layout at ${width}px`, () => {
     test.use({ viewport: { width, height: 900 } });
 
-    test('keeps the title beside its logo and the status at the bottom right', async ({ page }) => {
+    test('keeps role and status on one line beneath the logo and title', async ({ page }) => {
       await page.goto('/projects');
       const cards = page.locator('.project-card-link');
       await expect(cards.first()).toBeVisible();
       for (const card of await cards.all()) {
         const header = card.locator('.project-card-header');
+        const metadata = card.locator('.project-card-metadata');
         const footer = card.locator('.project-card-footer');
         await expect(header.locator('.project-card-title')).toHaveCount(1);
         await expect(header.locator('.project-status')).toHaveCount(0);
         await expect(footer.locator('.project-card-more')).toHaveCount(1);
-        await expect(footer.locator('.project-status')).toHaveCount(1);
+        await expect(footer.locator('.project-status')).toHaveCount(0);
+        await expect(metadata.locator('.project-card-role')).toHaveCount(1);
+        await expect(metadata.locator('.project-status')).toHaveCount(1);
+        await expect(card.locator('.project-status')).toHaveCount(1);
+        await expect(card.locator(':scope > :first-child')).toHaveClass('project-card-heading');
         await expect(card.locator(':scope > :last-child')).toHaveClass('project-card-footer');
 
         const titleBox = (await header.locator('.project-card-title').boundingBox())!;
@@ -214,11 +229,16 @@ for (const width of [1280, 820, 390, 320]) {
 
         const footerBox = (await footer.boundingBox())!;
         const moreBox = (await footer.locator('.project-card-more').boundingBox())!;
-        const statusBox = (await footer.locator('.project-status').boundingBox())!;
+        const metadataBox = (await metadata.boundingBox())!;
+        const roleBox = (await metadata.locator('.project-card-role').boundingBox())!;
+        const statusBox = (await metadata.locator('.project-status').boundingBox())!;
+        const descriptionBox = (await card.locator('.project-card-description').boundingBox())!;
         expect(Math.abs(moreBox.x - footerBox.x)).toBeLessThan(1);
-        expect(statusBox.x).toBeGreaterThan(moreBox.x + moreBox.width);
-        expect(Math.abs(statusBox.x + statusBox.width - footerBox.x - footerBox.width)).toBeLessThan(1);
-        expect(Math.abs(statusBox.y + statusBox.height / 2 - moreBox.y - moreBox.height / 2)).toBeLessThan(1);
+        expect(metadataBox.y).toBeGreaterThan(headerBox.y + headerBox.height);
+        expect(descriptionBox.y).toBeGreaterThan(metadataBox.y + metadataBox.height);
+        expect(Math.abs(metadataBox.x - headerBox.x)).toBeLessThan(1);
+        expect(statusBox.x).toBeGreaterThan(roleBox.x + roleBox.width);
+        expect(Math.abs(statusBox.y - roleBox.y)).toBeLessThan(1);
 
         const contentBottom = await card.evaluate((element) => {
           const style = getComputedStyle(element);
@@ -233,6 +253,17 @@ for (const width of [1280, 820, 390, 320]) {
 
 test.describe('Projects on small screens', () => {
   test.use({ viewport: { width: 390, height: 844 } });
+
+  test('keeps card metadata readable with enlarged text', async ({ page }) => {
+    await page.goto('/projects');
+    await page.locator('html').evaluate((element) => { element.style.fontSize = '200%'; });
+    for (const metadata of await page.locator('.project-card-metadata').all()) {
+      await expect(metadata.locator('.project-card-role')).toBeVisible();
+      await expect(metadata.locator('.project-status')).toBeVisible();
+      expect(await metadata.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
+    }
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  });
 
   test('cards and full articles fit the viewport in both themes', async ({ page }) => {
     for (const colorScheme of ['light', 'dark'] as const) {

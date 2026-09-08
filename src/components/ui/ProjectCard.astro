@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
+import { projectRoleLabels } from '../../utils/projects';
 import ProjectStatus from './ProjectStatus.astro';
 import ProjectTechnologies from './ProjectTechnologies.astro';
 
@@ -14,17 +15,25 @@ const titleId = `project-${project.id}`;
 
 <article class="project-card">
   <a class="project-card-link" href={`/projects/${project.id}`} aria-labelledby={titleId}>
-    <div class="project-card-header">
-      {project.data.logoImage && (
-        <Image class="project-card-logo" src={project.data.logoImage} alt="" height={48} />
-      )}
-      <h2 class="project-card-title" id={titleId}>{project.data.title}</h2>
+    <div class="project-card-heading">
+      <div class="project-card-header">
+        {project.data.logoImage && (
+          <Image class="project-card-logo" src={project.data.logoImage} alt="" height={48} />
+        )}
+        <h2 class="project-card-title" id={titleId}>{project.data.title}</h2>
+      </div>
+      <p class="project-card-metadata">
+        <span class="project-card-role">{projectRoleLabels[project.data.role]}</span>
+        <span class="project-card-status">
+          <span class="project-card-separator" aria-hidden="true">&middot;</span>
+          <ProjectStatus status={project.data.status} variant="inline" />
+        </span>
+      </p>
     </div>
     <p class="project-card-description">{project.data.description}</p>
     <ProjectTechnologies technologies={project.data.technologyStack} />
     <div class="project-card-footer">
       <span class="project-card-more">Read about this project <span aria-hidden="true">&rarr;</span></span>
-      <ProjectStatus status={project.data.status} />
     </div>
   </a>
 </article>
@@ -61,6 +70,13 @@ const titleId = `project-${project.id}`;
     outline-offset: 4px;
   }
 
+  .project-card-heading {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+  }
+
   .project-card-header {
     display: flex;
     align-items: center;
@@ -78,7 +94,33 @@ const titleId = `project-${project.id}`;
 
   .project-card-title {
     font-size: 1.375rem;
+    letter-spacing: -0.015em;
     min-width: 0;
+  }
+
+  .project-card-metadata {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--spacing-xs) var(--spacing-sm);
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
+  }
+
+  .project-card-role {
+    color: var(--color-text);
+    font-weight: 500;
+  }
+
+  .project-card-status {
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--spacing-sm);
+  }
+
+  .project-card-separator {
+    flex-shrink: 0;
   }
 
   .project-card-description {
@@ -89,16 +131,9 @@ const titleId = `project-${project.id}`;
   .project-card-footer {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: var(--spacing-sm);
     width: 100%;
     margin-top: auto;
     padding-top: var(--spacing-sm);
-  }
-
-  .project-card-footer :global(.project-status) {
-    flex-shrink: 0;
-    text-align: right;
   }
 
   .project-card-more {
@@ -108,6 +143,12 @@ const titleId = `project-${project.id}`;
 
   .project-card-link:hover .project-card-more {
     text-decoration: underline;
+  }
+
+  @media (max-width: 36rem) {
+    .project-card-link {
+      padding: var(--spacing-md);
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
