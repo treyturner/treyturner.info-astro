@@ -3,11 +3,11 @@
   "role": "NOC Engineer I-III",
   "startDate": "2004-05",
   "endDate": "2006-05",
-  "description": "Lorem ipsum",
+  "description": "Maintained a large production network of Linux routers and core routing infrastructure, handling on-call incidents, technical escalations, and updates while minimizing customer downtime.",
   "highlights": [
     "Repaired and maintained 13,000 Linux routers and their uplinks on a 24/7 basis with pager rotation between a small team",
     "Managed and troubleshot Cisco 7200 at the core, including DS3 and T1 testing and configuration",
-    "Responded to escalations from outside groups requiring thorough understanding of proprietary network design, diagnostic tools, sand processes",
+    "Responded to escalations from outside groups requiring thorough understanding of proprietary network design, diagnostic tools, and processes",
     "Seamlessly administered hardware and software updates in a large production environment, ensuring low failure percentages and minimizing client downtime"
   ],
   "logo": "wayport.jpg"

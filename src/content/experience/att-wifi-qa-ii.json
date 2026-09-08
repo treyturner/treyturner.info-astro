@@ -3,7 +3,7 @@
   "role": "QA Engineer II",
   "startDate": "2010-05",
   "endDate": "2013-05",
-  "description": "Lorem ipsum",
+  "description": "Designed functional and performance tests for web services, maintained CI test jobs, and helped other testers adopt team processes and best practices through onboarding and ongoing support.",
   "highlights": [
     "Designed and executed functional and performance tests of SOAP and REST services",
     "Implemented and monitored test jobs in Jenkins",

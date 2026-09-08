@@ -3,7 +3,7 @@
   "role": "QA Automation Engineer / Tech Stack Lead",
   "startDate": "2015-10",
   "endDate": "2016-06",
-  "description": "Lorem ipsum",
+  "description": "Led test automation architecture across media players, content management, and analytics systems, creating shared frameworks and tooling for cross-platform testing, synthetic monitoring, and performance analysis.",
   "highlights": [
     "Authored, executed, and reviewed WebDriver code leveraging cloud infrastructure and mobile platform coverage to target HTML5 and Flash media players and an Angular CMS",
     "Automated tests around the analytics, reporting, and ETL portions of the business",

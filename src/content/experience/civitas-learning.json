@@ -3,7 +3,7 @@
   "role": "Data Quality Engineer",
   "startDate": "2015-10",
   "endDate": "2016-06",
-  "description": "Lorem ipsum",
+  "description": "Built test frameworks for web applications and data processing pipelines, integrated testing into CI, and investigated performance bottlenecks using dedicated test environments and monitoring tools.",
   "highlights": [
     "Developed front and back end functional test frameworks using Geb, Spock, Groovy, and Gradle",
     "Created comprehensive Selenium page and module objects for a variety of front end applications and a database-connected framework for validating data processing and ETL",

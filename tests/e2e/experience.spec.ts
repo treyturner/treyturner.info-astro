@@ -47,6 +47,19 @@ test.describe('Experience page', () => {
     }
   });
 
+  test('each card has a non-placeholder description', async ({ page }) => {
+    await page.goto('/experience');
+    const cards = page.locator('.experience-card');
+    const count = await cards.count();
+    expect(count).toBeGreaterThan(0);
+    for (let i = 0; i < count; i++) {
+      const description = cards.nth(i).locator('.experience-description');
+      await expect(description).toHaveCount(1);
+      await expect(description).toContainText(/\S/);
+      await expect(description).not.toContainText(/lorem\s+ipsum/i);
+    }
+  });
+
   test('each card has highlights', async ({ page }) => {
     await page.goto('/experience');
     const cards = page.locator('.experience-card');
