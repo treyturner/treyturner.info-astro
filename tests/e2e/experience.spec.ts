@@ -78,14 +78,19 @@ test.describe('Experience page', () => {
     await expect(activeLink).toContainText('Experience');
   });
 
-  test('each card has a company logo', async ({ page }) => {
+  test('each card loads its company logo', async ({ page }) => {
     await page.goto('/experience');
     const cards = page.locator('.experience-card');
     const count = await cards.count();
     expect(count).toBeGreaterThan(0);
     for (let i = 0; i < count; i++) {
       const logo = cards.nth(i).locator('.experience-logo');
+      await expect(logo).toHaveCount(1);
+      await logo.scrollIntoViewIfNeeded();
       await expect(logo).toBeVisible();
+      await expect.poll(() => logo.evaluate(
+        (image: HTMLImageElement) => image.complete && image.naturalWidth > 0,
+      )).toBe(true);
     }
   });
 });

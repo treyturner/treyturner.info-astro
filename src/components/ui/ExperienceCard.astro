@@ -11,8 +11,8 @@ const { experience } = Astro.props;
 const dateRange = formatDateRange(experience.startDate, experience.endDate);
 const isCurrent = !experience.endDate;
 
-const allLogos = import.meta.glob<{ default: ImageMetadata }>('../../assets/logos/*', { eager: true });
-const logoKey  = `../../assets/logos/${experience.logo}`;
+const allLogos = import.meta.glob<{ default: ImageMetadata }>('../../assets/logos/companies/*', { eager: true });
+const logoKey  = `../../assets/logos/companies/${experience.logo}`;
 const logoSrc  = allLogos[logoKey]?.default;
 ---
 
