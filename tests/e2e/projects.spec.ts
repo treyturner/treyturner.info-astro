@@ -1,46 +1,27 @@
-import { readFileSync } from 'node:fs';
 import { basename, extname } from 'node:path';
-import { parseFrontmatter } from 'astro/markdown';
 import { test, expect, type Locator } from '@playwright/test';
+import { formatYearMonthDay } from '../../src/schemas/common';
 import { projectRoleLabels, projectStatusLabels } from '../../src/utils/projects';
+import { readProjectContent } from '../helpers/project-content';
 
-const publishedProjects = [
-  { id: 'wled-builds', title: 'Custom WLED and WLED-MM builds' },
-  { id: 'mister-deskflow', title: 'MiSTer-deskflow' },
-  { id: 'patreage', title: 'Patreage' },
-  { id: 'lower-duck-pond', title: 'Lower Duck Pond Hosting' },
-  { id: 'docker-beets', title: 'docker-beets' },
-  { id: 'code-doodles', title: 'Code Doodles Revival' },
-  { id: 'playwright-adventures', title: 'playwright-adventures' },
-].map((project) => {
-  const source = readFileSync(new URL(`../../src/content/projects/${project.id}.mdx`, import.meta.url), 'utf8');
-  const { frontmatter } = parseFrontmatter(source);
-  return {
-    ...project,
-    logoImage: frontmatter.logoImage as string | undefined,
-    role: frontmatter.role as keyof typeof projectRoleLabels,
-    status: frontmatter.status as keyof typeof projectStatusLabels,
-    liveUrl: frontmatter.liveUrl as string | undefined,
-    endDate: frontmatter.endDate as string | undefined,
-  };
-});
+const { publishedProjects, draftProjects } = readProjectContent();
 
-async function expectProjectLogo(logo: Locator, logoImage: string | undefined) {
-  await expect(logo).toHaveCount(logoImage ? 1 : 0);
-  if (!logoImage) return;
+async function expectProjectImage(image: Locator, imagePath: string | undefined) {
+  await expect(image).toHaveCount(imagePath ? 1 : 0);
+  if (!imagePath) return;
 
-  await logo.scrollIntoViewIfNeeded();
-  await expect(logo).toBeVisible();
-  await expect(logo).toHaveAttribute('width', /^[1-9]\d*$/);
-  await expect(logo).toHaveAttribute('height', /^[1-9]\d*$/);
+  await image.scrollIntoViewIfNeeded();
+  await expect(image).toBeVisible();
+  await expect(image).toHaveAttribute('width', /^[1-9]\d*$/);
+  await expect(image).toHaveAttribute('height', /^[1-9]\d*$/);
 
   // Development uses an image endpoint; production uses a hashed, optimized filename.
-  const src = new URL((await logo.getAttribute('src'))!, 'http://localhost');
-  const imagePath = src.searchParams.get('href') ?? decodeURIComponent(src.pathname);
-  const logoName = basename(logoImage, extname(logoImage));
-  expect(basename(imagePath).startsWith(`${logoName}.`), `Expected logo ${logoImage}, received ${imagePath}`).toBe(true);
+  const src = new URL((await image.getAttribute('src'))!, 'http://localhost');
+  const resolvedPath = src.searchParams.get('href') ?? decodeURIComponent(src.pathname);
+  const imageName = basename(imagePath, extname(imagePath));
+  expect(basename(resolvedPath).startsWith(`${imageName}.`), `Expected image ${imagePath}, received ${resolvedPath}`).toBe(true);
 
-  await expect.poll(() => logo.evaluate(
+  await expect.poll(() => image.evaluate(
     (image: HTMLImageElement) => image.complete && image.naturalWidth > 0,
   )).toBe(true);
 }
@@ -71,49 +52,65 @@ test.describe('Projects page', () => {
   test('shows only published cards in display order, with title as the tie-breaker', async ({ page }) => {
     await page.goto('/projects');
     await expect(page.locator('.project-card-title')).toHaveText(publishedProjects.map(({ title }) => title));
-    await expect(page.locator('.projects-empty')).toHaveCount(0);
-    await expect(page.getByRole('link', { name: 'Example Project', exact: true })).toHaveCount(0);
+    await expect(page.locator('.project-card-link')).toHaveCount(publishedProjects.length);
+    expect(await page.locator('.project-card-link').evaluateAll(
+      (links) => links.map((link) => link.getAttribute('href')),
+    )).toEqual(publishedProjects.map(({ id }) => `/projects/${id}`));
+    await expect(page.locator('.projects-empty')).toHaveCount(publishedProjects.length ? 0 : 1);
+    for (const { id } of draftProjects) {
+      await expect(page.locator(`.project-card-link[href="/projects/${id}"]`)).toHaveCount(0);
+    }
     await expect(page.locator('.project-content')).toHaveCount(0);
   });
 
   test('cards include summaries, roles, labeled statuses, technologies, and optional logos', async ({ page }) => {
     await page.goto('/projects');
-    for (const { id, logoImage, role, status } of publishedProjects) {
+    for (const { id, logoImage, role, status, description, technologyStack } of publishedProjects) {
       const card = page.locator(`.project-card-link[href="/projects/${id}"]`);
-      await expect(card.locator('.project-card-description')).not.toBeEmpty();
+      await expect(card.locator('.project-card-description')).toHaveText(description);
       await expect(card.locator('.project-card-role')).toHaveText(projectRoleLabels[role]);
       await expect(card.locator('.project-status')).toHaveText(`Status: ${projectStatusLabels[status]}`);
       await expect(card.locator('.project-status')).toHaveCSS('border-top-width', '0px');
       await expect(card.locator('.project-status')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
       await expect(card.locator('.project-card-separator')).toHaveAttribute('aria-hidden', 'true');
-      await expect(card.getByRole('list', { name: 'Technology stack' })).toBeVisible();
+      const technologies = card.getByRole('list', { name: 'Technology stack' });
+      await expect(technologies).toHaveCount(technologyStack.length ? 1 : 0);
+      await expect(technologies.locator('li')).toHaveText(technologyStack);
       await expect(card.locator('.project-card-more')).toContainText('Read about this project');
-      await expectProjectLogo(card.locator('.project-card-logo'), logoImage);
+      await expectProjectImage(card.locator('.project-card-logo'), logoImage);
     }
   });
 
   test('a whole card is a single native link and can be opened with the keyboard', async ({ page }) => {
+    test.skip(!publishedProjects.length, 'No published projects to navigate to.');
+    const { id, title } = publishedProjects[0];
+    const path = `/projects/${id}`;
     await page.goto('/projects');
-    const card = page.getByRole('link', { name: 'MiSTer-deskflow', exact: true });
-    await expect(card).toHaveAttribute('href', '/projects/mister-deskflow');
+    const card = page.locator(`.project-card-link[href="${path}"]`);
+    await expect(card).toHaveAccessibleName(title);
     await expect(card.locator('a, button')).toHaveCount(0);
     await card.focus();
     await expect(card).toBeFocused();
     await page.keyboard.press('Enter');
-    await expect(page).toHaveURL(/\/projects\/mister-deskflow\/?$/);
-    await expect(page.locator('h1')).toHaveText('MiSTer-deskflow');
+    await expect(page).toHaveURL((url) => decodeURIComponent(url.pathname).replace(/\/$/, '') === path);
+    await expect(page.locator('h1')).toHaveText(title);
     await page.locator('.project-back-link').first().click();
     await expect(page).toHaveURL(/\/projects\/?$/);
   });
 
   test('clicking the card description navigates to its project', async ({ page }) => {
+    test.skip(!publishedProjects.length, 'No published projects to navigate to.');
+    const path = `/projects/${publishedProjects[0].id}`;
     await page.goto('/projects');
-    await page.locator('[href="/projects/wled-builds"] .project-card-description').click();
-    await expect(page).toHaveURL(/\/projects\/wled-builds\/?$/);
+    await page.locator(`.project-card-link[href="${path}"] .project-card-description`).click();
+    await expect(page).toHaveURL((url) => decodeURIComponent(url.pathname).replace(/\/$/, '') === path);
   });
 
   test('draft projects and unknown projects have no accessible detail page', async ({ request }) => {
-    for (const id of ['example-project', 'not-a-project']) {
+    let unknownId = 'not-a-project';
+    const ids = new Set([...publishedProjects, ...draftProjects].map(({ id }) => id));
+    while (ids.has(unknownId)) unknownId += '-missing';
+    for (const id of [...draftProjects.map(({ id }) => id), unknownId]) {
       const response = await request.get(`/projects/${id}`);
       expect(response.status()).toBe(404);
     }
@@ -121,12 +118,13 @@ test.describe('Projects page', () => {
 });
 
 test.describe('Project detail pages', () => {
-  for (const { id, title, logoImage, role, status, liveUrl, endDate } of publishedProjects) {
+  for (const project of publishedProjects) {
+    const { id, title, logoImage, role, status, liveUrl, startDate, endDate, technologyStack } = project;
     test(`renders the ${id} logo according to its content`, async ({ page }) => {
       const response = await page.goto(`/projects/${id}`);
       expect(response?.status()).toBe(200);
       await expect(page.locator('h1')).toHaveText(title);
-      await expectProjectLogo(page.locator('.project-logo'), logoImage);
+      await expectProjectImage(page.locator('.project-logo'), logoImage);
     });
 
     test(`renders the full ${id} project and page-specific metadata`, async ({ page, request }) => {
@@ -134,8 +132,8 @@ test.describe('Project detail pages', () => {
       expect(response?.status()).toBe(200);
       await expect(page.locator('h1')).toHaveText(title);
       await expect(page).toHaveTitle(`${title} | Trey Turner`);
-      await expect(page.locator('.project-description')).not.toBeEmpty();
-      await expect(page.locator('.project-goal dd')).not.toBeEmpty();
+      await expect(page.locator('.project-description')).toHaveText(project.description);
+      await expect(page.locator('.project-goal dd')).toHaveText(project.goal);
       await expect(page.locator('.project-facts')).toContainText(projectRoleLabels[role]);
       await expect(page.locator('.project-facts dt')).toHaveText([
         'Goal', 'My role', 'Status', 'Started', ...(endDate ? ['Ended'] : []),
@@ -150,10 +148,30 @@ test.describe('Project detail pages', () => {
       } else {
         await expect(visitLink).toHaveCount(0);
       }
-      await expect(page.locator('.project-facts time').first()).toHaveAttribute('datetime', /\d{4}-\d{2}-\d{2}T/);
-      await expect(page.locator('.project-content > p')).toHaveCount(5);
-      await expect(page.locator('.project-content > ul > li')).toHaveCount(5);
-      await expect(page.getByRole('list', { name: 'Technology stack' })).toBeVisible();
+      const dates = endDate ? [startDate, endDate] : [startDate];
+      await expect(page.locator('.project-facts time')).toHaveText(dates.map(formatYearMonthDay));
+      for (const [index, date] of dates.entries()) {
+        await expect(page.locator('.project-facts time').nth(index)).toHaveAttribute('datetime', date.toISOString());
+      }
+      const content = page.locator('.project-content');
+      await expect(content).toHaveCount(1);
+      if (project.body) await expect(content).not.toBeEmpty();
+      else await expect(content).toBeEmpty();
+      const technologies = page.getByRole('list', { name: 'Technology stack' });
+      await expect(technologies).toHaveCount(technologyStack.length ? 1 : 0);
+      await expect(technologies.locator('li')).toHaveText(technologyStack);
+
+      const repositories = project.repositoryUrls ?? [];
+      const links = page.getByRole('list', { name: 'Project links' });
+      const linkCount = repositories.length + (liveUrl ? 1 : 0);
+      await expect(links).toHaveCount(linkCount ? 1 : 0);
+      await expect(links.getByRole('link')).toHaveCount(linkCount);
+      for (const [index, url] of repositories.entries()) {
+        const name = repositories.length === 1 ? 'Repository' : `Repository ${index + 1}`;
+        await expect(links.getByRole('link', { name, exact: true })).toHaveAttribute('href', url);
+      }
+
+      await expectProjectImage(page.locator('.project-featured-image'), project.featuredImage);
 
       const activeLink = page.locator('nav a.active');
       await expect(activeLink).toHaveText('Projects');
@@ -175,39 +193,6 @@ test.describe('Project detail pages', () => {
       }
     });
   }
-
-  test('renders multiple repository links and omits absent optional fields', async ({ page }) => {
-    await page.goto('/projects/wled-builds');
-    const links = page.getByRole('list', { name: 'Project links' });
-    await expect(links.getByRole('link', { name: 'Repository 1', exact: true })).toHaveAttribute('href', 'https://github.com/treyturner/wled-builds');
-    await expect(links.getByRole('link', { name: 'Repository 2', exact: true })).toHaveAttribute('href', 'https://github.com/treyturner/wled-mm-builds');
-    await expect(links.getByRole('link', { name: /^Visit / })).toHaveCount(0);
-    await expect(page.locator('.project-featured-image')).toHaveCount(0);
-    await expect(page.locator('.project-facts dt')).toHaveText(['Goal', 'My role', 'Status', 'Started']);
-  });
-
-  test('renders a single repository and live link with the supplied dates', async ({ page }) => {
-    await page.goto('/projects/code-doodles');
-    const links = page.getByRole('list', { name: 'Project links' });
-    await expect(links.getByRole('link', { name: 'Repository', exact: true })).toHaveAttribute('href', 'https://github.com/treyturner/codedoodl.es/tree/feat/containerize');
-    await expect(links.getByRole('link', { name: 'Visit https://doodles.treyturner.info', exact: true })).toHaveAttribute('href', 'https://doodles.treyturner.info');
-    await expect(page.locator('.project-facts time')).toHaveText(['April 27, 2026', 'April 27, 2026']);
-    await expect(page.locator('.project-facts dt')).toContainText(['Started', 'Ended']);
-  });
-
-  test('renders the optional featured image without inventing a repository link', async ({ page }) => {
-    await page.goto('/projects/patreage');
-    const image = page.locator('.project-featured-image');
-    await expect(image).toBeVisible();
-    await expect(image).toHaveAttribute('width', /^[1-9]\d*$/);
-    await expect(image).toHaveAttribute('height', /^[1-9]\d*$/);
-    await image.scrollIntoViewIfNeeded();
-    await expect.poll(() => image.evaluate(
-      (element: HTMLImageElement) => element.complete && element.naturalWidth > 0,
-    )).toBe(true);
-    await expect(page.locator('.project-links a')).toHaveCount(1);
-    await expect(page.locator('.project-links a')).toHaveAttribute('href', 'https://patreon-verification.treyturner.info');
-  });
 });
 
 for (const width of [1280, 820, 390, 320]) {
@@ -215,6 +200,7 @@ for (const width of [1280, 820, 390, 320]) {
     test.use({ viewport: { width, height: 900 } });
 
     test('keeps role and status on one line beneath the logo and title', async ({ page }) => {
+      test.skip(!publishedProjects.length, 'No published project cards to measure.');
       await page.goto('/projects');
       const cards = page.locator('.project-card-link');
       await expect(cards.first()).toBeVisible();
@@ -315,7 +301,7 @@ test.describe('Projects on small screens', () => {
   test('cards and full articles fit the viewport in both themes', async ({ page }) => {
     for (const colorScheme of ['light', 'dark'] as const) {
       await page.emulateMedia({ colorScheme });
-      for (const path of ['/projects', '/projects/wled-builds', '/projects/patreage']) {
+      for (const path of ['/projects', ...publishedProjects.map(({ id }) => `/projects/${id}`)]) {
         await page.goto(path);
         await expect(page.locator('html')).toHaveAttribute('data-theme', colorScheme);
         expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
