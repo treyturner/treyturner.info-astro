@@ -1,0 +1,29 @@
+---
+title: "Custom WLED and WLED-MM builds"
+role: "solo-dev"
+goal: "Customized builds of WLED and the Moon Modules fork for a variety of LED driver boards I use at home."
+description: "Board-specific WLED and Moon Modules firmware for my home lighting, with containerized builds, automated releases, and fixes for large LED matrices."
+status: "active"
+logoImage: "wled.png"
+repositoryUrls: ["https://github.com/treyturner/wled-builds", "https://github.com/treyturner/wled-mm-builds"]
+technologyStack: ["PlatformIO", "C++", "Bash", "Docker", "GitHub Actions", "ESP32"]
+displayOrder: 0
+startDate: "2026-01-22"
+draft: false
+---
+
+I maintain these builds to get WLED and its Moon Modules fork configured for the LED controllers I use at home. My setup spans LED strips, matrix panels, and audio-reactive lighting, with different boards needing different pin assignments, peripherals, and memory settings. I wanted those choices recorded in a build configuration I could reuse when updating firmware, instead of reconstructing them for each release. The result is a pair of companion repositories: one for mainline WLED and one for WLED-MM, sharing a similar build and release process while keeping their upstream-specific settings separate.
+
+My contribution is the hardware configuration, packaging, and targeted fixes around those upstream projects. The builds cover QuinLED Dig2go and DigUno controllers, including Ethernet and temperature-sensor variants, alongside ESP32-S3 matrix boards from Adafruit and Lilygo; the mainline repository also includes a Waveshare matrix target. An ESP32-A1S Audio Kit has a separate configuration as a dedicated audio sender. PlatformIO overrides capture the board choices and enabled features, while a Docker-based builder provides the toolchain. The same Makefile-driven process can build a selected upstream tag, branch, or commit locally or in CI, with dependency preparation separated from the parallel board builds.
+
+I kept the scope tied to hardware I have a reason to support, rather than trying to produce every possible WLED variant. The useful features are the combinations that make those controllers easier to build, install, and maintain:
+
+- Board-specific firmware configurations for LED strips and HUB75 matrix panels, including wired-network and temperature-sensor options where supported.
+- Audio-reactive configurations, including a dedicated audio-sender build for distributing audio data to other controllers.
+- Targeted mainline WLED patches for 256-pixel-wide matrices and configurable matrix-buffer memory placement.
+- Containerized builds with reusable dependency caches and a choice of upstream revision and board targets.
+- Factory images for initial flashing and OTA images for updates, with automated release publishing to GitHub and my Forgejo instance.
+
+One implementation challenge was making a 256-by-64 HUB75 matrix work within both WLED's assumptions and the controller's memory budget. Supporting a width of 256 required more than changing one limit: validation, saved panel dimensions, and the configuration UI all had to agree, and a separate boundary check rejected a matrix using exactly the allowed pixel count. I addressed those together in a narrow source patch. Memory placement presented another tradeoff: moving the DMA framebuffer into external PSRAM saved internal memory, but the driver's frequent cache flushes made full-frame updates too slow. For the Waveshare build, I instead kept a four-bit-per-channel DMA framebuffer in internal RAM and moved WLED's separate staging buffer into PSRAM. That reduces internal memory pressure without putting the timing-sensitive framebuffer on the slower path, at the cost of reduced color depth.
+
+These are ongoing, unofficial builds for my own lighting setup, not replacements for the WLED or Moon Modules projects, and I am not affiliated with them or QuinLED. I try to keep the differences understandable: board settings live in the overrides, and mainline source patches are documented with the conditions under which they can be removed. The patch step accepts fixes already present upstream and stops when a patch no longer applies cleanly, making an upstream change something to review rather than silently work around. The value for me is having a repeatable way to carry the hardware-specific work forward while continuing to use the effects and capabilities developed by the upstream communities.
