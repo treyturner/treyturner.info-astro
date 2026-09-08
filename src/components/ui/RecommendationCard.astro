@@ -10,7 +10,7 @@ interface Props {
 const { recommendation } = Astro.props;
 
 const allPeople = import.meta.glob<{ default: ImageMetadata }>('../../assets/people/*.jpg', { eager: true });
-const allLogos  = import.meta.glob<{ default: ImageMetadata }>('../../assets/logos/*',      { eager: true });
+const allLogos  = import.meta.glob<{ default: ImageMetadata }>('../../assets/logos/companies/*', { eager: true });
 
 const photoKey = `../../assets/people/${recommendation.author.toLowerCase().replace(/\s+/g, '-')}.jpg`;
 const photoSrc = allPeople[photoKey]?.default;
@@ -35,7 +35,7 @@ const photoSrc = allPeople[photoKey]?.default;
     </div>
     <div class="recommendation-roles">
       {recommendation.roles.map((r) => {
-        const logoKey = `../../assets/logos/${r.logo}`;
+        const logoKey = `../../assets/logos/companies/${r.logo}`;
         const roleLogo = allLogos[logoKey]?.default;
         return (
           <div class="recommendation-role-entry">

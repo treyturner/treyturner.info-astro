@@ -87,9 +87,19 @@ test.describe('Recommendations page', () => {
     await expect(photos).not.toHaveCount(0);
   });
 
-  test('most role entries have a company logo', async ({ page }) => {
+  test('each role entry loads its company logo', async ({ page }) => {
     await page.goto('/recommendations');
-    const logos = page.locator('.recommendation-role-logo');
-    await expect(logos).not.toHaveCount(0);
+    const roles = page.locator('.recommendation-role-entry');
+    const count = await roles.count();
+    expect(count).toBeGreaterThan(0);
+    for (let i = 0; i < count; i++) {
+      const logo = roles.nth(i).locator('.recommendation-role-logo');
+      await expect(logo).toHaveCount(1);
+      await logo.scrollIntoViewIfNeeded();
+      await expect(logo).toBeVisible();
+      await expect.poll(() => logo.evaluate(
+        (image: HTMLImageElement) => image.complete && image.naturalWidth > 0,
+      )).toBe(true);
+    }
   });
 });
