@@ -1,0 +1,29 @@
+---
+title: "Lower Duck Pond Hosting"
+role: "solo-dev"
+goal: "Build and maintain free, secure, and very real web hosting for the fictional residents of Lower Duck Pond."
+description: "A community-scale hosting platform for the handmade websites of r/HaveWeMet, built around static hosting, tenant isolation, and reproducible infrastructure."
+status: "pre-alpha"
+repositoryUrls: ["https://github.com/lowerduckpond-net/lowerduckpond.net"]
+liveUrl: "https://lowerduckpond.net"
+technologyStack: ["Python", "FastAPI", "OpenTofu", "Ansible", "Caddy"]
+displayOrder: 2
+startDate: "2026-08-19"
+draft: false
+---
+
+I started Lower Duck Pond Hosting to give the fictional residents of r/HaveWeMet somewhere to build very real websites. An imaginary business, neighborhood club, election campaign, or municipal department can have a life beyond its posts, and a small handmade site seems like a natural extension of that shared world. The spirit I have in mind is closer to GeoCities: personal pages with their own character, made by people who have something entertaining to contribute. It is also a chance for me to build and document a hosting platform from the infrastructure up, with a community purpose behind the engineering.
+
+The scope is deliberately community-sized. I am starting with static HTML, CSS, JavaScript, and assets on a single DigitalOcean host, keeping the system small enough to understand and operate myself. OpenTofu defines the infrastructure, Ansible configures the host, and I am building the publishing and site-management machinery in Python. Caddy is the web server behind Cloudflare, while a separate FastAPI application is the foundation for the future public control plane. PHP and SQL hosting are later possibilities that need their own isolation and recovery work before I offer them.
+
+I want residents to be able to bring their own websites without having to become server administrators. Archive uploads are the initial publishing interface, and I am building the operational foundations before adding self-service signup and management. The major capabilities I am working toward are:
+
+- Free static hosting with HTTPS and friendly site names for community projects.
+- Validated archive uploads, storage limits, and versioned deployments with rollback.
+- Separate, permanent content addresses for each site, with reusable names that do not transfer the previous site's browser identity.
+- Site suspension, restoration, archival, and portable exports so owners can recover or take their work elsewhere.
+- Reproducible infrastructure, encrypted backups, and tested recovery procedures.
+
+One less obvious implementation challenge was making site names reusable without also reusing a previous owner's browser identity. Browsers can retain local storage and service workers after a site disappears, so assigning its old address to someone else can carry old behavior forward. I addressed that in the routing model by separating the friendly name from a permanent, tenant-specific content address. The friendly address only redirects; it never serves the uploaded website, and the actual content address is never reassigned. I also separated trusted platform services on lowerduckpond.net from tenant content on lowerduckpond.com. Route tests check the generated mappings and redirects, while browser checks exercise the boundary between the platform and tenant domains.
+
+Lower Duck Pond Hosting is still pre-alpha. The production infrastructure and host configuration are in place, and the recorded acceptance checks cover HTTPS, repeatable configuration, backups, restores, and recovery after a reboot. I am still building out the static publishing and site lifecycle, and production tenant publishing remains deliberately disabled until the remaining acceptance gates pass. Public account management and a small community pilot come later. The outcome I want is a modest, maintainable service that gives people more room to play in Lower Duck Pond, with enough care behind it that their handmade sites are worth entrusting to me.
