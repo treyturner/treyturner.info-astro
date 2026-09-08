@@ -107,6 +107,14 @@ npm run test:e2e
 
 Playwright auto-starts the preview server when `reuseExistingServer` is false (CI). Locally it reuses an already-running preview server if available.
 
+To check the running development server as well, set `PLAYWRIGHT_BASE_URL`:
+
+```sh
+PLAYWRIGHT_BASE_URL=http://localhost:4321 npm run test:e2e -- tests/e2e/projects.spec.ts
+```
+
+This override does not start or stop a server. It is useful for catching development-only content and image-cache problems that a fresh production build can miss.
+
 ### Coverage regression
 
 `scripts/check-coverage-regression.mjs` compares the current branch's `coverage/coverage-summary.json` against the base branch's. In CI this runs automatically after unit tests on every pull request and fails the job if coverage regresses.
