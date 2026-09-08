@@ -1,0 +1,67 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ProjectCard from '../components/ui/ProjectCard.astro';
+import { getCollection } from 'astro:content';
+import { getPublishedProjects } from '../utils/projects';
+
+const projects = getPublishedProjects(await getCollection('projects'));
+---
+
+<BaseLayout
+  title="Projects"
+  description="Personal software, automation, and infrastructure projects by Trey Turner."
+>
+  <section class="projects-page">
+    <h1>Projects</h1>
+    <p class="projects-intro">
+      A home for personal software, automation, and infrastructure projects.
+    </p>
+    {projects.length > 0 ? (
+      <ul class="projects-grid" aria-label="Projects">
+        {projects.map((project) => (
+          <li><ProjectCard project={project} /></li>
+        ))}
+      </ul>
+    ) : (
+      <p class="projects-empty">No projects published yet. Check back soon!</p>
+    )}
+  </section>
+</BaseLayout>
+
+<style>
+  .projects-page {
+    max-width: var(--max-width);
+    margin-inline: auto;
+  }
+
+  .projects-page h1 {
+    margin-bottom: var(--spacing-md);
+  }
+
+  .projects-intro {
+    color: var(--color-text-secondary);
+    font-size: 1.125rem;
+    margin-bottom: var(--spacing-2xl);
+  }
+
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--spacing-lg);
+    list-style: none;
+  }
+
+  .projects-grid > li {
+    min-width: 0;
+  }
+
+  .projects-empty {
+    color: var(--color-text-secondary);
+  }
+
+  @media (max-width: 48rem) {
+    .projects-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

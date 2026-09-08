@@ -3,6 +3,7 @@
   { "label": "Skills", "href": "/skills" },
   { "label": "Experience", "href": "/experience" },
   { "label": "Recommendations", "href": "/recommendations" },
+  { "label": "Projects", "href": "/projects" },
   { "label": "Homelab", "href": "/homelab" },
   { "label": "Blog", "href": "/blog" }
 ]

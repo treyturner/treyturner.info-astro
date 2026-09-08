@@ -13,6 +13,8 @@ const visibleNavigation = navigation.filter((item) => {
   if (item.href === '/homelab') return hasPublishedHomelabPosts;
   return true;
 });
+const isActive = (href: string) => currentPath === href
+  || (href === '/projects' && currentPath.startsWith('/projects/'));
 ---
 
 <nav class="site-nav" aria-label="Main navigation">
@@ -22,8 +24,8 @@ const visibleNavigation = navigation.filter((item) => {
         <li>
           <a
             href={item.href}
-            class:list={['nav-link', { active: currentPath === item.href }]}
-            aria-current={currentPath === item.href ? 'page' : undefined}
+            class:list={['nav-link', { active: isActive(item.href) }]}
+            aria-current={isActive(item.href) ? (currentPath === item.href ? 'page' : 'location') : undefined}
           >
             {item.label}
           </a>

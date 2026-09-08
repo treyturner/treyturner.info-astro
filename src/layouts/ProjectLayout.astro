@@ -1,0 +1,220 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import BaseLayout from './BaseLayout.astro';
+import ProjectStatus from '../components/ui/ProjectStatus.astro';
+import ProjectTechnologies from '../components/ui/ProjectTechnologies.astro';
+import { formatYearMonthDay } from '../schemas/common';
+import { projectRoleLabels } from '../utils/projects';
+
+interface Props {
+  project: CollectionEntry<'projects'>['data'];
+}
+
+const { project } = Astro.props;
+const repositories = project.repositoryUrls ?? [];
+---
+
+<BaseLayout title={project.title} description={project.description}>
+  <article class="project-page">
+    <a href="/projects" class="project-back-link">&larr; Back to Projects</a>
+    <header class="project-header">
+      {project.logoImage && (
+        <Image class="project-logo" src={project.logoImage} alt="" height={64} />
+      )}
+      <h1>{project.title}</h1>
+      <ProjectStatus status={project.status} />
+      <p class="project-description">{project.description}</p>
+      <dl class="project-facts">
+        <div class="project-goal">
+          <dt>Goal</dt>
+          <dd>{project.goal}</dd>
+        </div>
+        <div>
+          <dt>My role</dt>
+          <dd>{projectRoleLabels[project.role]}</dd>
+        </div>
+        <div>
+          <dt>Started</dt>
+          <dd><time datetime={project.startDate.toISOString()}>{formatYearMonthDay(project.startDate)}</time></dd>
+        </div>
+        {project.endDate && (
+          <div>
+            <dt>Ended</dt>
+            <dd><time datetime={project.endDate.toISOString()}>{formatYearMonthDay(project.endDate)}</time></dd>
+          </div>
+        )}
+      </dl>
+      <ProjectTechnologies technologies={project.technologyStack} />
+      {(project.liveUrl || repositories.length > 0) && (
+        <ul class="project-links" aria-label="Project links">
+          {project.liveUrl && <li><a href={project.liveUrl}>Visit project <span aria-hidden="true">&nearr;</span></a></li>}
+          {repositories.map((url, index) => (
+            <li>
+              <a href={url}>
+                {repositories.length === 1 ? 'Repository' : `Repository ${index + 1}`}
+                <span aria-hidden="true"> &nearr;</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+    </header>
+    {project.featuredImage && (
+      <Image class="project-featured-image" src={project.featuredImage} alt="" width={960} />
+    )}
+    <div class="project-content">
+      <slot />
+    </div>
+    <footer class="project-footer">
+      <a href="/projects" class="project-back-link">&larr; Back to Projects</a>
+    </footer>
+  </article>
+</BaseLayout>
+
+<style>
+  .project-page {
+    max-width: var(--content-width);
+    margin-inline: auto;
+    overflow-wrap: anywhere;
+  }
+
+  .project-back-link {
+    display: inline-block;
+    padding-block: var(--spacing-sm);
+    font-weight: 500;
+  }
+
+  .project-header {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-lg);
+    margin-block: var(--spacing-lg) var(--spacing-2xl);
+    padding-bottom: var(--spacing-xl);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .project-logo {
+    height: 4rem;
+    width: auto;
+    max-width: 12rem;
+    object-fit: contain;
+  }
+
+  .project-description {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: 1.125rem;
+  }
+
+  .project-facts {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--spacing-lg);
+    width: 100%;
+  }
+
+  .project-goal {
+    grid-column: 1 / -1;
+  }
+
+  .project-facts dt {
+    margin-bottom: var(--spacing-xs);
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
+  }
+
+  .project-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm) var(--spacing-lg);
+    list-style: none;
+  }
+
+  .project-links a {
+    display: inline-block;
+    padding-block: var(--spacing-sm);
+    font-weight: 500;
+  }
+
+  .project-page :global(a:focus-visible) {
+    outline: 3px solid var(--color-primary);
+    outline-offset: 4px;
+  }
+
+  .project-featured-image {
+    width: 100%;
+    height: auto;
+    margin-bottom: var(--spacing-2xl);
+    border-radius: var(--radius-md);
+  }
+
+  .project-content {
+    line-height: 1.8;
+  }
+
+  .project-content :global(h2),
+  .project-content :global(h3),
+  .project-content :global(h4) {
+    margin-top: var(--spacing-xl);
+    margin-bottom: var(--spacing-md);
+  }
+
+  .project-content :global(p),
+  .project-content :global(ul),
+  .project-content :global(ol),
+  .project-content :global(pre),
+  .project-content :global(blockquote) {
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .project-content :global(ul),
+  .project-content :global(ol) {
+    padding-left: var(--spacing-xl);
+  }
+
+  .project-content :global(li) {
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .project-content :global(a) {
+    text-decoration: underline;
+  }
+
+  .project-content :global(blockquote) {
+    border-left: 3px solid var(--color-primary);
+    padding-left: var(--spacing-lg);
+    color: var(--color-text-secondary);
+  }
+
+  .project-content :global(table) {
+    display: block;
+    overflow-x: auto;
+    border-collapse: collapse;
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .project-content :global(th),
+  .project-content :global(td) {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 1px solid var(--color-border);
+    text-align: left;
+  }
+
+  .project-content :global(th) {
+    background-color: var(--color-bg-secondary);
+  }
+
+  .project-footer {
+    margin-top: var(--spacing-2xl);
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid var(--color-border);
+  }
+
+  @media (max-width: 36rem) {
+    .project-facts {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

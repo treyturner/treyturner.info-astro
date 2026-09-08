@@ -5,6 +5,7 @@ const navItems = [
   { label: 'Skills', href: '/skills' },
   { label: 'Experience', href: '/experience' },
   { label: 'Recommendations', href: '/recommendations' },
+  { label: 'Projects', href: '/projects' },
 ];
 
 test.describe('Site navigation', () => {
@@ -30,6 +31,15 @@ test.describe('Site navigation', () => {
   test('hides Homelab when there are no published posts', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('nav a[href="/homelab"]')).toHaveCount(0);
+  });
+
+  test('positions Projects before Homelab and Blog in the navigation config', async () => {
+    const navigation = (
+      await import('../../src/data/navigation.json', { with: { type: 'json' } })
+    ).default;
+    const labels = navigation.map((item) => item.label);
+    expect(labels.indexOf('Projects')).toBeLessThan(labels.indexOf('Homelab'));
+    expect(labels.indexOf('Projects')).toBeLessThan(labels.indexOf('Blog'));
   });
 
   test('highlights the active page in navigation', async ({ page }) => {

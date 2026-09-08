@@ -1,0 +1,26 @@
+---
+import type { ProjectFrontmatter } from '../../schemas/projects';
+import { projectStatusLabels } from '../../utils/projects';
+
+interface Props {
+  status: ProjectFrontmatter['status'];
+}
+
+const { status } = Astro.props;
+---
+
+<span class="project-status">{projectStatusLabels[status]}</span>
+
+<style>
+  .project-status {
+    display: inline-block;
+    width: fit-content;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    background-color: var(--color-bg-secondary);
+    color: var(--color-text);
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+</style>
