@@ -23,6 +23,12 @@ Stored in `src/content/`:
 - `recommendations/` — JSON
 - `homelab/` — MDX
 
+### Logo Assets
+
+- `src/assets/logos/companies/` — company logos used by Experience and Recommendations.
+- `src/assets/logos/projects/` — project logos resolved by the Projects schema.
+- Content keeps filename-only references (`logo` or `logoImage`); each loader supplies the appropriate directory.
+
 ## Rendering Model
 
 - Prefer static generation wherever possible
