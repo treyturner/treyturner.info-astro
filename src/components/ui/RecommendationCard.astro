@@ -1,13 +1,14 @@
 ---
 import { Image } from 'astro:assets';
-import type { Recommendation } from '../../schemas/recommendations';
+import type { LinkedRecommendation } from '../../utils/recommendations';
 import { formatRecommendationDate } from '../../schemas/recommendations';
 
 interface Props {
-  recommendation: Recommendation;
+  recommendation: LinkedRecommendation['data'];
+  id: string;
 }
 
-const { recommendation } = Astro.props;
+const { recommendation, id } = Astro.props;
 
 const allPeople = import.meta.glob<{ default: ImageMetadata }>('../../assets/people/*.jpg', { eager: true });
 const allLogos  = import.meta.glob<{ default: ImageMetadata }>('../../assets/logos/companies/*', { eager: true });
@@ -16,7 +17,7 @@ const photoKey = `../../assets/people/${recommendation.author.toLowerCase().repl
 const photoSrc = allPeople[photoKey]?.default;
 ---
 
-<article class="recommendation-card">
+<article class="recommendation-card" id={id} tabindex="-1" aria-label={`Recommendation from ${recommendation.author}`}>
   <blockquote class="recommendation-text">
     <p>{recommendation.text}</p>
   </blockquote>
@@ -40,7 +41,25 @@ const photoSrc = allPeople[photoKey]?.default;
         return (
           <div class="recommendation-role-entry">
             <div class="recommendation-role-text">
-              <span class="recommendation-role">{r.role} at {r.company}</span>
+              {r.experiences.length === 1 ? (
+                <a class="recommendation-role recommendation-experience-link"
+                   href={`/experience#${r.experiences[0].id}`}>
+                  {r.role} at {r.company}
+                </a>
+              ) : (
+                <>
+                  <span class="recommendation-role">{r.role} at {r.company}</span>
+                  {r.experiences.length > 1 && (
+                    <ul class="recommendation-experience-links" aria-label="Related experience">
+                      {r.experiences.map((experience) => (
+                        <li><a class="recommendation-experience-link" href={`/experience#${experience.id}`}>
+                          {experience.data.role}
+                        </a></li>
+                      ))}
+                    </ul>
+                  )}
+                </>
+              )}
               <span class="recommendation-relationship">{r.relationship}</span>
             </div>
             {roleLogo && (
@@ -59,6 +78,17 @@ const photoSrc = allPeople[photoKey]?.default;
     border-radius: var(--radius-md);
     padding: var(--spacing-xl);
     background-color: var(--color-surface);
+    scroll-margin-top: var(--spacing-lg);
+  }
+
+  .recommendation-card:target {
+    border-color: var(--color-primary);
+  }
+
+  .recommendation-card:focus-visible,
+  .recommendation-experience-link:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 3px;
   }
 
   .recommendation-card + .recommendation-card {
@@ -75,7 +105,6 @@ const photoSrc = allPeople[photoKey]?.default;
     font-size: 1.0625rem;
     line-height: 1.7;
     color: var(--color-text);
-    font-style: italic;
     margin-bottom: 0;
   }
 
@@ -173,6 +202,18 @@ const photoSrc = allPeople[photoKey]?.default;
   .recommendation-role {
     font-size: 0.875rem;
     color: var(--color-text-secondary);
+  }
+
+  .recommendation-experience-link {
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+
+  .recommendation-experience-links {
+    list-style: none;
+    padding: 0;
+    font-size: 0.875rem;
   }
 
   .recommendation-relationship {

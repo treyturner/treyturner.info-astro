@@ -2,15 +2,17 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import RecommendationCard from '../components/ui/RecommendationCard.astro';
 import { getCollection } from 'astro:content';
-import { sortByDate } from '../utils/content';
-import type { Recommendation } from '../schemas/recommendations';
+import { linkRecommendations, type LinkedRecommendation } from '../utils/recommendations';
 
 const RELATIONSHIP_ORDER = ['Direct manager', 'Direct report', 'Colleague'];
 
-const recommendationEntries = await getCollection('recommendations');
-const sorted = sortByDate(recommendationEntries);
+const [recommendationEntries, experienceEntries] = await Promise.all([
+  getCollection('recommendations'),
+  getCollection('experience'),
+]);
+const { recommendations: sorted } = linkRecommendations(recommendationEntries, experienceEntries);
 
-function effectiveRelationship(data: Recommendation): string {
+function effectiveRelationship(data: LinkedRecommendation['data']): string {
   return data.roles
     .map(r => r.relationship)
     .reduce((best, rel) => {
@@ -41,7 +43,7 @@ const groups = RELATIONSHIP_ORDER
           <h2 class="group-heading">From {group.relationship.toLowerCase()}s</h2>
           <div class="recommendations-list">
             {group.entries.map(entry => (
-              <RecommendationCard recommendation={entry.data} />
+              <RecommendationCard id={entry.id} recommendation={entry.data} />
             ))}
           </div>
         </section>

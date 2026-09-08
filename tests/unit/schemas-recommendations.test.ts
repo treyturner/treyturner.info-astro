@@ -1,5 +1,11 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { roleSchema, recommendationSchema, formatRecommendationDate } from '../../src/schemas/recommendations';
+
+// Expose Astro's real reference implementation without starting its virtual-module server.
+vi.mock('astro:content', async () => {
+  const { createReference } = await import('astro/content/runtime');
+  return { reference: createReference() };
+});
 
 const validRole = {
   role: 'VP of Engineering',
@@ -17,6 +23,32 @@ const validEntry = {
 };
 
 describe('roleSchema', () => {
+  it('defaults omitted experience references to an empty array', () => {
+    expect(roleSchema.parse(validRole).experiences).toEqual([]);
+  });
+
+  it('resolves one or multiple experience IDs to Astro references', () => {
+    for (const experiences of [[], ['invodo'], ['att-wifi-qa', 'att-wifi-qa-ii']]) {
+      expect(roleSchema.parse({ ...validRole, experiences }).experiences).toEqual(
+        experiences.map((id) => ({ collection: 'experience', id })),
+      );
+    }
+  });
+
+  it.each(['', ' ', 'Invodo', '../invodo', 'invodo.json', 'invodo#role', 12, null, {}])(
+    'rejects invalid experience IDs: %j', (id) => {
+      expect(roleSchema.safeParse({ ...validRole, experiences: [id] }).success).toBe(false);
+    },
+  );
+
+  it.each(['invodo', null, {}])('rejects non-array experience references: %j', (experiences) => {
+    expect(roleSchema.safeParse({ ...validRole, experiences }).success).toBe(false);
+  });
+
+  it('rejects duplicate experience references within one role', () => {
+    expect(roleSchema.safeParse({ ...validRole, experiences: ['invodo', 'invodo'] }).success).toBe(false);
+  });
+
   it('accepts a valid role', () => {
     const result = roleSchema.safeParse(validRole);
     expect(result.success).toBe(true);

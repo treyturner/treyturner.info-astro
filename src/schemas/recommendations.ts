@@ -1,3 +1,4 @@
+import { reference } from 'astro:content';
 import { z } from "astro/zod";
 import { yyyyMmDdToDateSchema, formatYearMonthDay } from "./common";
 
@@ -6,6 +7,13 @@ export const roleSchema = z.object({
   company: z.string().min(1),
   relationship: z.string().min(1),
   logo: z.string().regex(/^.+\.(jpg|svg|png)$/, "Must be a filename ending in .jpg, .svg, or .png"),
+  experiences: z.array(
+    z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Must be an experience entry ID')
+      .pipe(reference('experience')),
+  ).default([]).refine(
+    (entries) => new Set(entries.map((entry) => entry.id)).size === entries.length,
+    'Experience references must be unique within a role',
+  ),
 });
 
 export const recommendationSchema = z.object({
