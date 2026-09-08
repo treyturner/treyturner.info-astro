@@ -5,6 +5,7 @@ const pages = [
   '/skills',
   '/experience',
   '/recommendations',
+  '/projects',
   '/homelab',
   '/blog',
 ];

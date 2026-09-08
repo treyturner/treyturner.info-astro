@@ -39,7 +39,8 @@ test.describe('Home page', () => {
     await page.goto('/');
     const nav = page.locator('nav');
     await expect(nav).toBeVisible();
-    await expect(nav.locator('a')).toHaveCount(4);
+    await expect(nav.locator('a')).toHaveCount(5);
+    await expect(nav.locator('a[href="/projects"]')).toBeVisible();
     await expect(nav.locator('a[href="/blog"]')).toHaveCount(0);
     await expect(nav.locator('a[href="/homelab"]')).toHaveCount(0);
   });

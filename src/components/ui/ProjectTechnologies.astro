@@ -1,0 +1,31 @@
+---
+interface Props {
+  technologies: string[];
+}
+
+const { technologies } = Astro.props;
+---
+
+{technologies.length > 0 && (
+  <ul class="project-technologies" aria-label="Technology stack">
+    {technologies.map((technology) => <li>{technology}</li>)}
+  </ul>
+)}
+
+<style>
+  .project-technologies {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    list-style: none;
+  }
+
+  .project-technologies li {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-bg-secondary);
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
+    overflow-wrap: anywhere;
+  }
+</style>
