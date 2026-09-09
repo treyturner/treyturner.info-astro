@@ -61,6 +61,33 @@ test.describe('Projects page', () => {
     );
   });
 
+  test('offers a branded Patreon link that can be followed with the keyboard', async ({ page }) => {
+    await page.goto('/projects');
+    const badge = page.getByRole('link', { name: 'Support on Patreon', exact: true });
+    await expect(badge).toHaveCount(1);
+    await expect(badge).toBeVisible();
+    await expect(badge).toHaveAttribute('href', 'https://patreon.treyturner.info');
+    await expect(badge.locator('svg')).toHaveAttribute('aria-hidden', 'true');
+    await expect(badge.locator('svg')).toHaveAttribute('focusable', 'false');
+    await expect(badge.locator('svg')).toBeVisible();
+    await badge.hover();
+    await expect(badge).toHaveCSS('color', 'rgb(255, 255, 255)');
+    await expect(badge).toHaveCSS('background-color', 'rgb(0, 0, 0)');
+
+    await page.locator('h1').click();
+    await page.keyboard.press('Tab');
+    await expect(badge).toBeFocused();
+    await expect(badge).toHaveCSS('outline-style', 'solid');
+    await expect(badge).toHaveCSS('outline-width', '2px');
+    // Verify the navigation without depending on the external service.
+    await page.route('https://patreon.treyturner.info/', (route) => route.fulfill({
+      status: 200, contentType: 'text/html', body: '<title>Patreon destination</title>',
+    }));
+    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL('https://patreon.treyturner.info/');
+    await expect(page).toHaveTitle('Patreon destination');
+  });
+
   test('shows only published cards in display order, with title as the tie-breaker', async ({ page }) => {
     await page.goto('/projects');
     await expect(page.locator('.project-card-title')).toHaveText(publishedProjects.map(({ title }) => title));
@@ -233,6 +260,32 @@ for (const width of [1280, 820, 390, 320]) {
   test.describe(`Project layout at ${width}px`, () => {
     test.use({ viewport: { width, height: 900 } });
 
+    test('positions the Patreon badge alongside the heading or below it in both themes', async ({ page }) => {
+      for (const colorScheme of ['light', 'dark'] as const) {
+        await page.emulateMedia({ colorScheme });
+        await page.goto('/projects');
+        await expect(page.locator('html')).toHaveAttribute('data-theme', colorScheme);
+        const header = page.locator('.projects-header');
+        const badge = header.getByRole('link', { name: 'Support on Patreon' });
+        await expect(badge).toBeVisible();
+        const headerBox = (await header.boundingBox())!;
+        const headingBox = (await header.locator('.projects-heading').boundingBox())!;
+        const badgeBox = (await badge.boundingBox())!;
+        const listBox = (await page.locator('.projects-grid, .projects-empty').boundingBox())!;
+        expect(badgeBox.height).toBeGreaterThanOrEqual(44);
+        expect(listBox.y).toBeGreaterThan(headerBox.y + headerBox.height);
+        if (width > 768) {
+          expect(badgeBox.x).toBeGreaterThan(headingBox.x + headingBox.width);
+          expect(Math.abs(badgeBox.x + badgeBox.width - headerBox.x - headerBox.width)).toBeLessThan(1);
+          expect(Math.abs(badgeBox.y + badgeBox.height / 2 - headingBox.y - headingBox.height / 2)).toBeLessThan(1);
+        } else {
+          expect(badgeBox.y).toBeGreaterThan(headingBox.y + headingBox.height);
+          expect(Math.abs(badgeBox.x - headingBox.x)).toBeLessThan(1);
+        }
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+      }
+    });
+
     test('keeps role and status on one line beneath the logo and title', async ({ page }) => {
       test.skip(!publishedProjects.length, 'No published project cards to measure.');
       await page.goto('/projects');
@@ -324,6 +377,9 @@ test.describe('Projects on small screens', () => {
   test('keeps card metadata readable with enlarged text', async ({ page }) => {
     await page.goto('/projects');
     await page.locator('html').evaluate((element) => { element.style.fontSize = '200%'; });
+    const badge = page.getByRole('link', { name: 'Support on Patreon' });
+    await expect(badge).toBeVisible();
+    expect(await badge.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
     for (const metadata of await page.locator('.project-card-metadata').all()) {
       await expect(metadata.locator('.project-card-role')).toBeVisible();
       await expect(metadata.locator('.project-status')).toBeVisible();
