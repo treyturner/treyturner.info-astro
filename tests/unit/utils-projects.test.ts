@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getPublishedProjects, projectRoleLabels, projectStatusLabels } from '../../src/utils/projects';
+import { getPublishedProjects, getRepositoryLink, projectRoleLabels, projectStatusLabels } from '../../src/utils/projects';
 
 const entry = (id: string, displayOrder = 0, title = id, draft = false) => ({
   id,
@@ -77,5 +77,29 @@ describe('project labels', () => {
       collaborator: 'Collaborator',
       member: 'Member',
     });
+  });
+});
+
+describe('getRepositoryLink', () => {
+  it.each([
+    ['https://github.com/beetbox/beets', 'beetbox/beets'],
+    ['https://github.com/Samik081/beets-beatport4', 'Samik081/beets-beatport4'],
+    ['https://github.com/treyturner/codedoodl.es/tree/feat/containerize', 'treyturner/codedoodl.es'],
+    ['https://github.com/owner/repo/blob/main/README.md?plain=1#readme', 'owner/repo'],
+    ['https://github.com/owner/repo/', 'owner/repo'],
+    ['https://github.com/owner/repo.git', 'owner/repo'],
+    ['https://www.GitHub.com/owner/repo', 'owner/repo'],
+  ])('labels %s without changing its destination', (href, label) => {
+    expect(getRepositoryLink(href)).toEqual({ href, label, isGitHub: true });
+  });
+
+  it.each([
+    'https://gitlab.com/group/subgroup/repo',
+    'https://git.example.com/owner/repo',
+    'https://github.com.example.com/owner/repo',
+    'https://github.com/',
+    'https://github.com/owner',
+  ])('keeps an unrecognized repository URL readable without GitHub branding: %s', (href) => {
+    expect(getRepositoryLink(href)).toEqual({ href, label: href, isGitHub: false });
   });
 });

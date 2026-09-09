@@ -2,9 +2,21 @@ import { basename, extname } from 'node:path';
 import { test, expect, type Locator } from '@playwright/test';
 import { formatYearMonthDay } from '../../src/schemas/common';
 import { projectRoleLabels, projectStatusLabels } from '../../src/utils/projects';
+import { inlineCodeToText, parseInlineCode } from '../../src/utils/inline-code';
 import { readProjectContent } from '../helpers/project-content';
 
 const { publishedProjects, draftProjects } = readProjectContent();
+
+async function expectInlineCode(locator: Locator, text: string) {
+  await expect(locator).toHaveText(inlineCodeToText(text));
+  await expect(locator.locator('code')).toHaveText(
+    parseInlineCode(text).filter((part) => part.code).map((part) => part.text),
+  );
+  for (const code of await locator.locator('code').all()) {
+    await expect(code).toHaveCSS('font-family', /monospace/);
+  }
+  await expect(locator.locator('a, script, iframe')).toHaveCount(0);
+}
 
 async function expectProjectImage(image: Locator, imagePath: string | undefined) {
   await expect(image).toHaveCount(imagePath ? 1 : 0);
@@ -67,7 +79,7 @@ test.describe('Projects page', () => {
     await page.goto('/projects');
     for (const { id, logoImage, role, status, description, technologyStack } of publishedProjects) {
       const card = page.locator(`.project-card-link[href="/projects/${id}"]`);
-      await expect(card.locator('.project-card-description')).toHaveText(description);
+      await expectInlineCode(card.locator('.project-card-description'), description);
       await expect(card.locator('.project-card-role')).toHaveText(projectRoleLabels[role]);
       await expect(card.locator('.project-status')).toHaveText(`Status: ${projectStatusLabels[status]}`);
       await expect(card.locator('.project-status')).toHaveCSS('border-top-width', '0px');
@@ -132,8 +144,8 @@ test.describe('Project detail pages', () => {
       expect(response?.status()).toBe(200);
       await expect(page.locator('h1')).toHaveText(title);
       await expect(page).toHaveTitle(`${title} | Trey Turner`);
-      await expect(page.locator('.project-description')).toHaveText(project.description);
-      await expect(page.locator('.project-goal dd')).toHaveText(project.goal);
+      await expectInlineCode(page.locator('.project-description'), project.description);
+      await expectInlineCode(page.locator('.project-goal dd'), project.goal);
       await expect(page.locator('.project-facts')).toContainText(projectRoleLabels[role]);
       await expect(page.locator('.project-facts dt')).toHaveText([
         'Goal', 'My role', 'Status', 'Started', ...(endDate ? ['Ended'] : []),
@@ -157,6 +169,9 @@ test.describe('Project detail pages', () => {
       await expect(content).toHaveCount(1);
       if (project.body) await expect(content).not.toBeEmpty();
       else await expect(content).toBeEmpty();
+      for (const code of await content.locator(':not(pre) > code').all()) {
+        await expect(code).toHaveCSS('font-family', /monospace/);
+      }
       const technologies = page.getByRole('list', { name: 'Technology stack' });
       await expect(technologies).toHaveCount(technologyStack.length ? 1 : 0);
       await expect(technologies.locator('li')).toHaveText(technologyStack);
@@ -166,9 +181,27 @@ test.describe('Project detail pages', () => {
       const linkCount = repositories.length + (liveUrl ? 1 : 0);
       await expect(links).toHaveCount(linkCount ? 1 : 0);
       await expect(links.getByRole('link')).toHaveCount(linkCount);
+      const repositoryLinks = links.locator('.project-repository-link');
+      await expect(repositoryLinks).toHaveCount(repositories.length);
       for (const [index, url] of repositories.entries()) {
-        const name = repositories.length === 1 ? 'Repository' : `Repository ${index + 1}`;
-        await expect(links.getByRole('link', { name, exact: true })).toHaveAttribute('href', url);
+        const parsed = new URL(url);
+        const segments = parsed.pathname.split('/').filter(Boolean);
+        const isGitHub = /^(www\.)?github\.com$/.test(parsed.hostname) && segments.length >= 2;
+        const name = isGitHub ? segments.slice(0, 2).join('/').replace(/\.git$/i, '') : url;
+        const link = repositoryLinks.nth(index);
+        await expect(link).toHaveAccessibleName(name);
+        await expect(link).toHaveAttribute('href', url);
+        const icon = link.locator('svg.github-icon');
+        await expect(icon).toHaveCount(isGitHub ? 1 : 0);
+        if (isGitHub) {
+          await expect(icon).toBeVisible();
+          await expect(icon).toHaveAttribute('aria-hidden', 'true');
+          await expect(icon).toHaveAttribute('focusable', 'false');
+          await expect(icon).toHaveAttribute('fill', 'currentColor');
+          const iconBox = (await icon.boundingBox())!;
+          const labelBox = (await link.locator(':scope > span').boundingBox())!;
+          expect(iconBox.x + iconBox.width).toBeLessThan(labelBox.x);
+        }
       }
 
       await expectProjectImage(page.locator('.project-featured-image'), project.featuredImage);
@@ -183,6 +216,7 @@ test.describe('Project detail pages', () => {
       expect(description).toBeTruthy();
       expect((await page.locator('.project-description').innerText()).startsWith(description!.replace(/\.\.\.$/, ''))).toBe(true);
       await expect(page.locator('meta[property="og:description"]')).toHaveAttribute('content', description!);
+      await expect(page.locator('meta[name="twitter:description"]')).toHaveAttribute('content', description!);
       await expect(page.locator('meta[property="og:title"]')).toHaveAttribute('content', `${title} | Trey Turner`);
 
       const internalLinks = await page.locator('main a[href^="/"]').evaluateAll(

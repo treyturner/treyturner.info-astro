@@ -2,19 +2,22 @@
 import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
 import BaseLayout from './BaseLayout.astro';
+import GitHubIcon from '../components/ui/GitHubIcon.astro';
+import InlineCode from '../components/ui/InlineCode.astro';
 import ProjectTechnologies from '../components/ui/ProjectTechnologies.astro';
 import { formatYearMonthDay } from '../schemas/common';
-import { projectRoleLabels, projectStatusLabels } from '../utils/projects';
+import { getRepositoryLink, projectRoleLabels, projectStatusLabels } from '../utils/projects';
+import { inlineCodeToText } from '../utils/inline-code';
 
 interface Props {
   project: CollectionEntry<'projects'>['data'];
 }
 
 const { project } = Astro.props;
-const repositories = project.repositoryUrls ?? [];
+const repositories = (project.repositoryUrls ?? []).map(getRepositoryLink);
 ---
 
-<BaseLayout title={project.title} description={project.description}>
+<BaseLayout title={project.title} description={inlineCodeToText(project.description)}>
   <article class="project-page">
     <a href="/projects" class="project-back-link">&larr; Back to Projects</a>
     <header class="project-header">
@@ -24,11 +27,11 @@ const repositories = project.repositoryUrls ?? [];
         )}
         <h1>{project.title}</h1>
       </div>
-      <p class="project-description">{project.description}</p>
+      <p class="project-description"><InlineCode text={project.description} /></p>
       <dl class:list={['project-facts', { 'has-end-date': project.endDate }]}>
         <div class="project-goal">
           <dt>Goal</dt>
-          <dd>{project.goal}</dd>
+          <dd><InlineCode text={project.goal} /></dd>
         </div>
         <div>
           <dt>My role</dt>
@@ -53,11 +56,11 @@ const repositories = project.repositoryUrls ?? [];
       {(project.liveUrl || repositories.length > 0) && (
         <ul class="project-links" aria-label="Project links">
           {project.liveUrl && <li><a href={project.liveUrl}>Visit {project.liveUrl} <span aria-hidden="true">&nearr;</span></a></li>}
-          {repositories.map((url, index) => (
+          {repositories.map(({ href, label, isGitHub }) => (
             <li>
-              <a href={url}>
-                {repositories.length === 1 ? 'Repository' : `Repository ${index + 1}`}
-                <span aria-hidden="true"> &nearr;</span>
+              <a class="project-repository-link" href={href}>
+                {isGitHub && <GitHubIcon />}
+                <span>{label}<span aria-hidden="true"> &nearr;</span></span>
               </a>
             </li>
           ))}
@@ -162,6 +165,17 @@ const repositories = project.repositoryUrls ?? [];
     display: inline-block;
     padding-block: var(--spacing-sm);
     font-weight: 500;
+  }
+
+  .project-links .project-repository-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    max-width: 100%;
+  }
+
+  .project-repository-link > span {
+    min-width: 0;
   }
 
   .project-page :global(a:focus-visible) {

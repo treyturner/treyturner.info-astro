@@ -1,0 +1,11 @@
+---
+import { parseInlineCode } from '../../utils/inline-code';
+
+interface Props {
+  text: string;
+}
+
+const { text } = Astro.props;
+---
+
+{parseInlineCode(text).map((part) => part.code ? <code>{part.text}</code> : part.text)}
