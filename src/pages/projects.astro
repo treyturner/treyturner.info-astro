@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ProjectCard from '../components/ui/ProjectCard.astro';
+import PatreonBadge from '../components/ui/PatreonBadge.astro';
 import { getCollection } from 'astro:content';
 import { getPublishedProjects } from '../utils/projects';
 
@@ -12,10 +13,15 @@ const projects = getPublishedProjects(await getCollection('projects'));
   description="Personal software, automation, and infrastructure projects by Trey Turner."
 >
   <section class="projects-page">
-    <h1>Projects</h1>
-    <p class="projects-intro">
-      A home for personal software, automation, and infrastructure projects.
-    </p>
+    <header class="projects-header">
+      <div class="projects-heading">
+        <h1>Projects</h1>
+        <p class="projects-intro">
+          A home for personal software, automation, and infrastructure projects.
+        </p>
+      </div>
+      <div class="projects-support"><PatreonBadge /></div>
+    </header>
     {projects.length > 0 ? (
       <ul class="projects-grid" aria-label="Projects">
         {projects.map((project) => (
@@ -38,10 +44,24 @@ const projects = getPublishedProjects(await getCollection('projects'));
     margin-bottom: var(--spacing-md);
   }
 
+  .projects-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--spacing-xl);
+    margin-bottom: var(--spacing-2xl);
+  }
+
+  .projects-support {
+    display: flex;
+    justify-content: flex-end;
+    min-width: 0;
+  }
+
   .projects-intro {
     color: var(--color-text-secondary);
     font-size: 1.125rem;
-    margin-bottom: var(--spacing-2xl);
+    margin-bottom: 0;
   }
 
   .projects-grid {
@@ -60,6 +80,15 @@ const projects = getPublishedProjects(await getCollection('projects'));
   }
 
   @media (max-width: 48rem) {
+    .projects-header {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--spacing-lg);
+    }
+
+    .projects-support {
+      justify-content: flex-start;
+    }
+
     .projects-grid {
       grid-template-columns: minmax(0, 1fr);
     }
