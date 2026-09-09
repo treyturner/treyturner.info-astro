@@ -1,4 +1,46 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Locator, type Page } from '@playwright/test';
+
+async function expectArrivalHighlight(page: Page, card: Locator, reducedMotion = false, blur = false) {
+  await expect(card).toBeInViewport();
+  await expect(card).toBeFocused();
+  await expect(card).toHaveCSS('border-top-width', '1px');
+  await expect(card).toHaveCSS('outline-style', 'none');
+  await expect(card).toHaveCSS('box-shadow', 'none');
+  await expect(card).toHaveCSS('animation-duration', '5s');
+  await expect(card).toHaveCSS('animation-timing-function', reducedMotion ? 'steps(1)' : 'linear');
+
+  const colors = await card.evaluate((element) => {
+    const animation = element.getAnimations()[0];
+    animation.pause();
+    animation.currentTime = 0;
+    const accent = element.querySelector('.experience-company, .recommendation-experience-link')!;
+    const normalCard = document.querySelector('.experience-card:not(:target), .recommendation-card:not(:target)')!;
+    return { accent: getComputedStyle(accent).color, normal: getComputedStyle(normalCard).borderTopColor };
+  });
+  await expect(card).toHaveCSS('border-top-color', colors.accent);
+
+  // Seek the actual CSS animation instead of making the test wait five seconds.
+  await card.evaluate((element) => { element.getAnimations()[0].currentTime = 2500; });
+  if (reducedMotion) {
+    await expect(card).toHaveCSS('border-top-color', colors.accent);
+  } else {
+    await expect(card).not.toHaveCSS('border-top-color', colors.accent);
+    await expect(card).not.toHaveCSS('border-top-color', colors.normal);
+  }
+
+  if (blur) {
+    await page.locator('h1').click();
+    await expect(card).not.toBeFocused();
+    expect(await card.evaluate((element) => element.getAnimations()[0].currentTime)).toBe(2500);
+    await expect(card).toHaveCSS('outline-style', 'none');
+  }
+
+  await card.evaluate((element) => { element.getAnimations()[0].finish(); });
+  await expect(card).toHaveCSS('border-top-color', colors.normal);
+  await expect(card).toHaveCSS('outline-style', 'none');
+  expect(await card.evaluate((element) => element.matches(':target'))).toBe(true);
+  if (!blur) await expect(card).toBeFocused();
+}
 
 const expectedLinks = [
   ['alan-feldman', 'invodo'],
@@ -48,6 +90,7 @@ test.describe('Experience and recommendation links', () => {
     const role = page.locator('#alan-feldman a[href="/experience#att-wifi-qa-ii"]');
     await expect(role).toHaveText('Eng. Manager at AT&T Wi-Fi');
     await role.focus();
+    await expect(role).toHaveCSS('outline-width', '2px');
     await page.keyboard.press('Enter');
     await expect(page).toHaveURL(/\/experience#att-wifi-qa-ii$/);
     await expect(page.locator('#att-wifi-qa-ii')).toBeInViewport();
@@ -56,6 +99,7 @@ test.describe('Experience and recommendation links', () => {
     const preview = page.locator('#att-wifi-qa-ii').getByRole('link', { name: 'Read recommendation from Alan Feldman' });
     await expect(preview.locator('a, button')).toHaveCount(0);
     await preview.focus();
+    await expect(preview).toHaveCSS('outline-width', '2px');
     await page.keyboard.press('Enter');
     await expect(page).toHaveURL(/\/recommendations#alan-feldman$/);
     await expect(page.locator('#alan-feldman')).toBeInViewport();
@@ -101,6 +145,44 @@ test.describe('Experience and recommendation links', () => {
     await expect(jim.locator('img')).toHaveCount(0);
   });
 });
+
+for (const colorScheme of ['light', 'dark'] as const) {
+  test.describe(`Linked-entry highlights in ${colorScheme} mode`, () => {
+    test.use({ colorScheme, contextOptions: { reducedMotion: 'no-preference' } });
+
+    for (const navigation of ['mouse', 'keyboard'] as const) {
+      test(`${navigation} arrivals use one border that fades while the entry stays targeted`, async ({ page }) => {
+        await page.goto('/recommendations');
+        const role = page.locator('#alan-feldman a[href="/experience#att-wifi-qa-ii"]');
+        if (navigation === 'mouse') await role.click();
+        else {
+          await role.focus();
+          await page.keyboard.press('Enter');
+        }
+        await expect(page).toHaveURL(/\/experience#att-wifi-qa-ii$/);
+        const experience = page.locator('#att-wifi-qa-ii');
+        await expectArrivalHighlight(page, experience, false, navigation === 'mouse');
+
+        const preview = experience.getByRole('link', { name: 'Read recommendation from Alan Feldman' });
+        if (navigation === 'mouse') await preview.click();
+        else {
+          await preview.focus();
+          await page.keyboard.press('Enter');
+        }
+        await expect(page).toHaveURL(/\/recommendations#alan-feldman$/);
+        await expectArrivalHighlight(page, page.locator('#alan-feldman'), false, navigation === 'mouse');
+      });
+    }
+
+    test('reduced motion holds the single border briefly, then restores the normal border', async ({ page }) => {
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      for (const path of ['/experience#att-wifi-qa-ii', '/recommendations#alan-feldman']) {
+        await page.goto(path);
+        await expectArrivalHighlight(page, page.locator('article:target'), true);
+      }
+    });
+  });
+}
 
 test.describe('Recommendation links on small screens', () => {
   test.use({ viewport: { width: 390, height: 844 } });

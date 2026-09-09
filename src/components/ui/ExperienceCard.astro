@@ -4,6 +4,7 @@ import { formatDateRange } from '../../schemas/experience';
 import type { Experience } from '../../schemas/experience';
 import type { ExperienceRecommendation } from '../../utils/recommendations';
 import RecommendationPreview from './RecommendationPreview.astro';
+import '../../styles/entry-target.css';
 
 interface Props {
   experience: Experience;
@@ -61,11 +62,7 @@ const logoSrc  = allLogos[logoKey]?.default;
     scroll-margin-top: var(--spacing-lg);
   }
 
-  .experience-card:target {
-    border-color: var(--color-primary);
-  }
-
-  .experience-card:focus-visible {
+  .experience-card:focus-visible:not(:target) {
     outline: 2px solid var(--color-primary);
     outline-offset: 3px;
   }
