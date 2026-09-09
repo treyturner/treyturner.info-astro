@@ -1,0 +1,17 @@
+/* Anchor destinations retain native focus without a second, offset outline. */
+:is(.experience-card, .recommendation-card):target {
+  outline: none;
+  animation: entry-target-fade 5s linear;
+}
+
+@keyframes entry-target-fade {
+  from { border-color: var(--color-primary); }
+  to { border-color: var(--color-border); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(.experience-card, .recommendation-card):target {
+    /* Keep the arrival cue for five seconds, then clear it without a fade. */
+    animation-timing-function: steps(1, end);
+  }
+}

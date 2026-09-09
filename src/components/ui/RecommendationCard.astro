@@ -2,6 +2,7 @@
 import { Image } from 'astro:assets';
 import type { LinkedRecommendation } from '../../utils/recommendations';
 import { formatRecommendationDate } from '../../schemas/recommendations';
+import '../../styles/entry-target.css';
 
 interface Props {
   recommendation: LinkedRecommendation['data'];
@@ -81,11 +82,7 @@ const photoSrc = allPeople[photoKey]?.default;
     scroll-margin-top: var(--spacing-lg);
   }
 
-  .recommendation-card:target {
-    border-color: var(--color-primary);
-  }
-
-  .recommendation-card:focus-visible,
+  .recommendation-card:focus-visible:not(:target),
   .recommendation-experience-link:focus-visible {
     outline: 2px solid var(--color-primary);
     outline-offset: 3px;
