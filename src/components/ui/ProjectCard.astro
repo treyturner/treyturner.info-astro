@@ -2,6 +2,7 @@
 import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
 import { projectRoleLabels } from '../../utils/projects';
+import InlineCode from './InlineCode.astro';
 import ProjectStatus from './ProjectStatus.astro';
 import ProjectTechnologies from './ProjectTechnologies.astro';
 
@@ -30,7 +31,7 @@ const titleId = `project-${project.id}`;
         </span>
       </p>
     </div>
-    <p class="project-card-description">{project.data.description}</p>
+    <p class="project-card-description"><InlineCode text={project.data.description} /></p>
     <ProjectTechnologies technologies={project.data.technologyStack} />
     <div class="project-card-footer">
       <span class="project-card-more">Read about this project <span aria-hidden="true">&rarr;</span></span>

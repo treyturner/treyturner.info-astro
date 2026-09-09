@@ -19,6 +19,16 @@ export const projectRoleLabels: Record<ProjectFrontmatter['role'], string> = {
   member: 'Member',
 };
 
+/** Label a schema-validated URL without discarding its branch, query, or fragment. */
+export function getRepositoryLink(href: string) {
+  const url = new URL(href);
+  const [owner, repository] = url.pathname.split('/').filter(Boolean);
+  const isGitHub = ['github.com', 'www.github.com'].includes(url.hostname);
+  if (!isGitHub || !owner || !repository) return { href, label: href, isGitHub: false };
+
+  return { href, label: `${owner}/${repository.replace(/\.git$/i, '')}`, isGitHub: true };
+}
+
 interface ProjectSummary {
   id: string;
   data: Pick<ProjectFrontmatter, 'draft' | 'displayOrder' | 'title'>;
