@@ -1,0 +1,74 @@
+{
+  "categories": [
+    {
+      "name": "Test Automation",
+      "skills": [
+        "Selenium WebDriver",
+        "Playwright",
+        "Cypress",
+        "Appium",
+        "REST Assured",
+        "TestNG",
+        "JUnit",
+        "Pytest"
+      ]
+    },
+    {
+      "name": "CI/CD & DevOps",
+      "skills": [
+        "GitHub Actions",
+        "Jenkins",
+        "GitLab CI",
+        "Docker",
+        "Kubernetes",
+        "Terraform",
+        "Ansible"
+      ]
+    },
+    {
+      "name": "Programming Languages",
+      "skills": [
+        "TypeScript",
+        "JavaScript",
+        "Python",
+        "Java",
+        "Go",
+        "Bash"
+      ]
+    },
+    {
+      "name": "Cloud & Infrastructure",
+      "skills": [
+        "AWS",
+        "GCP",
+        "Linux Administration",
+        "Proxmox",
+        "Networking",
+        "DNS & TLS"
+      ]
+    },
+    {
+      "name": "Quality Engineering",
+      "skills": [
+        "Test Strategy & Planning",
+        "Performance Testing",
+        "Security Testing",
+        "API Testing",
+        "Contract Testing",
+        "Observability & Monitoring"
+      ]
+    },
+    {
+      "name": "Tools & Frameworks",
+      "skills": [
+        "Git",
+        "Astro",
+        "Node.js",
+        "PostgreSQL",
+        "Redis",
+        "Grafana",
+        "Allure"
+      ]
+    }
+  ]
+}

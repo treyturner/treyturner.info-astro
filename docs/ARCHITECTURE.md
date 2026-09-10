@@ -14,6 +14,11 @@ Stored in `src/data/`:
 - `skills.json`
 - `navigation.json`
 
+### Skills Lists
+
+- The Skills page renders `src/data/skills.json` in its curated category and skill order, with the most recently used skills first within each group. `skills.previous.json` is reference material, not a page data source.
+- Each group is an accessible, named ordered list with its numbers hidden and one skill per row. Plain sections replace tags and boxed cards; a responsive grid uses three, two, or one column as space allows, including when text is enlarged.
+
 ### Content Collections
 
 Stored in `src/content/`:

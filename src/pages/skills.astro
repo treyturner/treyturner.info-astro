@@ -10,15 +10,15 @@ import skillsData from '../data/skills.json';
       Core competencies built over two decades of quality engineering, test automation, and infrastructure work.
     </p>
     <div class="skills-grid">
-      {skillsData.categories.map((category) => (
-        <div class="skill-category">
-          <h2>{category.name}</h2>
-          <ul class="skill-list">
+      {skillsData.categories.map((category, index) => (
+        <section class="skill-category" aria-labelledby={`skill-group-${index}`}>
+          <h2 id={`skill-group-${index}`}>{category.name}</h2>
+          <ol class="skill-list" role="list" aria-labelledby={`skill-group-${index}`}>
             {category.skills.map((skill) => (
               <li class="skill-item">{skill}</li>
             ))}
-          </ul>
-        </div>
+          </ol>
+        </section>
       ))}
     </div>
   </section>
@@ -37,20 +37,22 @@ import skillsData from '../data/skills.json';
   .skills-intro {
     color: var(--color-text-secondary);
     font-size: 1.125rem;
-    margin-bottom: var(--spacing-2xl);
+    margin-bottom: var(--spacing-md);
   }
 
   .skills-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+    /* Collapse columns instead of overflowing on small screens or enlarged text. */
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
     gap: var(--spacing-xl);
+    align-items: start;
   }
 
   .skill-category {
-    background-color: var(--color-bg-secondary);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    padding: var(--spacing-lg);
+    min-width: 0;
+    border-top: 1px solid var(--color-border);
+    padding-top: var(--spacing-md);
+    overflow-wrap: anywhere;
   }
 
   .skill-category h2 {
@@ -61,17 +63,14 @@ import skillsData from '../data/skills.json';
 
   .skill-list {
     list-style: none;
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--spacing-sm);
+    display: grid;
+    gap: var(--spacing-xs);
+    margin: 0;
+    padding: 0;
   }
 
   .skill-item {
-    background-color: var(--color-bg);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-full);
-    padding: var(--spacing-xs) var(--spacing-md);
-    font-size: 0.875rem;
+    font-size: 1rem;
     color: var(--color-text);
   }
 </style>
