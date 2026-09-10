@@ -1,73 +1,71 @@
 {
   "categories": [
     {
-      "name": "Test Automation",
+      "name": "Languages",
       "skills": [
-        "Selenium WebDriver",
-        "Playwright",
-        "Cypress",
-        "Appium",
-        "REST Assured",
-        "TestNG",
-        "JUnit",
-        "Pytest"
-      ]
-    },
-    {
-      "name": "CI/CD & DevOps",
-      "skills": [
-        "GitHub Actions",
-        "Jenkins",
-        "GitLab CI",
-        "Docker",
-        "Kubernetes",
-        "Terraform",
-        "Ansible"
-      ]
-    },
-    {
-      "name": "Programming Languages",
-      "skills": [
+        "Python",
         "TypeScript",
         "JavaScript",
-        "Python",
+        "Groovy",
         "Java",
-        "Go",
-        "Bash"
+        "Ruby",
+        "PHP"
       ]
     },
     {
-      "name": "Cloud & Infrastructure",
+      "name": "CI/CD & Delivery",
       "skills": [
-        "AWS",
-        "GCP",
-        "Linux Administration",
-        "Proxmox",
-        "Networking",
-        "DNS & TLS"
+        "GitHub Actions",
+        "Terraform",
+        "GitLab CI",
+        "Jenkins",
+        "CircleCI"
       ]
     },
     {
-      "name": "Quality Engineering",
+      "name": "UI Automation",
       "skills": [
-        "Test Strategy & Planning",
-        "Performance Testing",
-        "Security Testing",
-        "API Testing",
-        "Contract Testing",
-        "Observability & Monitoring"
+        "Playwright",
+        "Cypress",
+        "Selenium/WebDriver",
+        "webdriver.io"
       ]
     },
     {
-      "name": "Tools & Frameworks",
+      "name": "API & Integration",
       "skills": [
-        "Git",
-        "Astro",
-        "Node.js",
-        "PostgreSQL",
-        "Redis",
+        "Karate",
+        "Postman",
+        "Supertest",
+        "OpenAPI",
+        "Pact"
+      ]
+    },
+    {
+      "name": "Platforms & Tooling",
+      "skills": [
+        "Docker",
+        "Kubernetes",
+        "Tilt",
+        "TestRail",
+        "SonarCloud"
+      ]
+    },
+    {
+      "name": "Performance",
+      "skills": [
+        "Artillery",
+        "Gatling",
+        "JMeter"
+      ]
+    },
+    {
+      "name": "Observability",
+      "skills": [
+        "Datadog",
+        "Prometheus",
         "Grafana",
-        "Allure"
+        "Loki"
       ]
     }
   ]
