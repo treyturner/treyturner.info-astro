@@ -8,9 +8,9 @@ interface Props {
 }
 
 const { recommendation } = Astro.props;
-const allPeople = import.meta.glob<{ default: ImageMetadata }>('../../assets/people/*.jpg', { eager: true });
-const photoKey = `../../assets/people/${recommendation.author.toLowerCase().replace(/\s+/g, '-')}.jpg`;
-const photoSrc = allPeople[photoKey]?.default;
+const allPeople = import.meta.glob<{ default: ImageMetadata }>('../../assets/people/*.{jpg,svg}', { eager: true });
+const photoKey = `../../assets/people/${recommendation.author.toLowerCase().replace(/\s+/g, '-')}`;
+const photoSrc = allPeople[`${photoKey}.jpg`]?.default ?? allPeople[`${photoKey}.svg`]?.default;
 ---
 
 <a class="recommendation-preview related-entry" href={`/recommendations#${recommendation.id}`}
