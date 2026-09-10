@@ -1,7 +1,10 @@
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { pathToFileURL } from 'node:url';
+import { glob, type LoaderContext } from 'astro/loaders';
+import { parseFrontmatter } from 'astro/markdown';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { readProjectContent } from '../helpers/project-content';
 
 let directory: string;
@@ -66,10 +69,35 @@ describe('project browser-test content', () => {
     expect(publishedProjects[1].repositoryUrls).toBeUndefined();
   });
 
-  it('supports explicit slugs and nested index routes', () => {
+  it("matches Astro's default glob loader for explicit slugs and nested index routes", async () => {
     writeProject('entry.mdx', { slug: 'custom/route' });
     writeProject('nested/index.mdx');
-    expect(readProjectContent(directory).publishedProjects.map(({ id }) => id)).toEqual(['custom/route', 'nested']);
+    const ids: string[] = [];
+    const root = pathToFileURL(`${directory}/`);
+    const logger = { warn: vi.fn(), error: vi.fn() };
+    // Exercise the real ID generator, supplying only the content-store/parser services it needs.
+    await glob({ pattern: '**/*.mdx', base: root }).load({
+      collection: 'projects',
+      config: { root, srcDir: root },
+      logger,
+      store: {
+        keys: () => [],
+        get: () => undefined,
+        set: ({ id }: { id: string }) => { ids.push(id); },
+      },
+      parseData: async ({ data }: { data: Record<string, unknown> }) => data,
+      generateDigest: (contents: string) => contents,
+      entryTypes: new Map([['.mdx', {
+        getEntryInfo: ({ contents }: { contents: string }) => {
+          const { frontmatter, content } = parseFrontmatter(contents);
+          return { data: frontmatter, body: content };
+        },
+      }]]),
+    } as unknown as LoaderContext);
+    expect(logger.warn).not.toHaveBeenCalled();
+    expect(logger.error).not.toHaveBeenCalled();
+    expect(ids.sort()).toEqual(['custom/route', 'nested']);
+    expect(readProjectContent(directory).publishedProjects.map(({ id }) => id)).toEqual(ids);
   });
 
   it('handles an empty collection', () => {
