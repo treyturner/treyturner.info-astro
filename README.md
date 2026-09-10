@@ -24,9 +24,11 @@ Personal site built with [Astro](https://astro.build/). Deployed as a static sit
 | --------------- | ----------------------------------------------------------------------------------------------------- |
 | `ALLOWED_HOSTS` | Comma-separated additional hosts; a leading dot allows the domain and its subdomains |
 | `CORS_ORIGINS` | Optional comma-separated exact origins for cross-origin browser access, including scheme and any port; independent of `ALLOWED_HOSTS` |
-| `HMR_HOST`      | External hostname for Vite HMR WebSocket                                                              |
-| `HMR_PORT`      | External port for HMR (default `443`)                                                                 |
-| `HMR_PATH`      | Optional path prefix for HMR WebSocket                                                                |
+| `WS_HOST`      | External hostname for Vite's secure WebSocket connection (`server.ws.host`) |
+| `WS_CLIENT_PORT` | Browser-facing WebSocket port (`server.ws.clientPort`, default `443`); not the server's listening port |
+| `WS_PATH`      | Optional WebSocket path (`server.ws.path`) |
+
+WebSocket overrides take effect when `WS_HOST` is set. Existing workspace settings must rename `HMR_HOST`, `HMR_PORT`, and `HMR_PATH` to `WS_HOST`, `WS_CLIENT_PORT`, and `WS_PATH`, respectively; the old names are no longer read.
 
 None of these are needed for local development or the Coder exposed-port URLs: `localhost`, `coder.treyturner.info`, and all subdomains of `coder.treyturner.info` are allowed by default. Other hostnames remain blocked. This applies to development and preview servers.
 
