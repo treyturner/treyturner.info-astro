@@ -14,12 +14,12 @@ const corsOrigins = (process.env.CORS_ORIGINS ?? '')
   .split(',').map((origin) => origin.trim()).filter(Boolean);
 
 let ws: WsOptions | undefined;
-if (process.env.HMR_HOST) {
+if (process.env.WS_HOST) {
   ws = {
     protocol: 'wss',
-    host: process.env.HMR_HOST,
-    clientPort: Number(process.env.HMR_PORT || 443),
-    ...(process.env.HMR_PATH ? { path: process.env.HMR_PATH } : {}),
+    host: process.env.WS_HOST,
+    clientPort: Number(process.env.WS_CLIENT_PORT || 443),
+    ...(process.env.WS_PATH ? { path: process.env.WS_PATH } : {}),
   };
 }
 

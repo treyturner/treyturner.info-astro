@@ -8,7 +8,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 async function loadConfig(overrides: Record<string, string> = {}) {
   for (const [key, value] of Object.entries({
-    ALLOWED_HOSTS: '', CORS_ORIGINS: '', HMR_HOST: '', HMR_PORT: '', HMR_PATH: '',
+    ALLOWED_HOSTS: '', CORS_ORIGINS: '', WS_HOST: '', WS_CLIENT_PORT: '', WS_PATH: '',
+    HMR_HOST: '', HMR_PORT: '', HMR_PATH: '',
     __VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS: '', ...overrides,
   })) vi.stubEnv(key, value);
   vi.resetModules();
@@ -36,11 +37,19 @@ describe('development server configuration', () => {
     expect(config.vite?.server?.cors).toEqual({ origin: ['https://frontend.example.com', 'http://localhost:3000'] });
   });
 
-  it('retains default and custom WebSocket proxy settings', async () => {
-    const defaults = await loadConfig({ HMR_HOST: 'dev.example.com' });
+  it('uses WS variables for default and custom WebSocket proxy settings', async () => {
+    const defaults = await loadConfig({ WS_HOST: 'dev.example.com' });
     expect(defaults.vite?.server?.ws).toEqual({ protocol: 'wss', host: 'dev.example.com', clientPort: 443 });
-    const custom = await loadConfig({ HMR_HOST: 'dev.example.com', HMR_PORT: '8443', HMR_PATH: '/hmr' });
-    expect(custom.vite?.server?.ws).toEqual({ protocol: 'wss', host: 'dev.example.com', clientPort: 8443, path: '/hmr' });
+    const custom = await loadConfig({ WS_HOST: 'dev.example.com', WS_CLIENT_PORT: '8443', WS_PATH: '/ws' });
+    expect(custom.vite?.server?.ws).toEqual({ protocol: 'wss', host: 'dev.example.com', clientPort: 8443, path: '/ws' });
+  });
+
+  it('does not fall back to legacy HMR variables', async () => {
+    const legacy = { HMR_HOST: 'legacy.example.com', HMR_PORT: '8443', HMR_PATH: '/legacy' };
+    const ignored = await loadConfig(legacy);
+    expect(ignored.vite?.server?.ws).toBeUndefined();
+    const current = await loadConfig({ ...legacy, WS_HOST: 'dev.example.com' });
+    expect(current.vite?.server?.ws).toEqual({ protocol: 'wss', host: 'dev.example.com', clientPort: 443 });
   });
 
   it('enforces domain boundaries through the actual Vite HTTP middleware', async () => {
