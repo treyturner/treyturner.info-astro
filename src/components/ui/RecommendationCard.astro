@@ -3,6 +3,7 @@ import { Image } from 'astro:assets';
 import type { LinkedRecommendation } from '../../utils/recommendations';
 import { formatRecommendationDate } from '../../schemas/recommendations';
 import '../../styles/entry-target.css';
+import '../../styles/related-entry.css';
 
 interface Props {
   recommendation: LinkedRecommendation['data'];
@@ -25,7 +26,7 @@ const photoSrc = allPeople[photoKey]?.default;
   <footer class="recommendation-footer">
     <div class="recommendation-author-block">
       {photoSrc && (
-        <Image class="recommendation-photo" src={photoSrc} alt="" height={44} width={44} />
+        <Image class="recommendation-photo related-entry-image" src={photoSrc} alt="" height={48} width={48} />
       )}
       <div class="recommendation-author">
         <a href={recommendation.linkedIn} class="recommendation-author-link"
@@ -39,35 +40,29 @@ const photoSrc = allPeople[photoKey]?.default;
       {recommendation.roles.map((r) => {
         const logoKey = `../../assets/logos/companies/${r.logo}`;
         const roleLogo = allLogos[logoKey]?.default;
-        return (
-          <div class="recommendation-role-entry">
-            <div class="recommendation-role-text">
-              {r.experiences.length === 1 ? (
-                <a class="recommendation-role recommendation-experience-link"
-                   href={`/experience#${r.experiences[0].id}`}>
-                  {r.role} at {r.company}
-                </a>
-              ) : (
-                <>
-                  <span class="recommendation-role">{r.role} at {r.company}</span>
-                  {r.experiences.length > 1 && (
-                    <ul class="recommendation-experience-links" aria-label="Related experience">
-                      {r.experiences.map((experience) => (
-                        <li><a class="recommendation-experience-link" href={`/experience#${experience.id}`}>
-                          {experience.data.role}
-                        </a></li>
-                      ))}
-                    </ul>
-                  )}
-                </>
+        // Give each destination its own whole-block link; unlinked roles remain text.
+        const destinations = r.experiences.length ? r.experiences : [undefined];
+        return destinations.map((experience) => {
+          const Entry = experience ? 'a' : 'div';
+          return (
+            <Entry class:list={['recommendation-role-entry', 'related-entry', { 'recommendation-experience-link': experience }]}
+                   href={experience ? `/experience#${experience.id}` : undefined}>
+              {roleLogo && (
+                <Image class="recommendation-role-logo related-entry-image" src={roleLogo} alt="" height={48} />
               )}
-              <span class="recommendation-relationship">{r.relationship}</span>
-            </div>
-            {roleLogo && (
-              <Image class="recommendation-role-logo" src={roleLogo} alt={r.company} height={40} />
-            )}
-          </div>
-        );
+              <div class="recommendation-role-text related-entry-content">
+                <span class="recommendation-role related-entry-title"><span class="recommendation-role-phrase">{r.role},</span>{' '}<span class="recommendation-role-phrase">{r.company}</span></span>
+                {r.experiences.length > 1 && experience && (
+                  <span class="recommendation-related-role related-entry-meta">{experience.data.role}</span>
+                )}
+                <span class="recommendation-relationship related-entry-meta">{r.relationship}</span>
+                {experience && (
+                  <span class="recommendation-engagement-link related-entry-action">See engagement <span aria-hidden="true">→</span></span>
+                )}
+              </div>
+            </Entry>
+          );
+        });
       })}
     </div>
   </footer>
@@ -82,8 +77,7 @@ const photoSrc = allPeople[photoKey]?.default;
     scroll-margin-top: var(--spacing-lg);
   }
 
-  .recommendation-card:focus-visible:not(:target),
-  .recommendation-experience-link:focus-visible {
+  .recommendation-card:focus-visible:not(:target) {
     outline: 2px solid var(--color-primary);
     outline-offset: 3px;
   }
@@ -105,27 +99,29 @@ const photoSrc = allPeople[photoKey]?.default;
     margin-bottom: 0;
   }
 
-  .recommendation-text p::before {
-    content: '\201C';
+  .recommendation-text p::before,
+  .recommendation-text p::after {
     font-size: 1.5em;
+    /* Keep the larger decorative glyphs from expanding the text's line boxes. */
+    line-height: 0;
     color: var(--color-primary);
     font-weight: 700;
+  }
+
+  .recommendation-text p::before {
+    content: '\201C';
     margin-right: 0.1em;
   }
 
   .recommendation-text p::after {
     content: '\201D';
-    font-size: 1.5em;
-    color: var(--color-primary);
-    font-weight: 700;
     margin-left: 0.1em;
   }
 
   .recommendation-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) repeat(2, minmax(0, 1fr));
+    align-items: start;
     gap: var(--spacing-sm);
     padding-top: var(--spacing-md);
     border-top: 1px solid var(--color-border);
@@ -134,22 +130,22 @@ const photoSrc = allPeople[photoKey]?.default;
   /* Left: photo + author info */
   .recommendation-author-block {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: var(--spacing-sm);
   }
 
   .recommendation-photo {
-    height: 2.75rem;
-    width: 2.75rem;
+    width: 3rem;
     border-radius: var(--radius-full);
     object-fit: cover;
-    flex-shrink: 0;
   }
 
   .recommendation-author {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-xs);
+    min-width: 0;
+    overflow-wrap: anywhere;
   }
 
   .recommendation-author-link {
@@ -171,62 +167,49 @@ const photoSrc = allPeople[photoKey]?.default;
     color: var(--color-text-secondary);
   }
 
-  /* Right: role entries laid out horizontally */
+  /* Reserve two equal role columns, even when the middle one is empty. */
   .recommendation-roles {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: var(--spacing-md);
-    align-items: flex-start;
-    justify-content: flex-end;
-  }
-
-  /* Each entry: two-line text column + logo to the right spanning both lines */
-  .recommendation-role-entry {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
+    display: grid;
+    grid-column: 2 / -1;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--spacing-sm);
+    align-items: start;
   }
 
-  .recommendation-role-text {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--spacing-xs);
+  .recommendation-role-entry:only-child {
+    grid-column: 2;
   }
 
   .recommendation-role {
-    font-size: 0.875rem;
-    color: var(--color-text-secondary);
+    max-width: 100%;
   }
 
-  .recommendation-experience-link {
-    color: var(--color-primary);
-    text-decoration: underline;
-    text-underline-offset: 0.15em;
-  }
-
-  .recommendation-experience-links {
-    list-style: none;
-    padding: 0;
-    font-size: 0.875rem;
-  }
-
-  .recommendation-relationship {
-    font-size: 0.8125rem;
-    color: var(--color-text-secondary);
-    background-color: var(--color-bg-secondary);
-    padding: var(--spacing-xs) var(--spacing-sm);
-    border-radius: var(--radius-full);
-    align-self: flex-end;
+  .recommendation-role-phrase {
+    /* Prefer wrapping after the comma, but let oversized phrases wrap within the card. */
+    display: inline-block;
+    max-width: 100%;
+    vertical-align: top;
   }
 
   .recommendation-role-logo {
-    height: 2.5rem;
     width: auto;
     max-width: 5rem;
     object-fit: contain;
-    flex-shrink: 0;
+    object-position: top;
+  }
+
+  @media (max-width: 767px) {
+    .recommendation-footer {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .recommendation-roles {
+      grid-column: 1;
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .recommendation-role-entry:only-child {
+      grid-column: 1;
+    }
   }
 </style>
