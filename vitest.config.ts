@@ -1,5 +1,5 @@
 import { defineConfig } from 'vitest/config';
-import type { Reporter } from 'vitest/reporters';
+import type { Reporter } from 'vitest/node';
 
 const reporters: (string | [string, Record<string, unknown>])[] = ['default'];
 if (process.env.CI) {
