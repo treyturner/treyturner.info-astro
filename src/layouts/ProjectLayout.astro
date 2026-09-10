@@ -55,10 +55,10 @@ const repositories = (project.repositoryUrls ?? []).map(getRepositoryLink);
       <ProjectTechnologies technologies={project.technologyStack} />
       {(project.liveUrl || repositories.length > 0) && (
         <ul class="project-links" aria-label="Project links">
-          {project.liveUrl && <li><a href={project.liveUrl}>Visit {project.liveUrl} <span aria-hidden="true">&nearr;</span></a></li>}
+          {project.liveUrl && <li><a href={project.liveUrl} target="_blank" rel="noopener noreferrer">Visit {project.liveUrl} <span aria-hidden="true">&nearr;</span></a></li>}
           {repositories.map(({ href, label, isGitHub }) => (
             <li>
-              <a class="project-repository-link" href={href}>
+              <a class="project-repository-link" href={href} target="_blank" rel="noopener noreferrer">
                 {isGitHub && <GitHubIcon />}
                 <span>{label}<span aria-hidden="true"> &nearr;</span></span>
               </a>
