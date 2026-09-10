@@ -1,4 +1,5 @@
 import { test, expect, type Locator, type Page } from '@playwright/test';
+import { unwrappedWidth } from '../helpers/layout';
 
 async function expectArrivalHighlight(page: Page, card: Locator, reducedMotion = false, blur = false) {
   await expect(card).toBeInViewport();
@@ -285,6 +286,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
           nameStyle: typography(name.querySelector('strong')!),
           dateStyle: typography(date),
           nameY: name.getBoundingClientRect().y,
+          nameBottom: name.getBoundingClientRect().bottom,
           dateY: date.getBoundingClientRect().y,
           gap: getComputedStyle(footer.querySelector('.recommendation-author')!).rowGap,
           photo: photo ? photo.getBoundingClientRect().toJSON() : null,
@@ -295,6 +297,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
             return {
               titleStyle: typography(title), metaStyle: typography(meta), actionStyle: typography(action),
               titleY: title.getBoundingClientRect().y, metaY: meta.getBoundingClientRect().y,
+              titleBottom: title.getBoundingClientRect().bottom,
               gap: getComputedStyle(role.querySelector('.related-entry-content')!).rowGap,
               logo: role.querySelector('.related-entry-image')!.getBoundingClientRect().toJSON(),
               actionGap: action.getBoundingClientRect().y - meta.getBoundingClientRect().bottom,
@@ -314,7 +317,9 @@ for (const colorScheme of ['light', 'dark'] as const) {
           expect(role.actionStyle.lineHeight).toBe(footer.dateStyle.lineHeight);
           expect(role.gap).toBe(footer.gap);
           expect(Math.abs(role.titleY - footer.nameY)).toBeLessThan(1);
-          expect(Math.abs(role.metaY - footer.dateY)).toBeLessThan(1);
+          // Metadata follows its own title, which may wrap differently from the author's name.
+          expect(Math.abs(footer.dateY - footer.nameBottom - parseFloat(footer.gap))).toBeLessThan(1);
+          expect(Math.abs(role.metaY - role.titleBottom - parseFloat(role.gap))).toBeLessThan(1);
           expect(Math.abs(role.actionGap - parseFloat(footer.gap))).toBeLessThan(1);
           expect(role.logo.height).toBe(48);
           if (footer.photo) expect(Math.abs(role.logo.y - footer.photo.y)).toBeLessThan(1);
@@ -401,7 +406,6 @@ for (const width of [1280, 390, 320]) {
       await page.goto('/recommendations');
       for (const card of await page.locator('.recommendation-card').all()) {
         const authorBox = (await card.locator('.recommendation-author-block').boundingBox())!;
-        const textBox = (await card.locator('.recommendation-author').boundingBox())!;
         const nameBox = (await card.locator('.recommendation-author-link').boundingBox())!;
         const dateBox = (await card.locator('.recommendation-date').boundingBox())!;
         expect(Math.abs(nameBox.y - authorBox.y)).toBeLessThan(1);
@@ -413,7 +417,15 @@ for (const width of [1280, 390, 320]) {
         if (await photo.count()) {
           const photoBox = (await photo.boundingBox())!;
           expect(photoBox.y).toBeGreaterThan(nameBox.y);
-          expect(Math.abs(photoBox.y + photoBox.height / 2 - textBox.y - textBox.height / 2)).toBeLessThan(1);
+          const nameLineHeight = await card.locator('.recommendation-author-link').evaluate(
+            (element) => parseFloat(getComputedStyle(element).lineHeight),
+          );
+          const dateLineHeight = await card.locator('.recommendation-date').evaluate(
+            (element) => parseFloat(getComputedStyle(element).lineHeight),
+          );
+          // Like the role logos, photos stay aligned with the first two line heights on wraps.
+          const firstPairCenter = nameBox.y + (nameLineHeight + textGap + dateLineHeight) / 2;
+          expect(Math.abs(photoBox.y + photoBox.height / 2 - firstPairCenter)).toBeLessThan(1);
           expect(photoBox.width).toBeCloseTo(photoBox.height);
         }
         const rolesBox = (await card.locator('.recommendation-roles').boundingBox())!;
@@ -513,7 +525,8 @@ for (const width of [1280, 600, 320]) {
       // Neither phrase needs to split internally at these sizes.
       expect(Math.abs(jobBox.height - lineHeight)).toBeLessThan(1);
       expect(Math.abs(companyBox.height - lineHeight)).toBeLessThan(1);
-      if (width !== 320) {
+      const availableWidth = (await role.locator('.recommendation-role-text').boundingBox())!.width;
+      if (await unwrappedWidth(title) <= availableWidth) {
         expect(Math.abs(companyBox.y - jobBox.y)).toBeLessThan(1);
         expect(companyBox.x).toBeGreaterThan(jobBox.x + jobBox.width);
         expect(Math.abs(titleBox.height - lineHeight)).toBeLessThan(1);
@@ -526,7 +539,7 @@ for (const width of [1280, 600, 320]) {
   });
 }
 
-test('current role and company labels fit one line in the desktop columns', async ({ page }) => {
+test('current role and company labels use one line only when they fit the desktop columns', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto('/recommendations');
   const titles = page.locator('.recommendation-role');
@@ -534,7 +547,12 @@ test('current role and company labels fit one line in the desktop columns', asyn
   for (const title of await titles.all()) {
     const titleBox = (await title.boundingBox())!;
     const lineHeight = await title.evaluate((element) => parseFloat(getComputedStyle(element).lineHeight));
-    expect(Math.abs(titleBox.height - lineHeight), await title.textContent() ?? '').toBeLessThan(1);
+    const availableWidth = (await title.locator('..').boundingBox())!.width;
+    if (await unwrappedWidth(title) <= availableWidth) {
+      expect(Math.abs(titleBox.height - lineHeight), await title.textContent() ?? '').toBeLessThan(1);
+    } else {
+      expect(titleBox.height).toBeGreaterThan(lineHeight);
+    }
     expect(await title.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
   }
 });

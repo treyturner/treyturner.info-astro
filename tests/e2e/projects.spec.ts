@@ -1,5 +1,6 @@
 import { basename, extname } from 'node:path';
 import { test, expect, type Locator } from '@playwright/test';
+import { unwrappedWidth } from '../helpers/layout';
 import { formatYearMonthDay } from '../../src/schemas/common';
 import { projectRoleLabels, projectStatusLabels } from '../../src/utils/projects';
 import { inlineCodeToText, parseInlineCode } from '../../src/utils/inline-code';
@@ -333,7 +334,7 @@ for (const width of [1280, 820, 390, 320]) {
       }
     });
 
-    test('keeps role and status on one line beneath the logo and title', async ({ page }) => {
+    test('keeps role and status below the heading, sharing a line when they fit', async ({ page }) => {
       test.skip(!publishedProjects.length, 'No published project cards to measure.');
       await page.goto('/projects');
       const cards = page.locator('.project-card-link');
@@ -372,8 +373,16 @@ for (const width of [1280, 820, 390, 320]) {
         expect(metadataBox.y).toBeGreaterThan(headerBox.y + headerBox.height);
         expect(descriptionBox.y).toBeGreaterThan(metadataBox.y + metadataBox.height);
         expect(Math.abs(metadataBox.x - headerBox.x)).toBeLessThan(1);
-        expect(statusBox.x).toBeGreaterThan(roleBox.x + roleBox.width);
-        expect(Math.abs(statusBox.y - roleBox.y)).toBeLessThan(1);
+        if (await unwrappedWidth(metadata) <= headerBox.width) {
+          expect(statusBox.x).toBeGreaterThan(roleBox.x + roleBox.width);
+          expect(Math.abs(statusBox.y - roleBox.y)).toBeLessThan(1);
+        } else {
+          const statusGroupBox = (await metadata.locator('.project-card-status').boundingBox())!;
+          const rowGap = await metadata.evaluate((element) => parseFloat(getComputedStyle(element).rowGap));
+          expect(Math.abs(statusGroupBox.x - roleBox.x)).toBeLessThan(1);
+          expect(Math.abs(statusGroupBox.y - roleBox.y - roleBox.height - rowGap)).toBeLessThan(1);
+        }
+        expect(await metadata.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
 
         const contentBottom = await card.evaluate((element) => {
           const style = getComputedStyle(element);
