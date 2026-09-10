@@ -103,6 +103,12 @@ describe('recommendationSchema', () => {
     expect(result.date).toBeInstanceOf(Date);
   });
 
+  it('rejects impossible recommendation dates through the shared date schema', () => {
+    expect(recommendationSchema.safeParse({ ...validEntry, date: '2025-02-31' }).success).toBe(false);
+    expect(recommendationSchema.parse({ ...validEntry, date: '2024-02-29' }).date.toISOString())
+      .toBe('2024-02-29T12:00:00.000Z');
+  });
+
   it('rejects empty author', () => {
     const result = recommendationSchema.safeParse({ ...validEntry, author: '' });
     expect(result.success).toBe(false);

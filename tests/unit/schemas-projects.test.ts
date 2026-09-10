@@ -84,6 +84,34 @@ describe('projectSchema', () => {
     expect(result.endDate).toBeInstanceOf(Date);
   });
 
+  describe.each(['startDate', 'endDate'] as const)('%s calendar validation', (field) => {
+    it.each(['2025-02-29', '2025-02-31', '2024-02-30', '2025-04-31', '2025-06-31', '2025-09-31', '2025-11-31'])(
+      'rejects impossible date %s instead of normalizing it', (date) => {
+        const result = projectSchema.safeParse({ ...validProject, [field]: date });
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.error.issues).toContainEqual(expect.objectContaining({
+            path: [field], message: 'Must be a valid calendar date',
+          }));
+        }
+      },
+    );
+  });
+
+  it.each(['2000-02-29', '2024-02-29', '2025-02-28', '2025-04-30', '2025-07-31', '2079-12-31'])(
+    'preserves valid date %s, including leap days and same-day projects', (date) => {
+      const result = projectSchema.parse({ ...validProject, startDate: date, endDate: date });
+      expect(result.startDate.toISOString()).toBe(`${date}T12:00:00.000Z`);
+      expect(result.endDate!.toISOString()).toBe(`${date}T12:00:00.000Z`);
+    },
+  );
+
+  it.each(['1999-12-31', '2080-01-01', '2025-2-01', '2025-02-1', '2025-00-01', '2025-13-01', '2025-01-00', '2025-01-32'])(
+    'continues to reject out-of-range or non-padded dates: %s', (startDate) => {
+      expect(projectSchema.safeParse({ ...validProject, startDate }).success).toBe(false);
+    },
+  );
+
   it('rejects an end date before the start date', () => {
     const result = projectSchema.safeParse({ ...validProject, endDate: '2025-01-31' });
     expect(result.success).toBe(false);
