@@ -12,7 +12,8 @@ export const yyyyMmDdDateSchema = z
   .regex(
     /^(20[0-7]\d)-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/,
     "Must be YYYY-MM-DD with valid zero-padded month/day",
-  );
+  )
+  .pipe(z.iso.date("Must be a valid calendar date"));
 
 export const yyyyMmToDateSchema = yyyyMmDateSchema
   .transform((ym) => new Date(`${ym}-01T12:00:00.000Z`));
