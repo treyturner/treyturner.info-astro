@@ -1,0 +1,145 @@
+---
+import { defaultTypewriterTimings, type TypewriterTimings } from '../../utils/typewriter';
+
+interface Props {
+  titles: string[];
+  fallback: string;
+  timings?: Partial<TypewriterTimings>;
+}
+
+const { titles, fallback, timings = {} } = Astro.props;
+const settings = { ...defaultTypewriterTimings, ...timings };
+---
+
+<typewriter-title data-titles={JSON.stringify(titles)} data-timings={JSON.stringify(settings)}>
+  <p class="visually-hidden">{fallback}</p>
+  <div class="typewriter-line">
+    <p class="typewriter-words" aria-hidden="true">
+      <span data-fallback>{fallback}</span>
+      <!-- Keep space for every complete title, including mobile wrapping and the static fallback. -->
+      {[fallback, ...titles].map((title) => <span class="typewriter-measure">{title}<span class="typewriter-cursor">|</span></span>)}
+      <span data-animated hidden><span data-text></span><span class="typewriter-cursor" data-cursor>|</span></span>
+    </p>
+    <button class="typewriter-toggle" type="button" data-toggle hidden aria-label="Pause title animation" title="Pause title animation">
+      <svg class="pause-icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" focusable="false"><path d="M4 3h3v10H4zm5 0h3v10H9z" /></svg>
+      <svg class="play-icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" focusable="false"><path d="m4 2 9 6-9 6z" /></svg>
+    </button>
+  </div>
+</typewriter-title>
+
+<script>
+  import { createTypewriter } from '../../utils/typewriter';
+
+  class TypewriterTitle extends HTMLElement {
+    private cleanup?: () => void;
+
+    connectedCallback() {
+      if (this.cleanup) return;
+      const fallback = this.querySelector<HTMLElement>('[data-fallback]')!;
+      const animated = this.querySelector<HTMLElement>('[data-animated]')!;
+      const text = this.querySelector<HTMLElement>('[data-text]')!;
+      const button = this.querySelector<HTMLButtonElement>('[data-toggle]')!;
+      const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+      let pausedByUser = false;
+      text.textContent = '';
+      const player = createTypewriter(
+        JSON.parse(this.dataset.titles!),
+        (value) => { text.textContent = value; },
+        JSON.parse(this.dataset.timings!),
+      );
+      const refresh = () => {
+        const enabled = !motion.matches;
+        fallback.hidden = enabled;
+        animated.hidden = !enabled;
+        button.hidden = !enabled;
+        button.setAttribute('aria-label', pausedByUser ? 'Resume title animation' : 'Pause title animation');
+        button.title = button.getAttribute('aria-label')!;
+        button.toggleAttribute('data-paused', pausedByUser);
+        const running = enabled && !pausedByUser && !document.hidden;
+        this.toggleAttribute('data-running', running);
+        if (running) player.resume();
+        else player.pause();
+      };
+      const toggle = () => { pausedByUser = !pausedByUser; refresh(); };
+      button.addEventListener('click', toggle);
+      motion.addEventListener('change', refresh);
+      document.addEventListener('visibilitychange', refresh);
+      this.cleanup = () => {
+        player.destroy();
+        button.removeEventListener('click', toggle);
+        motion.removeEventListener('change', refresh);
+        document.removeEventListener('visibilitychange', refresh);
+      };
+      refresh();
+    }
+
+    disconnectedCallback() {
+      this.cleanup?.();
+      this.cleanup = undefined;
+    }
+  }
+
+  if (!customElements.get('typewriter-title')) customElements.define('typewriter-title', TypewriterTitle);
+</script>
+
+<style>
+  typewriter-title {
+    --title-accent: #806000;
+    display: block;
+    max-width: 100%;
+    margin-bottom: var(--spacing-lg);
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: var(--title-accent);
+  }
+
+  :global([data-theme="dark"]) typewriter-title { --title-accent: #eeee22; }
+
+  .typewriter-line {
+    display: grid;
+    grid-template-columns: 2rem minmax(0, 1fr) 2rem;
+    align-items: start;
+    gap: var(--spacing-xs);
+    width: fit-content;
+    max-width: 100%;
+    margin-inline: auto;
+  }
+
+  /* Balance the control so the title itself stays centered beneath the name. */
+  .typewriter-line::before { content: ''; }
+
+  .typewriter-words {
+    display: grid;
+    min-width: 0;
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .typewriter-words > span { grid-area: 1 / 1; }
+  .typewriter-measure { visibility: hidden; pointer-events: none; user-select: none; }
+  .typewriter-cursor { display: inline-block; width: 0.55em; }
+  [data-running] [data-cursor] { animation: cursor-blink 1s step-end infinite; }
+
+  .typewriter-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-sm);
+    color: var(--color-text-secondary);
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .typewriter-toggle[hidden] { visibility: hidden; }
+  .typewriter-toggle:hover { color: var(--title-accent); }
+  .typewriter-toggle:focus-visible { outline: 2px solid var(--title-accent); outline-offset: 2px; }
+  .play-icon, [data-paused] .pause-icon { display: none; }
+  [data-paused] .play-icon { display: block; }
+
+  @keyframes cursor-blink { 50% { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { [data-cursor] { animation: none; } }
+</style>

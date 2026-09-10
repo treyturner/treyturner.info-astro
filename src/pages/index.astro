@@ -1,12 +1,13 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import TypewriterTitle from '../components/ui/TypewriterTitle.astro';
 import siteData from '../data/site.json';
 ---
 
 <BaseLayout>
   <section class="vcard">
     <h1 class="vcard-name">{siteData.name}</h1>
-    <p class="vcard-title">{siteData.title}</p>
+    <TypewriterTitle titles={siteData.rotatingTitles} fallback={siteData.title} timings={siteData.titleAnimation} />
     <p class="vcard-tagline">{siteData.tagline}</p>
     <div class="vcard-social">
       <a href={siteData.social.github} target="_blank" rel="noopener noreferrer" class="social-link">
@@ -31,13 +32,6 @@ import siteData from '../data/site.json';
     font-size: 3rem;
     margin-bottom: var(--spacing-sm);
     color: var(--color-text);
-  }
-
-  .vcard-title {
-    font-size: 1.25rem;
-    color: var(--color-text-secondary);
-    margin-bottom: var(--spacing-lg);
-    font-weight: 500;
   }
 
   .vcard-tagline {

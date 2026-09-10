@@ -53,6 +53,12 @@ Stored in `src/content/`:
 - Move logic into utilities and reusable components
 - Use schemas to validate content early
 
+### Animated Home Title
+
+The home page progressively enhances its canonical `site.json` title with `TypewriterTitle.astro`. `rotatingTitles` supplies the ordered phrases; `titleAnimation` configures typing, deletion, initial delay, inter-title delay, and the 3.5-second hold (all in milliseconds). No Typed.js or client framework dependency is required.
+
+The pure player in `src/utils/typewriter.ts` types/deletes whole Unicode graphemes and preserves the remaining delay when paused. The custom element owns its lifecycle, cancels timers/listeners when removed, suspends in hidden documents, and offers a keyboard-accessible pause/resume button. Reduced motion and no-JavaScript access retain the canonical static title. Screen readers receive stable text instead of the animated characters. Invisible, accessibility-hidden title copies reserve responsive space so changing words cannot move surrounding content. Colors use yellow in dark mode and darker gold in light mode.
+
 ## Styling
 
 - Plain CSS only
