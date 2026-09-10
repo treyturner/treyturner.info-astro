@@ -1,0 +1,63 @@
+/* Shared presentation for the two directions of experience/recommendation links. */
+.related-entry {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  min-width: 0;
+  max-width: 100%;
+  padding: 0;
+  border: 0;
+  background-color: transparent;
+  color: var(--color-text);
+  line-height: 1.6;
+  text-decoration: none;
+}
+
+a.related-entry:hover,
+a.related-entry:focus-visible {
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+a.related-entry:focus-visible {
+  outline: none;
+}
+
+a.related-entry:focus-visible .related-entry-action {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.related-entry-image {
+  height: 3rem;
+  /* Center on the first name/title and metadata lines without moving the text. */
+  margin-top: calc(var(--spacing-xs) / 2);
+  flex-shrink: 0;
+}
+
+.related-entry-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  align-items: flex-start;
+  min-width: 0;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+.related-entry-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.related-entry-meta {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.related-entry-action {
+  font-size: 0.875rem;
+  color: var(--color-primary);
+}

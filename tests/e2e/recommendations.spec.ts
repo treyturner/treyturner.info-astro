@@ -44,7 +44,7 @@ test.describe('Recommendations page', () => {
     expect(count).toBeGreaterThan(0);
     for (let i = 0; i < count; i++) {
       const text = await roles.nth(i).textContent();
-      expect(text).toContain(' at ');
+      expect(text).toMatch(/^.+, .+$/);
     }
   });
 
