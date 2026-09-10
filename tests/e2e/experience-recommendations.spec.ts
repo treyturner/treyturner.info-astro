@@ -150,10 +150,10 @@ test.describe('Experience and recommendation links', () => {
     }
   });
 
-  test('loads 48px author photos with dimensions and supports an author without a photo', async ({ page }) => {
+  test('loads 48px author images including the SVG placeholder', async ({ page }) => {
     await page.goto('/experience');
     const photos = page.locator('.recommendation-preview img');
-    await expect(photos).toHaveCount(13);
+    await expect(photos).toHaveCount(expectedLinks.length);
     for (let i = 0; i < await photos.count(); i++) {
       const photo = photos.nth(i);
       await photo.scrollIntoViewIfNeeded();
@@ -166,13 +166,35 @@ test.describe('Experience and recommendation links', () => {
     const jim = page.getByRole('link', { name: 'Read recommendation from Jim Carlile' });
     await jim.scrollIntoViewIfNeeded();
     await expect(jim).toBeVisible();
-    await expect(jim.locator('img')).toHaveCount(0);
+    await expect(jim.locator('img')).toHaveCount(1);
+    await expect(jim.locator('img')).toHaveAttribute('src', /jim-carlile.*\.svg/);
   });
 });
 
 for (const colorScheme of ['light', 'dark'] as const) {
   test.describe(`Linked-entry styling in ${colorScheme} mode`, () => {
     test.use({ colorScheme, contextOptions: { reducedMotion: 'no-preference' } });
+
+    test("uses Jim's neutral SVG avatar on both recommendation views", async ({ page }) => {
+      for (const [path, selector] of [
+        ['/recommendations', '#jim-carlile .recommendation-photo'],
+        ['/experience', '[href="/recommendations#jim-carlile"] .preview-photo'],
+      ]) {
+        await page.goto(path);
+        const avatar = page.locator(selector);
+        await avatar.scrollIntoViewIfNeeded();
+        await expect(avatar).toBeVisible();
+        await expect(avatar).toHaveAttribute('src', /jim-carlile.*\.svg/);
+        await expect(avatar).toHaveAttribute('alt', '');
+        await expect(avatar).toHaveAttribute('width', '48');
+        await expect(avatar).toHaveAttribute('height', '48');
+        await expect(avatar).toHaveCSS('width', '48px');
+        await expect(avatar).toHaveCSS('height', '48px');
+        await expect.poll(() => avatar.evaluate(
+          (image: HTMLImageElement) => image.complete && image.naturalWidth > 0,
+        )).toBe(true);
+      }
+    });
 
     test('role blocks keep plain, theme-readable titles during hover and keyboard focus', async ({ page }) => {
       await page.goto('/recommendations');

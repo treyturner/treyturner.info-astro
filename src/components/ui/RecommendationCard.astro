@@ -12,11 +12,11 @@ interface Props {
 
 const { recommendation, id } = Astro.props;
 
-const allPeople = import.meta.glob<{ default: ImageMetadata }>('../../assets/people/*.jpg', { eager: true });
+const allPeople = import.meta.glob<{ default: ImageMetadata }>('../../assets/people/*.{jpg,svg}', { eager: true });
 const allLogos  = import.meta.glob<{ default: ImageMetadata }>('../../assets/logos/companies/*', { eager: true });
 
-const photoKey = `../../assets/people/${recommendation.author.toLowerCase().replace(/\s+/g, '-')}.jpg`;
-const photoSrc = allPeople[photoKey]?.default;
+const photoKey = `../../assets/people/${recommendation.author.toLowerCase().replace(/\s+/g, '-')}`;
+const photoSrc = allPeople[`${photoKey}.jpg`]?.default ?? allPeople[`${photoKey}.svg`]?.default;
 ---
 
 <article class="recommendation-card" id={id} tabindex="-1" aria-label={`Recommendation from ${recommendation.author}`}>
