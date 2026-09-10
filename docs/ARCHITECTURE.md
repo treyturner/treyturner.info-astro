@@ -83,6 +83,8 @@ Playwright covers:
 - broken links
 - metadata checks
 
+Layout assertions measure text using the active font instead of assuming that a particular label always occupies one line. Typography regressions also exercise sans-serif and monospace fallbacks so wider glyphs and enlarged text cannot silently overflow content columns.
+
 ### Coverage
 
 Coverage is enforced at a minimum of 80% for:
