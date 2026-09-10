@@ -61,12 +61,15 @@ test.describe('Projects page', () => {
     );
   });
 
-  test('offers a branded Patreon link that can be followed with the keyboard', async ({ page }) => {
+  test('offers a branded Patreon link that opens a new tab with the keyboard', async ({ page, context }) => {
     await page.goto('/projects');
+    const originalUrl = page.url();
     const badge = page.getByRole('link', { name: 'Support on Patreon', exact: true });
     await expect(badge).toHaveCount(1);
     await expect(badge).toBeVisible();
     await expect(badge).toHaveAttribute('href', 'https://patreon.treyturner.info');
+    await expect(badge).toHaveAttribute('target', '_blank');
+    await expect(badge).toHaveAttribute('rel', 'noopener noreferrer');
     await expect(badge.locator('svg')).toHaveAttribute('aria-hidden', 'true');
     await expect(badge.locator('svg')).toHaveAttribute('focusable', 'false');
     await expect(badge.locator('svg')).toBeVisible();
@@ -74,18 +77,24 @@ test.describe('Projects page', () => {
     await expect(badge).toHaveCSS('color', 'rgb(255, 255, 255)');
     await expect(badge).toHaveCSS('background-color', 'rgb(0, 0, 0)');
 
-    await page.locator('h1').click();
+    await page.locator('main h1').click();
     await page.keyboard.press('Tab');
     await expect(badge).toBeFocused();
     await expect(badge).toHaveCSS('outline-style', 'solid');
     await expect(badge).toHaveCSS('outline-width', '2px');
-    // Verify the navigation without depending on the external service.
-    await page.route('https://patreon.treyturner.info/', (route) => route.fulfill({
+    // Intercept the new tab's navigation without depending on the external service.
+    await context.route('https://patreon.treyturner.info/', (route) => route.fulfill({
       status: 200, contentType: 'text/html', body: '<title>Patreon destination</title>',
     }));
+    const opened = page.waitForEvent('popup');
     await page.keyboard.press('Enter');
-    await expect(page).toHaveURL('https://patreon.treyturner.info/');
-    await expect(page).toHaveTitle('Patreon destination');
+    const tab = await opened;
+    await expect(tab).toHaveURL('https://patreon.treyturner.info/');
+    await expect(tab).toHaveTitle('Patreon destination');
+    expect(await tab.evaluate(() => window.opener === null)).toBe(true);
+    expect(await tab.evaluate(() => document.referrer)).toBe('');
+    await expect(page).toHaveURL(originalUrl);
+    await tab.close();
   });
 
   test('shows only published cards in display order, with title as the tie-breaker', async ({ page }) => {
@@ -157,6 +166,40 @@ test.describe('Projects page', () => {
 });
 
 test.describe('Project detail pages', () => {
+  for (const kind of ['deployment', 'repository'] as const) {
+    test(`opens a ${kind} in a new tab without leaving the project page`, async ({ page, context }) => {
+      const project = publishedProjects.find((project) => (
+        kind === 'deployment' ? project.liveUrl : project.repositoryUrls?.length
+      ));
+      test.skip(!project, `No published project with a ${kind} link.`);
+      const destination = new URL(kind === 'deployment' ? project!.liveUrl! : project!.repositoryUrls![0]).href;
+      await page.goto(`/projects/${project!.id}`);
+      const originalUrl = page.url();
+      const links = page.getByRole('list', { name: 'Project links' });
+      const link = kind === 'deployment'
+        ? links.getByRole('link', { name: /^Visit / })
+        : links.locator('.project-repository-link').first();
+
+      // Intercept at context level so the new tab never needs the external service.
+      await context.route(destination, (route) => route.fulfill({
+        status: 200, contentType: 'text/html', body: '<title>Project destination</title>',
+      }));
+      const opened = page.waitForEvent('popup');
+      if (kind === 'deployment') await link.click();
+      else {
+        await link.focus();
+        await page.keyboard.press('Enter');
+      }
+      const tab = await opened;
+      await expect(tab).toHaveURL(destination);
+      await expect(tab).toHaveTitle('Project destination');
+      expect(await tab.evaluate(() => window.opener === null)).toBe(true);
+      expect(await tab.evaluate(() => document.referrer)).toBe('');
+      await expect(page).toHaveURL(originalUrl);
+      await tab.close();
+    });
+  }
+
   for (const project of publishedProjects) {
     const { id, title, logoImage, role, status, liveUrl, startDate, endDate, technologyStack } = project;
     test(`renders the ${id} logo according to its content`, async ({ page }) => {
@@ -208,6 +251,10 @@ test.describe('Project detail pages', () => {
       const linkCount = repositories.length + (liveUrl ? 1 : 0);
       await expect(links).toHaveCount(linkCount ? 1 : 0);
       await expect(links.getByRole('link')).toHaveCount(linkCount);
+      for (const link of await links.getByRole('link').all()) {
+        await expect(link).toHaveAttribute('target', '_blank');
+        await expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+      }
       const repositoryLinks = links.locator('.project-repository-link');
       await expect(repositoryLinks).toHaveCount(repositories.length);
       for (const [index, url] of repositories.entries()) {
