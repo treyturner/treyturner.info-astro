@@ -48,7 +48,15 @@ const isActive = (href: string) => currentPath === href
     flex-wrap: wrap;
   }
 
+  .nav-list > li {
+    min-width: 0;
+    max-width: 100%;
+  }
+
   .nav-link {
+    display: block;
+    /* Allow oversized labels to wrap without reducing the user's text size. */
+    overflow-wrap: anywhere;
     font-size: 0.9375rem;
     color: var(--color-text-secondary);
     text-decoration: none;

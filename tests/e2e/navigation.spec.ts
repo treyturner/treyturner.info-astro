@@ -78,6 +78,69 @@ test.describe('Site navigation', () => {
   });
 });
 
+for (const font of ['system-ui', 'sans-serif', 'monospace']) {
+  test.describe(`Navigation reflow with ${font}`, () => {
+    for (const width of [1280, 390, 320]) {
+      test(`fits its column with normal and enlarged text at ${width}px`, async ({ page }) => {
+        await page.setViewportSize({ width, height: 900 });
+        // Exercise the longest label at its heavier active-link weight.
+        await page.goto('/recommendations');
+        await page.addStyleTag({ content: `:root { --font-family-body: ${font}; }` });
+        const nav = page.getByRole('navigation', { name: 'Main navigation' });
+        const list = nav.locator('.nav-list');
+        const links = nav.getByRole('link');
+        await expect(links).toHaveText(navItems.map(({ label }) => label));
+
+        for (const scale of [100, 200]) {
+          await page.locator('html').evaluate((element, scale) => {
+            element.style.fontSize = `${scale}%`;
+          }, scale);
+          const rootFontSize = await page.locator('html').evaluate(
+            (element) => parseFloat(getComputedStyle(element).fontSize),
+          );
+          for (const element of [nav, list]) {
+            expect(await element.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
+          }
+          const listBox = (await list.boundingBox())!;
+          const boxes = [];
+          for (const link of await links.all()) {
+            await expect(link).toBeVisible();
+            await expect(link).toHaveCSS('font-size', `${rootFontSize * 0.9375}px`);
+            const box = (await link.boundingBox())!;
+            expect(box.x).toBeGreaterThanOrEqual(listBox.x - 1);
+            expect(box.x + box.width).toBeLessThanOrEqual(listBox.x + listBox.width + 1);
+            expect(await link.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
+            for (const previous of boxes) {
+              const separate = box.x >= previous.x + previous.width - 1
+                || box.y >= previous.y + previous.height - 1;
+              expect(separate, 'Navigation links must not overlap').toBe(true);
+            }
+            boxes.push(box);
+          }
+        }
+      });
+    }
+  });
+}
+
+test('enlarged mobile navigation remains keyboard accessible', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 900 });
+  await page.goto('/skills');
+  await page.locator('html').evaluate((element) => { element.style.fontSize = '200%'; });
+  const links = page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link');
+  await links.first().focus();
+  for (let index = 0; index < navItems.length; index++) {
+    await expect(links.nth(index)).toBeFocused();
+    await expect(links.nth(index)).toBeInViewport();
+    if (index < navItems.length - 1) await page.keyboard.press('Tab');
+  }
+  await page.keyboard.press('Shift+Tab');
+  await expect(links.filter({ hasText: /^Recommendations$/ })).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(page).toHaveURL('/recommendations');
+  await expect(page.locator('nav a.active')).toHaveAttribute('aria-current', 'page');
+});
+
 test.describe('SEO meta tags on all pages', () => {
   test('every page has a title', async ({ page }) => {
     for (const item of navItems) {
