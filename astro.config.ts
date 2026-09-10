@@ -2,16 +2,16 @@ import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import type { WsOptions } from 'vite';
 
-const allowedHosts = ['localhost'];
+const allowedHosts = ['localhost', '.coder.treyturner.info'];
 if (process.env.ALLOWED_HOSTS) {
   allowedHosts.push(
     ...process.env.ALLOWED_HOSTS.split(',').map((h) => h.trim()).filter(Boolean),
   );
 }
 
-const corsOrigins = allowedHosts
-  .filter((h) => h !== 'localhost')
-  .map((h) => `https://${h}`);
+// Host patterns control which requests we serve, not cross-origin browser access.
+const corsOrigins = (process.env.CORS_ORIGINS ?? '')
+  .split(',').map((origin) => origin.trim()).filter(Boolean);
 
 let ws: WsOptions | undefined;
 if (process.env.HMR_HOST) {
@@ -26,9 +26,9 @@ if (process.env.HMR_HOST) {
 export default defineConfig({
   integrations: [mdx()],
   site: 'https://astro.treyturner.info',
+  server: { allowedHosts },
   vite: {
     server: {
-      allowedHosts,
       ws,
       cors: corsOrigins.length ? { origin: corsOrigins } : undefined,
     },
