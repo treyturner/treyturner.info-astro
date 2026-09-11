@@ -23,6 +23,11 @@ updates:
           - "minor"
           - "patch"
     ignore:
+      # Defer #76 until @astrojs/check and typescript-eslint support TypeScript 7.
+      # Remove this range once both support it; keep TypeScript 6.x updates enabled.
+      - dependency-name: "typescript"
+        versions:
+          - "^7.0.0"
       - dependency-name: "@types/node"
         update-types:
           - "version-update:semver-major"

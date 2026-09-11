@@ -124,6 +124,12 @@ This override does not start or stop a server. It is useful for catching develop
 
 `scripts/check-coverage-regression.mjs` compares the current branch's `coverage/coverage-summary.json` against the base branch's. In CI this runs automatically after unit tests on every pull request and fails the job if coverage regresses.
 
+## Dependency update deferrals
+
+[Dependabot configuration](.github/dependabot.yml) temporarily excludes TypeScript 7.x following [PR #76](https://github.com/treyturner/treyturner.info-astro/pull/76). The site remains on TypeScript 6 because the Astro checker and TypeScript ESLint parser do not yet support version 7. Updates within 6.x and updates to other dependencies remain enabled.
+
+Remove the TypeScript ignore entry once both tools support TypeScript 7, then run the full quality gate before upgrading. The version exclusion also blocks automated security-update proposals requiring TypeScript 7; those require manual compatibility review while the deferral is in place.
+
 ## CI workflow
 
 [.github/workflows/ci.yml](.github/workflows/ci.yml) — single `CI` job, runs on every push to `main` and on pull requests targeting `main`.
