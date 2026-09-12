@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import site from '../../src/data/site.json' with { type: 'json' };
 
-const { typeDelay, deleteDelay, holdDelay, gapDelay, startDelay } = site.titleAnimation;
+const { typeDelay, randomTypeDelay, deleteDelay, holdDelay, gapDelay, startDelay } = site.titleAnimation;
 const firstTitleTime = startDelay + (site.rotatingTitles[0].length - 1) * typeDelay;
 
 test.describe('Animated job title', () => {
@@ -9,11 +9,13 @@ test.describe('Animated job title', () => {
   test.beforeEach(async ({ page }) => {
     await page.clock.install({ time: new Date('2026-01-01T00:00:00Z') });
     await page.clock.pauseAt(new Date('2026-01-01T00:01:00Z'));
+    // Test timing boundaries deterministically, with separate coverage for nonzero variation.
+    await page.addInitScript(() => { Math.random = () => 0; });
     await page.goto('/');
     await expect(page.locator('typewriter-title')).toHaveAttribute('data-running', '');
   });
 
-  test('types, holds for 3.5 seconds, backspaces, and cycles through every configured title', async ({ page }) => {
+  test('types, holds, backspaces, and cycles through every configured title with the configured timings', async ({ page }) => {
     const text = page.locator('typewriter-title [data-text]');
     await expect(text).toBeEmpty();
     await page.clock.runFor(startDelay);
@@ -34,23 +36,28 @@ test.describe('Animated job title', () => {
     }
   });
 
-  test('pauses and resumes with the keyboard without losing the remaining hold time', async ({ page }) => {
-    const text = page.locator('typewriter-title [data-text]');
-    await page.clock.runFor(firstTitleTime + 1000);
-    const pause = page.getByRole('button', { name: 'Pause title animation' });
-    await pause.focus();
-    await page.keyboard.press('Enter');
-    const resume = page.getByRole('button', { name: 'Resume title animation' });
-    await expect(resume).toBeFocused();
-    await expect(resume).toHaveCSS('outline-style', 'solid');
-    await expect(page.locator('typewriter-title')).not.toHaveAttribute('data-running');
-    await page.clock.runFor(10000);
-    await expect(text).toHaveText(site.rotatingTitles[0]);
-    await page.keyboard.press('Space');
-    await page.clock.runFor(holdDelay - 1000 - 1);
-    await expect(text).toHaveText(site.rotatingTitles[0]);
+  test('types at the configured speed without a cursor or playback controls', async ({ page }) => {
+    const title = page.locator('typewriter-title');
+    await expect(title.locator('button, [data-toggle], [data-cursor], .typewriter-cursor')).toHaveCount(0);
+    await page.clock.runFor(startDelay + typeDelay - 1);
+    await expect(title.locator('[data-text]')).toHaveText(site.rotatingTitles[0][0]);
     await page.clock.runFor(1);
-    await expect(text).toHaveText(site.rotatingTitles[0].slice(0, -1));
+    await expect(title.locator('[data-text]')).toHaveText(site.rotatingTitles[0].slice(0, 2));
+  });
+
+  test('applies the configured random extra delay separately for each typed character', async ({ page }) => {
+    const text = page.locator('typewriter-title [data-text]');
+    await page.evaluate(() => { Math.random = () => 1 - Number.EPSILON; });
+    // The initial character was already scheduled with zero randomness during initialization.
+    await page.clock.runFor(startDelay + typeDelay + randomTypeDelay - 1);
+    await expect(text).toHaveText(site.rotatingTitles[0][0]);
+    await page.evaluate(() => { Math.random = () => 0; });
+    await page.clock.runFor(1);
+    await expect(text).toHaveText(site.rotatingTitles[0].slice(0, 2));
+    await page.clock.runFor(typeDelay - 1);
+    await expect(text).toHaveText(site.rotatingTitles[0].slice(0, 2));
+    await page.clock.runFor(1);
+    await expect(text).toHaveText(site.rotatingTitles[0].slice(0, 3));
   });
 
   test('uses a stable accessible title instead of announcing every keystroke', async ({ page }) => {
@@ -65,20 +72,25 @@ test.describe('Animated job title', () => {
     expect(await title.ariaSnapshot()).toBe(snapshot);
   });
 
-  test('reacts to reduced-motion changes and preserves a user pause', async ({ page }) => {
-    await page.clock.runFor(startDelay);
-    await page.getByRole('button', { name: 'Pause title animation' }).click();
+  test('reacts to reduced-motion changes and resumes with the remaining hold time', async ({ page }) => {
+    await page.clock.runFor(firstTitleTime + 1000);
     await page.emulateMedia({ reducedMotion: 'reduce' });
     const title = page.locator('typewriter-title');
     await expect(title.locator('[data-fallback]')).toBeVisible();
     await expect(title.locator('[data-fallback]')).toHaveText(site.title);
     await expect(title.locator('[data-animated]')).toBeHidden();
     await expect(title.getByRole('button')).toHaveCount(0);
-    await page.clock.runFor(10000);
-    await page.emulateMedia({ reducedMotion: 'no-preference' });
-    await expect(page.getByRole('button', { name: 'Resume title animation' })).toBeVisible();
     await expect(title).not.toHaveAttribute('data-running');
-    await expect(title.locator('[data-text]')).toHaveText(site.rotatingTitles[0][0]);
+    await page.clock.runFor(10000);
+    await expect(title.locator('[data-text]')).toHaveText(site.rotatingTitles[0]);
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await expect(title).toHaveAttribute('data-running', '');
+    await expect(title.locator('[data-fallback]')).toBeHidden();
+    await expect(title.locator('[data-animated]')).toBeVisible();
+    await page.clock.runFor(holdDelay - 1000 - 1);
+    await expect(title.locator('[data-text]')).toHaveText(site.rotatingTitles[0]);
+    await page.clock.runFor(1);
+    await expect(title.locator('[data-text]')).toHaveText(site.rotatingTitles[0].slice(0, -1));
   });
 
   test('suspends in a hidden document and resumes without a catch-up burst', async ({ page }) => {
@@ -107,28 +119,41 @@ test.describe('Animated job title', () => {
     await element!.evaluate((element) => document.querySelector('.vcard-name')!.after(element));
     await page.clock.runFor(startDelay);
     await expect(page.locator('[data-text]')).toHaveText(site.rotatingTitles[0][0]);
-    await page.getByRole('button', { name: 'Pause title animation' }).click();
-    await page.clock.runFor(10000);
+    await element!.evaluate((element) => {
+      (element as HTMLElement & { connectedCallback(): void }).connectedCallback();
+    });
+    await page.clock.runFor(typeDelay - 1);
     await expect(page.locator('[data-text]')).toHaveText(site.rotatingTitles[0][0]);
+    await page.clock.runFor(1);
+    await expect(page.locator('[data-text]')).toHaveText(site.rotatingTitles[0].slice(0, 2));
   });
 
   for (const width of [1280, 390, 320]) {
-    test(`reserves space without overflow or layout jumps at ${width}px`, async ({ page }) => {
+    test(`centers the text beneath the name without overflow or layout jumps at ${width}px`, async ({ page }) => {
       await page.setViewportSize({ width, height: 900 });
       for (const scale of ['100%', '200%']) {
         await page.locator('html').evaluate((element, scale) => { element.style.fontSize = scale; }, scale);
         const title = page.locator('typewriter-title');
         const initial = (await title.boundingBox())!;
+        const name = (await page.locator('.vcard-name').boundingBox())!;
+        const nameCenter = name.x + name.width / 2;
         const taglineY = (await page.locator('.vcard-tagline').boundingBox())!.y;
         for (let index = 0; index < 12; index++) {
           await page.clock.runFor(800);
           const box = (await title.boundingBox())!;
           const words = (await title.locator('.typewriter-words').boundingBox())!;
-          const control = (await title.getByRole('button').boundingBox())!;
           expect(box.height).toBeCloseTo(initial.height);
           // Grid tracks can round to different subpixels at fractional font sizes.
-          expect(Math.abs(words.x + words.width / 2 - (box.x + box.width / 2))).toBeLessThan(1);
-          expect(control.y).toBeCloseTo(words.y);
+          expect(Math.abs(words.x + words.width / 2 - nameCenter)).toBeLessThan(1);
+          const textBox = await title.locator('[data-text]').evaluate((element) => {
+            const range = document.createRange();
+            range.selectNodeContents(element);
+            const { x, width } = range.getBoundingClientRect();
+            return { x, width };
+          });
+          if (textBox.width > 0) {
+            expect(Math.abs(textBox.x + textBox.width / 2 - nameCenter)).toBeLessThan(1);
+          }
           expect((await page.locator('.vcard-tagline').boundingBox())!.y).toBeCloseTo(taglineY);
           for (const element of [title, title.locator('.typewriter-words')]) {
             expect(await element.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
@@ -149,6 +174,7 @@ for (const mode of ['reduced-motion', 'no-javascript'] as const) {
       await expect(title.locator('[data-fallback]')).toHaveText(site.title);
       await expect(title.locator('[data-animated]')).toBeHidden();
       await expect(title.getByRole('button')).toHaveCount(0);
+      await expect(title.locator('[data-cursor], .typewriter-cursor')).toHaveCount(0);
       await expect(title).not.toHaveAttribute('data-running');
       expect(await title.ariaSnapshot()).toContain(site.title);
     });

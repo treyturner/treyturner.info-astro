@@ -1,7 +1,15 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import TypewriterTitle from '../components/ui/TypewriterTitle.astro';
+import SocialIcon from '../components/ui/SocialIcon.astro';
 import siteData from '../data/site.json';
+
+const socialLinks = [
+  { name: 'github', label: 'GitHub', href: siteData.social.github },
+  { name: 'linkedin', label: 'LinkedIn', href: siteData.social.linkedin },
+  { name: 'stackoverflow', label: 'Stack Overflow', href: siteData.social.stackoverflow },
+  { name: 'spotify', label: 'Spotify', href: siteData.social.spotify },
+] as const;
 ---
 
 <BaseLayout>
@@ -10,12 +18,12 @@ import siteData from '../data/site.json';
     <TypewriterTitle titles={siteData.rotatingTitles} fallback={siteData.title} timings={siteData.titleAnimation} />
     <p class="vcard-tagline">{siteData.tagline}</p>
     <div class="vcard-social">
-      <a href={siteData.social.github} target="_blank" rel="noopener noreferrer" class="social-link">
-        GitHub
-      </a>
-      <a href={siteData.social.linkedin} target="_blank" rel="noopener noreferrer" class="social-link">
-        LinkedIn
-      </a>
+      {socialLinks.map(({ name, label, href }) => (
+        <a href={href} target="_blank" rel="noopener noreferrer" class="social-link" title={`${label} (opens in a new tab)`}>
+          <SocialIcon name={name} />
+          <span class="visually-hidden">{label}</span>
+        </a>
+      ))}
     </div>
   </section>
 </BaseLayout>
@@ -45,6 +53,7 @@ import siteData from '../data/site.json';
 
   .vcard-social {
     display: flex;
+    flex-wrap: wrap;
     gap: var(--spacing-md);
     justify-content: center;
   }
@@ -52,18 +61,32 @@ import siteData from '../data/site.json';
   .social-link {
     display: inline-flex;
     align-items: center;
-    gap: var(--spacing-xs);
-    padding: var(--spacing-sm) var(--spacing-lg);
-    border: 1px solid var(--color-border);
+    justify-content: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    flex-shrink: 0;
+    padding: 0;
+    border: 0;
     border-radius: var(--radius-md);
+    background: transparent;
     color: var(--color-text);
-    font-weight: 500;
-    transition: border-color var(--transition-fast), color var(--transition-fast);
+    transition: color var(--transition-fast);
+  }
+
+  .social-link :global(svg) {
+    display: block;
+    width: 1.75rem;
+    height: 1.75rem;
+    flex-shrink: 0;
   }
 
   .social-link:hover {
-    border-color: var(--color-primary);
     color: var(--color-primary);
     text-decoration: none;
+  }
+
+  .social-link:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
   }
 </style>

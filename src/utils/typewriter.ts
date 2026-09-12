@@ -1,5 +1,6 @@
 export const defaultTypewriterTimings = {
-  typeDelay: 70,
+  typeDelay: 61,
+  randomTypeDelay: 0,
   deleteDelay: 40,
   holdDelay: 3500,
   gapDelay: 450,
@@ -21,6 +22,18 @@ export function createTypewriter(
   if (Object.values(delays).some((delay) => !Number.isFinite(delay) || delay < 0 || delay > 2_147_483_647)) {
     throw new Error('Typewriter delays must be finite, non-negative timer durations');
   }
+  if ([delays.typeDelay, delays.startDelay, delays.gapDelay].some((delay) => delay + delays.randomTypeDelay > 2_147_483_647)) {
+    throw new Error('Typewriter delays including randomness must fit within the timer duration limit');
+  }
+
+  function typingDelay(base: number) {
+    // Sample once per new character, not again when a paused timer resumes.
+    const extra = delays.randomTypeDelay === 0
+      ? 0
+      : Math.floor(Math.random() * (Math.floor(delays.randomTypeDelay) + 1));
+    return base + extra;
+  }
+
   const segmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
   const words = phrases.map((phrase) => Array.from(segmenter.segment(phrase), ({ segment }) => segment));
   let word = 0;
@@ -28,7 +41,7 @@ export function createTypewriter(
   let deleting = false;
   let paused = true;
   let destroyed = false;
-  let remaining = delays.startDelay;
+  let remaining = typingDelay(delays.startDelay);
   let dueAt = 0;
   let timer: ReturnType<typeof setTimeout> | undefined;
 
@@ -45,17 +58,18 @@ export function createTypewriter(
     length += deleting ? -1 : 1;
     const text = characters.slice(0, length).join('');
     if (!deleting) {
-      remaining = delays.typeDelay;
       if (length === characters.length) {
         deleting = true;
         remaining = delays.holdDelay;
+      } else {
+        remaining = typingDelay(delays.typeDelay);
       }
     } else {
       remaining = delays.deleteDelay;
       if (length === 0) {
         deleting = false;
         word = (word + 1) % words.length;
-        remaining = delays.gapDelay;
+        remaining = typingDelay(delays.gapDelay);
       }
     }
     onChange(text);
