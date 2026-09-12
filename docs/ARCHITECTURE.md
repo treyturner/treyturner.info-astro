@@ -63,7 +63,7 @@ The pure player in `src/utils/typewriter.ts` types/deletes whole Unicode graphem
 
 ### CV Download
 
-The home page places an outlined “Download CV” link between the tagline and social icons. It uses a native same-origin download link, with a decorative download icon to the right, and works without JavaScript. `public/trey-turner-cv.pdf` is served unchanged and downloads as `Trey-Turner-CV.pdf`; replace that asset to update the CV while keeping the link stable.
+The home page places an outlined “Download CV” link between the tagline and social icons, with equal 2.25rem gaps above and below the button. Its text, outline, and icon match the body-copy color at rest and use the theme accent on hover. It uses a native same-origin download link, with a decorative download icon to the right, and works without JavaScript. `public/trey-turner-cv.pdf` is served unchanged and downloads as `Trey Turner - Automation Engineer, CI-CD & Test Infrastructure.pdf`; replace that asset to update the CV while keeping the link stable.
 
 ## Styling
 

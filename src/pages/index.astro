@@ -18,7 +18,7 @@ const socialLinks = [
     <h1 class="vcard-name">{siteData.name}</h1>
     <TypewriterTitle titles={siteData.rotatingTitles} fallback={siteData.title} timings={siteData.titleAnimation} />
     <p class="vcard-tagline">{siteData.tagline}</p>
-    <a class="cv-download" href="/trey-turner-cv.pdf" download="Trey-Turner-CV.pdf">
+    <a class="cv-download" href="/trey-turner-cv.pdf" download="Trey Turner - Automation Engineer, CI-CD &amp; Test Infrastructure.pdf">
       <span>Download CV</span>
       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
         <path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5" />
@@ -37,6 +37,8 @@ const socialLinks = [
 
 <style>
   .vcard {
+    /* Split the original 3rem/1.5rem gaps evenly without moving the social row. */
+    --action-gap: calc((var(--spacing-2xl) + var(--spacing-lg)) / 2);
     max-width: var(--content-width);
     margin-inline: auto;
     text-align: center;
@@ -54,7 +56,7 @@ const socialLinks = [
     color: var(--color-text-secondary);
     max-width: 40rem;
     margin-inline: auto;
-    margin-bottom: var(--spacing-2xl);
+    margin-bottom: var(--action-gap);
     line-height: 1.7;
   }
 
@@ -74,16 +76,16 @@ const socialLinks = [
     max-width: 100%;
     min-height: 3rem;
     margin-inline: auto;
-    margin-bottom: var(--spacing-lg);
+    margin-bottom: var(--action-gap);
     /* Leave room for the label when text is enlarged on a narrow screen. */
     padding: var(--spacing-sm) min(var(--spacing-lg), 4vw);
-    border: 1px solid var(--color-primary);
+    border: 1px solid currentColor;
     border-radius: var(--radius-md);
-    color: var(--color-primary);
+    color: var(--color-text-secondary);
     background: transparent;
     font-weight: 500;
     text-decoration: none;
-    transition: background-color var(--transition-fast);
+    transition: color var(--transition-fast), background-color var(--transition-fast);
   }
 
   .cv-download span {
