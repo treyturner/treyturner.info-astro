@@ -8,6 +8,26 @@ const { publishedProjects } = readProjectContent();
 for (const font of ['sans-serif', 'monospace']) {
   test.describe(`Responsive typography with ${font}`, () => {
     for (const width of [1280, 390, 320]) {
+      test(`enlarged home name wraps without horizontal overflow at ${width}px`, async ({ page }) => {
+        await page.setViewportSize({ width, height: 900 });
+        await page.emulateMedia({ reducedMotion: 'reduce' });
+        await page.goto('/');
+        await page.addStyleTag({ content: `:root { --font-family-body: ${font}; font-size: 200%; }` });
+        const name = page.locator('.vcard-name');
+        await expect(name).toHaveText('Trey Turner');
+        // Keep the enlarged text readable: wrap it instead of shrinking or clipping it.
+        const rem = await page.locator('html').evaluate((element) => parseFloat(getComputedStyle(element).fontSize));
+        await expect(name).toHaveCSS('font-size', `${3 * rem}px`);
+        await expect(name).toHaveCSS('overflow-x', 'visible');
+        for (const locator of [name, page.locator('.vcard'), page.locator('html')]) {
+          const { scrollWidth, clientWidth } = await locator.evaluate((element) => ({
+            scrollWidth: element.scrollWidth,
+            clientWidth: element.clientWidth,
+          }));
+          expect(scrollWidth).toBeLessThanOrEqual(clientWidth);
+        }
+      });
+
       test(`recommendations wrap within their content column at ${width}px`, async ({ page }) => {
         await page.setViewportSize({ width, height: 900 });
         await page.goto('/recommendations');
