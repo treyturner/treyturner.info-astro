@@ -1,5 +1,6 @@
 ---
 import GitHubIcon from './GitHubIcon.astro';
+import PatreonIcon from './PatreonIcon.astro';
 
 /*
  * LinkedIn, Stack Overflow, and Spotify marks from Bootstrap Icons v1.13.1:
@@ -43,14 +44,14 @@ const paths = {
 };
 
 interface Props {
-  name: 'github' | keyof typeof paths;
+  name: 'github' | 'patreon' | keyof typeof paths;
 }
 
 const { name } = Astro.props;
 ---
 
-{name === 'github' ? <GitHubIcon /> : (
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" focusable="false">
+{name === 'github' ? <GitHubIcon /> : name === 'patreon' ? <PatreonIcon /> : (
+  <svg class={`${name}-icon`} xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" focusable="false">
     {paths[name].map((d) => <path d={d} />)}
   </svg>
 )}

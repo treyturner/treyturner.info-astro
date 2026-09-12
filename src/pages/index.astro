@@ -7,6 +7,7 @@ import siteData from '../data/site.json';
 const socialLinks = [
   { name: 'github', label: 'GitHub', href: siteData.social.github },
   { name: 'linkedin', label: 'LinkedIn', href: siteData.social.linkedin },
+  { name: 'patreon', label: 'Patreon', href: siteData.social.patreon },
   { name: 'stackoverflow', label: 'Stack Overflow', href: siteData.social.stackoverflow },
   { name: 'spotify', label: 'Spotify', href: siteData.social.spotify },
 ] as const;
@@ -80,6 +81,10 @@ const socialLinks = [
     flex-shrink: 0;
   }
 
+  /* Tighten the optical gap between these narrower marks without moving their hit targets. */
+  .social-link :global(.patreon-icon) { transform: translateX(0.0625rem); }
+  .social-link :global(.stackoverflow-icon) { transform: translateX(-0.0625rem); }
+
   .social-link:hover {
     color: var(--color-primary);
     text-decoration: none;
@@ -88,5 +93,11 @@ const socialLinks = [
   .social-link:focus-visible {
     outline: 2px solid var(--color-primary);
     outline-offset: 2px;
+  }
+
+  /* Keep all five icons together on phones while retaining 48px touch targets. */
+  @media (max-width: 30rem) {
+    .vcard-social { gap: var(--spacing-sm); }
+    .social-link { width: 3rem; height: 3rem; }
   }
 </style>
