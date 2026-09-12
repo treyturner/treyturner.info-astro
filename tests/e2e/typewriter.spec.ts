@@ -449,11 +449,23 @@ for (const colorScheme of ['dark', 'light'] as const) {
     });
   }
 
-  test.describe(`Title accent in ${colorScheme} mode`, () => {
-    test.use({ colorScheme, contextOptions: { reducedMotion: 'reduce' } });
-    test('uses yellow on dark backgrounds and readable gold on light backgrounds', async ({ page }) => {
-      await page.goto('/');
-      await expect(page.locator('typewriter-title')).toHaveCSS('color', colorScheme === 'dark' ? 'rgb(238, 238, 34)' : 'rgb(128, 96, 0)');
+  for (const reducedMotion of ['reduce', 'no-preference'] as const) {
+    test.describe(`Title accent in ${colorScheme} mode with ${reducedMotion} motion`, () => {
+      test.use({ colorScheme, reducedMotion });
+      test('matches the active navigation color on load and after switching themes', async ({ page }) => {
+        await page.goto('/');
+        const title = page.locator(`typewriter-title ${reducedMotion === 'reduce' ? '[data-fallback]' : '[data-text]'}`);
+        await expect(title).toBeVisible();
+        const activeLink = page.getByRole('navigation').getByRole('link', { name: 'Home', exact: true });
+        await expect(activeLink).toHaveAttribute('aria-current', 'page');
+        for (const theme of [colorScheme, colorScheme === 'dark' ? 'light' : 'dark']) {
+          await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
+          const color = theme === 'dark' ? 'rgb(238, 238, 34)' : 'rgb(37, 99, 235)';
+          await expect(activeLink).toHaveCSS('color', color);
+          await expect(title).toHaveCSS('color', await activeLink.evaluate((element) => getComputedStyle(element).color));
+          if (theme === colorScheme) await page.locator('#theme-toggle').click();
+        }
+      });
     });
-  });
+  }
 }
