@@ -119,7 +119,6 @@ const settings = { ...defaultTypewriterTimings, ...timings };
 
 <style>
   typewriter-title {
-    --title-accent: #806000;
     --control-color: #666666;
     position: relative;
     display: block;
@@ -127,11 +126,10 @@ const settings = { ...defaultTypewriterTimings, ...timings };
     margin-bottom: var(--spacing-lg);
     font-size: 1.25rem;
     font-weight: 500;
-    color: var(--title-accent);
+    color: var(--color-primary);
   }
 
   :global([data-theme="dark"]) typewriter-title {
-    --title-accent: #eeee22;
     --control-color: #cccccc;
   }
 
