@@ -33,6 +33,52 @@ describe('typewriter player', () => {
     player.destroy();
   });
 
+  it('backspaces an already displayed first title by grapheme and continues the normal loop', () => {
+    const render = vi.fn();
+    const player = createTypewriter(['👩‍💻e\u0301', 'C'], render, timings, { initialTitleComplete: true });
+    expect(vi.getTimerCount()).toBe(0);
+    vi.advanceTimersByTime(5000);
+    expect(render).not.toHaveBeenCalled();
+    player.resume();
+    vi.advanceTimersByTime(4);
+    expect(render).not.toHaveBeenCalled();
+    vi.advanceTimersByTime(1);
+    expect(render).toHaveBeenLastCalledWith('👩‍💻');
+    vi.advanceTimersByTime(5);
+    expect(render).toHaveBeenLastCalledWith('');
+    vi.advanceTimersByTime(19);
+    expect(render).toHaveBeenCalledTimes(2);
+    vi.advanceTimersByTime(1);
+    expect(render).toHaveBeenLastCalledWith('C');
+    vi.advanceTimersByTime(60);
+    expect(render.mock.calls.map(([text]) => text)).toEqual(['👩‍💻', '', 'C', '', '👩‍💻', '👩‍💻e\u0301']);
+    player.destroy();
+  });
+
+  it('preserves a partial initial backspace delay without adding typing randomness', () => {
+    const random = vi.spyOn(Math, 'random').mockReturnValue(1 - Number.EPSILON);
+    const render = vi.fn();
+    const player = createTypewriter(['AB', 'C'], render, { ...timings, randomTypeDelay: 10 }, { initialTitleComplete: true });
+    player.resume();
+    vi.advanceTimersByTime(2);
+    player.pause();
+    vi.advanceTimersByTime(1000);
+    player.resume();
+    vi.advanceTimersByTime(2);
+    expect(render).not.toHaveBeenCalled();
+    vi.advanceTimersByTime(1);
+    expect(render).toHaveBeenLastCalledWith('A');
+    expect(random).not.toHaveBeenCalled();
+    vi.advanceTimersByTime(5);
+    expect(render).toHaveBeenLastCalledWith('');
+    expect(random).toHaveBeenCalledTimes(1);
+    vi.advanceTimersByTime(29);
+    expect(render).toHaveBeenCalledTimes(2);
+    vi.advanceTimersByTime(1);
+    expect(render).toHaveBeenLastCalledWith('C');
+    player.destroy();
+  });
+
   it('preserves the remaining pause duration without scheduling duplicate timers', () => {
     const render = vi.fn();
     const player = createTypewriter(['A'], render, timings);

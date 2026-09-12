@@ -36,14 +36,228 @@ test.describe('Animated job title', () => {
     }
   });
 
-  test('types at the configured speed without a cursor or playback controls', async ({ page }) => {
+  test('types at the configured speed with a pause control but no cursor', async ({ page }) => {
     const title = page.locator('typewriter-title');
-    await expect(title.locator('button, [data-toggle], [data-cursor], .typewriter-cursor')).toHaveCount(0);
+    await expect(title.locator('[data-cursor], .typewriter-cursor')).toHaveCount(0);
+    await expect(title.getByRole('button', { name: 'Pause title animation', exact: true })).toBeVisible();
     await page.clock.runFor(startDelay + typeDelay - 1);
     await expect(title.locator('[data-text]')).toHaveText(site.rotatingTitles[0][0]);
     await page.clock.runFor(1);
     await expect(title.locator('[data-text]')).toHaveText(site.rotatingTitles[0].slice(0, 2));
   });
+
+  for (const { phase, elapsed, remaining, before, after } of [
+    { phase: 'before typing', elapsed: 0, remaining: startDelay, before: '', after: site.rotatingTitles[0][0] },
+    { phase: 'typing', elapsed: startDelay + Math.floor(typeDelay / 2), remaining: typeDelay - Math.floor(typeDelay / 2), before: site.rotatingTitles[0][0], after: site.rotatingTitles[0].slice(0, 2) },
+    { phase: 'holding', elapsed: firstTitleTime + 1000, remaining: holdDelay - 1000, before: site.rotatingTitles[0], after: site.rotatingTitles[0].slice(0, -1) },
+    { phase: 'deleting', elapsed: firstTitleTime + holdDelay + Math.floor(deleteDelay / 2), remaining: deleteDelay - Math.floor(deleteDelay / 2), before: site.rotatingTitles[0].slice(0, -1), after: site.rotatingTitles[0].slice(0, -2) },
+    { phase: 'between titles', elapsed: firstTitleTime + holdDelay + (site.rotatingTitles[0].length - 1) * deleteDelay + Math.floor(gapDelay / 2), remaining: gapDelay - Math.floor(gapDelay / 2), before: '', after: site.rotatingTitles[1][0] },
+  ]) {
+    test(`pauses and resumes ${phase} from the remaining delay`, async ({ page }) => {
+      const title = page.locator('typewriter-title');
+      const text = title.locator('[data-text]');
+      await page.clock.runFor(elapsed);
+      await title.getByRole('button', { name: 'Pause title animation', exact: true }).click();
+      await expect(title).not.toHaveAttribute('data-running');
+      await expect(title).toHaveAttribute('data-paused', '');
+      const play = title.getByRole('button', { name: 'Play title animation', exact: true });
+      await expect(play).toHaveAttribute('title', 'Play title animation');
+      await expect(play.locator('.play-icon')).toBeVisible();
+      await expect(play.locator('.pause-icon')).toBeHidden();
+      await page.clock.runFor(10000);
+      await expect(text).toHaveText(before);
+      await play.click();
+      await expect(title).toHaveAttribute('data-running', '');
+      await expect(title).not.toHaveAttribute('data-paused');
+      await expect(title.locator('.pause-icon')).toBeVisible();
+      await expect(title.locator('.play-icon')).toBeHidden();
+      await page.clock.runFor(remaining - 1);
+      await expect(text).toHaveText(before);
+      await page.clock.runFor(1);
+      await expect(text).toHaveText(after);
+    });
+  }
+
+  test('retains a manual pause across visibility and reduced-motion changes', async ({ page }) => {
+    const title = page.locator('typewriter-title');
+    await page.clock.runFor(startDelay);
+    await title.getByRole('button', { name: 'Pause title animation', exact: true }).click();
+    for (const hidden of [true, false]) {
+      await page.evaluate((hidden) => {
+        Object.defineProperty(document, 'hidden', { configurable: true, value: hidden });
+        document.dispatchEvent(new Event('visibilitychange'));
+      }, hidden);
+      await page.clock.runFor(10000);
+      await expect(title).not.toHaveAttribute('data-running');
+    }
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await expect(title.locator('[data-toggle]')).toBeHidden();
+    await expect(title.locator('[data-fallback]')).toBeVisible();
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await expect(title.getByRole('button', { name: 'Play title animation', exact: true })).toBeVisible();
+    await expect(title).not.toHaveAttribute('data-running');
+    await page.clock.runFor(10000);
+    await expect(title.locator('[data-text]')).toHaveText(site.rotatingTitles[0][0]);
+  });
+
+  for (const returnVia of ['Home link', 'Back button', 'reload']) {
+    test(`remembers pause and play across navigation using the ${returnVia}`, async ({ page }) => {
+      const title = page.locator('typewriter-title');
+      await page.clock.runFor(firstTitleTime);
+      await title.getByRole('button', { name: 'Pause title animation', exact: true }).click();
+      if (returnVia === 'reload') {
+        await page.reload();
+      } else {
+        await page.getByRole('navigation').getByRole('link', { name: 'Skills', exact: true }).click();
+        await expect(page).toHaveURL(/\/skills\/?$/);
+        if (returnVia === 'Back button') await page.goBack();
+        else await page.getByRole('navigation').getByRole('link', { name: 'Home', exact: true }).click();
+      }
+      await expect(title.getByRole('button', { name: 'Play title animation', exact: true })).toBeVisible();
+      await expect(title).not.toHaveAttribute('data-running');
+      await expect(title.locator('[data-text]')).toHaveText(site.rotatingTitles[0]);
+      await page.clock.runFor(10000);
+      await expect(title.locator('[data-text]')).toHaveText(site.rotatingTitles[0]);
+      await title.getByRole('button', { name: 'Play title animation', exact: true }).click();
+      await expect(title).toHaveAttribute('data-running', '');
+      await page.reload();
+      await expect(title).toHaveAttribute('data-running', '');
+      await expect(title.getByRole('button', { name: 'Pause title animation', exact: true })).toBeVisible();
+      await page.clock.runFor(startDelay);
+      await expect(title.locator('[data-text]')).toHaveText(site.rotatingTitles[0][0]);
+    });
+  }
+
+  test('backspaces the displayed first title when playing after a paused load', async ({ page }) => {
+    await page.evaluate(() => localStorage.setItem('title-animation-paused', 'true'));
+    await page.reload();
+    const title = page.locator('typewriter-title');
+    const text = title.locator('[data-text]');
+    const first = site.rotatingTitles[0];
+    const second = site.rotatingTitles[1];
+    await expect(title.getByRole('button', { name: 'Play title animation', exact: true })).toBeVisible();
+    await page.clock.runFor(10000);
+    await expect(text).toHaveText(first);
+    await title.getByRole('button', { name: 'Play title animation', exact: true }).click();
+    await expect(text).toHaveText(first);
+    await page.clock.runFor(deleteDelay - 1);
+    await expect(text).toHaveText(first);
+    await page.clock.runFor(1);
+    await expect(text).toHaveText(first.slice(0, -1));
+    await page.clock.runFor((first.length - 1) * deleteDelay);
+    await expect(text).toBeEmpty();
+    await page.clock.runFor(gapDelay - 1);
+    await expect(text).toBeEmpty();
+    await page.clock.runFor(1);
+    await expect(text).toHaveText(second[0]);
+    await page.clock.runFor((second.length - 1) * typeDelay);
+    await expect(text).toHaveText(second);
+  });
+
+  test('refreshes the saved choice when restored from the browser history cache', async ({ page }) => {
+    const title = page.locator('typewriter-title');
+    await page.clock.runFor(startDelay);
+    await page.evaluate(() => {
+      localStorage.setItem('title-animation-paused', 'true');
+      window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true }));
+    });
+    await expect(title).not.toHaveAttribute('data-running');
+    await page.clock.runFor(10000);
+    await expect(title.locator('[data-text]')).toHaveText(site.rotatingTitles[0][0]);
+    await page.evaluate(() => {
+      localStorage.setItem('title-animation-paused', 'false');
+      window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true }));
+    });
+    await expect(title).toHaveAttribute('data-running', '');
+    await page.clock.runFor(typeDelay);
+    await expect(title.locator('[data-text]')).toHaveText(site.rotatingTitles[0].slice(0, 2));
+  });
+
+  test('ignores an invalid saved preference', async ({ page }) => {
+    await page.evaluate(() => localStorage.setItem('title-animation-paused', 'invalid'));
+    await page.reload();
+    await expect(page.locator('typewriter-title')).toHaveAttribute('data-running', '');
+    await expect(page.getByRole('button', { name: 'Pause title animation', exact: true })).toBeVisible();
+  });
+
+  test('keeps the control usable when preference storage is blocked', async ({ page }) => {
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    await page.addInitScript(() => {
+      const getItem = Storage.prototype.getItem;
+      const setItem = Storage.prototype.setItem;
+      Storage.prototype.getItem = function (key) {
+        if (key === 'title-animation-paused') throw new DOMException('Storage blocked', 'SecurityError');
+        return getItem.call(this, key);
+      };
+      Storage.prototype.setItem = function (key, value) {
+        if (key === 'title-animation-paused') throw new DOMException('Storage blocked', 'SecurityError');
+        return setItem.call(this, key, value);
+      };
+    });
+    await page.reload();
+    const title = page.locator('typewriter-title');
+    await expect(title).toHaveAttribute('data-running', '');
+    await page.clock.runFor(startDelay);
+    await title.getByRole('button', { name: 'Pause title animation', exact: true }).click();
+    await page.evaluate(() => window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true })));
+    await page.clock.runFor(10000);
+    await expect(title).not.toHaveAttribute('data-running');
+    await expect(title.locator('[data-text]')).toHaveText(site.rotatingTitles[0][0]);
+    await title.getByRole('button', { name: 'Play title animation', exact: true }).click();
+    await expect(title).toHaveAttribute('data-running', '');
+    await page.clock.runFor(typeDelay);
+    await expect(title.locator('[data-text]')).toHaveText(site.rotatingTitles[0].slice(0, 2));
+    expect(errors).toEqual([]);
+  });
+
+  test('retains the pause choice on reconnection without duplicate button listeners', async ({ page }) => {
+    const title = page.locator('typewriter-title');
+    await title.getByRole('button', { name: 'Pause title animation', exact: true }).click();
+    await title.evaluate((element) => {
+      element.remove();
+      document.querySelector('.vcard-name')!.after(element);
+      (element as HTMLElement & { connectedCallback(): void }).connectedCallback();
+    });
+    await expect(title).not.toHaveAttribute('data-running');
+    await page.clock.runFor(10000);
+    await expect(title.locator('[data-text]')).toHaveText(site.rotatingTitles[0]);
+    await title.getByRole('button', { name: 'Play title animation', exact: true }).click();
+    await expect(title).toHaveAttribute('data-running', '');
+    await page.clock.runFor(deleteDelay);
+    await expect(title.locator('[data-text]')).toHaveText(site.rotatingTitles[0].slice(0, -1));
+  });
+
+  for (const colorScheme of ['dark', 'light'] as const) {
+    test(`keeps the control subtle but makes hover and keyboard focus clear in ${colorScheme} mode`, async ({ page }) => {
+      await page.emulateMedia({ colorScheme });
+      // The theme is selected from the OS preference when the page initializes.
+      await page.reload();
+      await expect(page.locator('typewriter-title')).toHaveAttribute('data-running', '');
+      const button = page.locator('typewriter-title [data-toggle]');
+      await expect(button).toHaveCSS('opacity', '0.2');
+      await expect(button).toHaveCSS('border-width', '0px');
+      const controlColor = colorScheme === 'dark' ? 'rgb(204, 204, 204)' : 'rgb(102, 102, 102)';
+      await expect(button).toHaveCSS('color', controlColor);
+      await expect(button.locator('svg')).toHaveCSS('fill', controlColor);
+      await button.hover();
+      await expect(button).toHaveCSS('opacity', '1');
+      await page.mouse.move(0, 0);
+      await expect(button).toHaveCSS('opacity', '0.2');
+      await button.focus();
+      await page.keyboard.press('Tab');
+      await page.keyboard.press('Shift+Tab');
+      await expect(button).toBeFocused();
+      await expect(button).toHaveCSS('opacity', '1');
+      await expect(button).toHaveCSS('outline-style', 'solid');
+      await page.keyboard.press('Space');
+      await expect(button).toHaveAccessibleName('Play title animation');
+      await expect(page.locator('typewriter-title')).not.toHaveAttribute('data-running');
+      await page.keyboard.press('Enter');
+      await expect(button).toHaveAccessibleName('Pause title animation');
+      await expect(page.locator('typewriter-title')).toHaveAttribute('data-running', '');
+    });
+  }
 
   test('applies the configured random extra delay separately for each typed character', async ({ page }) => {
     const text = page.locator('typewriter-title [data-text]');
@@ -138,6 +352,20 @@ test.describe('Animated job title', () => {
         const name = (await page.locator('.vcard-name').boundingBox())!;
         const nameCenter = name.x + name.width / 2;
         const taglineY = (await page.locator('.vcard-tagline').boundingBox())!.y;
+        const button = title.locator('[data-toggle]');
+        const buttonBox = (await button.boundingBox())!;
+        const controls = (await title.locator('.typewriter-controls').boundingBox())!;
+        expect(buttonBox.x).toBeCloseTo(Math.min(controls.x + controls.width + 4, width - buttonBox.width));
+        const initialWords = (await title.locator('.typewriter-words').boundingBox())!;
+        // Showing a control must not displace the pre-existing text or change its wrapping.
+        await button.evaluate((element) => { element.setAttribute('hidden', ''); });
+        expect(await title.locator('.typewriter-words').boundingBox()).toEqual(initialWords);
+        expect(await title.boundingBox()).toEqual(initial);
+        expect((await page.locator('.vcard-tagline').boundingBox())!.y).toBe(taglineY);
+        await button.evaluate((element) => { element.removeAttribute('hidden'); });
+        expect(buttonBox.width).toBeGreaterThanOrEqual(24);
+        expect(buttonBox.height).toBeGreaterThanOrEqual(24);
+        expect(buttonBox.x + buttonBox.width).toBeLessThanOrEqual(width + 0.01);
         for (let index = 0; index < 12; index++) {
           await page.clock.runFor(800);
           const box = (await title.boundingBox())!;
@@ -153,11 +381,11 @@ test.describe('Animated job title', () => {
           });
           if (textBox.width > 0) {
             expect(Math.abs(textBox.x + textBox.width / 2 - nameCenter)).toBeLessThan(1);
+            expect(buttonBox.x).toBeGreaterThanOrEqual(textBox.x + textBox.width - 1);
           }
+          expect(await button.boundingBox()).toEqual(buttonBox);
           expect((await page.locator('.vcard-tagline').boundingBox())!.y).toBeCloseTo(taglineY);
-          for (const element of [title, title.locator('.typewriter-words')]) {
-            expect(await element.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
-          }
+          expect(await title.locator('.typewriter-words').evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
         }
       }
     });

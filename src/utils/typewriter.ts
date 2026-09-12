@@ -9,11 +9,15 @@ export const defaultTypewriterTimings = {
 
 export type TypewriterTimings = typeof defaultTypewriterTimings;
 
-/** A pausable typing/deleting loop. Rendering and accessibility belong to the component. */
+/**
+ * A pausable typing/deleting loop. Rendering and accessibility belong to the component.
+ * initialTitleComplete starts with the first phrase already displayed, ready to backspace.
+ */
 export function createTypewriter(
   phrases: readonly string[],
   onChange: (text: string) => void,
   timings: Partial<TypewriterTimings> = {},
+  options: { initialTitleComplete?: boolean } = {},
 ) {
   if (!phrases.length || phrases.some((phrase) => !phrase.trim())) {
     throw new Error('Typewriter requires non-empty phrases');
@@ -37,11 +41,11 @@ export function createTypewriter(
   const segmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
   const words = phrases.map((phrase) => Array.from(segmenter.segment(phrase), ({ segment }) => segment));
   let word = 0;
-  let length = 0;
-  let deleting = false;
+  let length = options.initialTitleComplete ? words[0].length : 0;
+  let deleting = !!options.initialTitleComplete;
   let paused = true;
   let destroyed = false;
-  let remaining = typingDelay(delays.startDelay);
+  let remaining = deleting ? delays.deleteDelay : typingDelay(delays.startDelay);
   let dueAt = 0;
   let timer: ReturnType<typeof setTimeout> | undefined;
 

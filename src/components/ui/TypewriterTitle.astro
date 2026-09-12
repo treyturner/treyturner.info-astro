@@ -19,39 +19,89 @@ const settings = { ...defaultTypewriterTimings, ...timings };
     {[fallback, ...titles].map((title) => <span class="typewriter-measure">{title}</span>)}
     <span data-animated hidden><span data-text></span></span>
   </p>
+  <!-- Anchor the control beside the longest animated title without moving any text. -->
+  <span class="typewriter-controls">
+    {titles.map((title) => <span class="typewriter-measure" aria-hidden="true">{title}</span>)}
+    <button class="typewriter-toggle" type="button" data-toggle hidden aria-label="Pause title animation" title="Pause title animation">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+        <path class="pause-icon" d="M6 4h4v16H6zm8 0h4v16h-4z" />
+        <path class="play-icon" d="m7 3 14 9-14 9z" />
+      </svg>
+    </button>
+  </span>
 </typewriter-title>
 
 <script>
   import { createTypewriter } from '../../utils/typewriter';
 
+  const pauseStorageKey = 'title-animation-paused';
+
+  function readPausePreference(fallback = false) {
+    try {
+      return localStorage.getItem(pauseStorageKey) === 'true';
+    } catch {
+      return fallback;
+    }
+  }
+
   class TypewriterTitle extends HTMLElement {
     private cleanup?: () => void;
+    private userPaused = readPausePreference();
 
     connectedCallback() {
       if (this.cleanup) return;
       const fallback = this.querySelector<HTMLElement>('[data-fallback]')!;
       const animated = this.querySelector<HTMLElement>('[data-animated]')!;
       const text = this.querySelector<HTMLElement>('[data-text]')!;
+      const toggle = this.querySelector<HTMLButtonElement>('[data-toggle]')!;
       const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
-      text.textContent = '';
+      const titles: string[] = JSON.parse(this.dataset.titles!);
+      text.textContent = this.userPaused ? titles[0] : '';
       const player = createTypewriter(
-        JSON.parse(this.dataset.titles!),
+        titles,
         (value) => { text.textContent = value; },
         JSON.parse(this.dataset.timings!),
+        { initialTitleComplete: this.userPaused },
       );
       const refresh = () => {
         const enabled = !motion.matches;
         fallback.hidden = enabled;
         animated.hidden = !enabled;
-        const running = enabled && !document.hidden;
+        toggle.hidden = !enabled;
+        const label = this.userPaused ? 'Play title animation' : 'Pause title animation';
+        toggle.setAttribute('aria-label', label);
+        toggle.title = label;
+        this.toggleAttribute('data-paused', this.userPaused);
+        const running = enabled && !document.hidden && !this.userPaused;
         this.toggleAttribute('data-running', running);
         if (running) player.resume();
         else player.pause();
       };
+      const onToggle = () => {
+        this.userPaused = !this.userPaused;
+        try {
+          localStorage.setItem(pauseStorageKey, String(this.userPaused));
+        } catch {
+          // The control still works on this page when preference storage is unavailable.
+        }
+        refresh();
+      };
+      const onPageShow = (event: PageTransitionEvent) => {
+        if (event.persisted) {
+          this.userPaused = readPausePreference(this.userPaused);
+          refresh();
+        }
+      };
+      toggle.addEventListener('click', onToggle);
+      window.addEventListener('pageshow', onPageShow);
       motion.addEventListener('change', refresh);
       document.addEventListener('visibilitychange', refresh);
       this.cleanup = () => {
         player.destroy();
+        toggle.removeEventListener('click', onToggle);
+        window.removeEventListener('pageshow', onPageShow);
+        toggle.hidden = true;
+        this.removeAttribute('data-running');
         motion.removeEventListener('change', refresh);
         document.removeEventListener('visibilitychange', refresh);
       };
@@ -70,6 +120,8 @@ const settings = { ...defaultTypewriterTimings, ...timings };
 <style>
   typewriter-title {
     --title-accent: #806000;
+    --control-color: #666666;
+    position: relative;
     display: block;
     max-width: 100%;
     margin-bottom: var(--spacing-lg);
@@ -78,7 +130,10 @@ const settings = { ...defaultTypewriterTimings, ...timings };
     color: var(--title-accent);
   }
 
-  :global([data-theme="dark"]) typewriter-title { --title-accent: #eeee22; }
+  :global([data-theme="dark"]) typewriter-title {
+    --title-accent: #eeee22;
+    --control-color: #cccccc;
+  }
 
   .typewriter-words {
     display: grid;
@@ -92,4 +147,48 @@ const settings = { ...defaultTypewriterTimings, ...timings };
 
   .typewriter-words > span { grid-area: 1 / 1; }
   .typewriter-measure { visibility: hidden; pointer-events: none; user-select: none; }
+
+  .typewriter-controls {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    display: grid;
+    width: max-content;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    pointer-events: none;
+  }
+
+  .typewriter-controls > .typewriter-measure { grid-area: 1 / 1; }
+
+  .typewriter-toggle {
+    position: absolute;
+    top: 0;
+    /* Add a small gap without pushing the control past the viewport when text is enlarged. */
+    left: min(calc(100% + 4px), calc(50% + 50vw - max(1.5rem, 24px)));
+    display: grid;
+    place-items: center;
+    /* Fits in the existing page gutter even with narrow screens and enlarged text. */
+    width: 1.5rem;
+    height: 2rem;
+    min-width: 24px;
+    min-height: 24px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--control-color);
+    opacity: 0.2;
+    cursor: pointer;
+    pointer-events: auto;
+  }
+
+  .typewriter-toggle[hidden] { display: none; }
+  .typewriter-toggle svg { width: 1rem; height: 1rem; }
+  .typewriter-toggle:hover, .typewriter-toggle:focus-visible { opacity: 1; }
+  .typewriter-toggle:focus-visible { outline: 2px solid currentColor; outline-offset: -2px; }
+  .play-icon { display: none; }
+  typewriter-title[data-paused] .pause-icon { display: none; }
+  typewriter-title[data-paused] .play-icon { display: inline; }
 </style>
