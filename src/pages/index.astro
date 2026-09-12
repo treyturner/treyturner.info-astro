@@ -49,6 +49,8 @@ const socialLinks = [
     font-size: 3rem;
     margin-bottom: var(--spacing-sm);
     color: var(--color-text);
+    /* Wider system fonts can make even one name overflow at enlarged text sizes. */
+    overflow-wrap: anywhere;
   }
 
   .vcard-tagline {
