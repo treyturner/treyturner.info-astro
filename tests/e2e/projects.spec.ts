@@ -393,6 +393,41 @@ for (const width of [1280, 820, 390, 320]) {
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     });
 
+    test('keeps card text vertically aligned when a logo is absent', async ({ page }) => {
+      const project = publishedProjects.find(({ logoImage }) => logoImage);
+      test.skip(!project, 'No published project logo to compare.');
+      await page.goto('/projects');
+      const card = page.locator(`.project-card-link[href="/projects/${project!.id}"]`);
+      const title = card.locator('.project-card-title');
+      const logo = card.locator('.project-card-logo');
+      await expectProjectImage(logo, project!.logoImage);
+
+      // Keep the title on one line so logo presence is the only layout variable.
+      await title.evaluate((element) => { element.textContent = 'Project'; });
+      const measureText = () => card.evaluate((element) => {
+        const top = element.getBoundingClientRect().top;
+        return [...element.querySelectorAll('.project-card-header, .project-card-title, .project-card-metadata, .project-card-description')]
+          .map((child) => {
+            const rect = child.getBoundingClientRect();
+            return { top: rect.top - top, height: rect.height };
+          });
+      });
+      const withLogo = await measureText();
+      await logo.evaluate((element) => element.remove());
+      const withoutLogo = await measureText();
+      expect(withoutLogo).toHaveLength(withLogo.length);
+      for (const [index, before] of withLogo.entries()) {
+        expect(Math.abs(withoutLogo[index].top - before.top)).toBeLessThan(1);
+        expect(Math.abs(withoutLogo[index].height - before.height)).toBeLessThan(1);
+      }
+
+      // A missing logo reserves height, not an empty horizontal logo slot.
+      const titleBox = (await title.boundingBox())!;
+      const headerBox = (await card.locator('.project-card-header').boundingBox())!;
+      expect(Math.abs(titleBox.x - headerBox.x)).toBeLessThan(1);
+      expect(await card.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
+    });
+
     test('aligns detail logos and titles and orders the project facts', async ({ page }) => {
       for (const { id, logoImage } of publishedProjects) {
         await page.goto(`/projects/${id}`);
