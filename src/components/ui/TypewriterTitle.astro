@@ -179,7 +179,8 @@ const settings = { ...defaultTypewriterTimings, ...timings };
     border-radius: var(--radius-sm);
     background: transparent;
     color: var(--control-color);
-    opacity: 0.2;
+    /* Keep the resting icon above 3:1 contrast against both page backgrounds. */
+    opacity: 0.75;
     cursor: pointer;
     pointer-events: auto;
   }

@@ -4,6 +4,25 @@ import site from '../../src/data/site.json' with { type: 'json' };
 const { typeDelay, randomTypeDelay, deleteDelay, holdDelay, gapDelay, startDelay } = site.titleAnimation;
 const firstTitleTime = startDelay + (site.rotatingTitles[0].length - 1) * typeDelay;
 
+// Measure the rendered icon color, including the button opacity over the page background.
+// WCAG 2.2 SC 1.4.11 requires 3:1 for the visual cue identifying an active control.
+function controlContrast(button: Element) {
+  const rgb = (color: string) => color.match(/[\d.]+/g)!.slice(0, 3).map(Number);
+  const background = rgb(getComputedStyle(document.documentElement).backgroundColor);
+  const foreground = rgb(getComputedStyle(button.querySelector('svg')!).fill);
+  const opacity = Number(getComputedStyle(button).opacity);
+  const composited = foreground.map((channel, index) => channel * opacity + background[index] * (1 - opacity));
+  const luminance = (channels: number[]) => {
+    const [r, g, b] = channels.map((channel) => {
+      const value = channel / 255;
+      return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+    });
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  const lightness = [luminance(composited), luminance(background)];
+  return (Math.max(...lightness) + 0.05) / (Math.min(...lightness) + 0.05);
+}
+
 test.describe('Animated job title', () => {
   test.use({ contextOptions: { reducedMotion: 'no-preference' } });
   test.beforeEach(async ({ page }) => {
@@ -235,7 +254,7 @@ test.describe('Animated job title', () => {
       await page.reload();
       await expect(page.locator('typewriter-title')).toHaveAttribute('data-running', '');
       const button = page.locator('typewriter-title [data-toggle]');
-      await expect(button).toHaveCSS('opacity', '0.2');
+      await expect(button).toHaveCSS('opacity', '0.75');
       await expect(button).toHaveCSS('border-width', '0px');
       const controlColor = colorScheme === 'dark' ? 'rgb(204, 204, 204)' : 'rgb(102, 102, 102)';
       await expect(button).toHaveCSS('color', controlColor);
@@ -243,7 +262,7 @@ test.describe('Animated job title', () => {
       await button.hover();
       await expect(button).toHaveCSS('opacity', '1');
       await page.mouse.move(0, 0);
-      await expect(button).toHaveCSS('opacity', '0.2');
+      await expect(button).toHaveCSS('opacity', '0.75');
       await button.focus();
       await page.keyboard.press('Tab');
       await page.keyboard.press('Shift+Tab');
@@ -410,6 +429,26 @@ for (const mode of ['reduced-motion', 'no-javascript'] as const) {
 }
 
 for (const colorScheme of ['dark', 'light'] as const) {
+  for (const touch of [false, true]) {
+    test.describe(`Playback contrast in ${colorScheme} mode on ${touch ? 'touch' : 'desktop'}`, () => {
+      test.use({ colorScheme, hasTouch: touch, isMobile: touch, viewport: { width: touch ? 390 : 1280, height: 900 } });
+      test('keeps both icons at 3:1 contrast without hover or focus', async ({ page }) => {
+        await page.emulateMedia({ reducedMotion: 'no-preference' });
+        await page.goto('/');
+        for (const paused of [false, true]) {
+          await page.evaluate((paused) => localStorage.setItem('title-animation-paused', String(paused)), paused);
+          await page.reload();
+          const button = page.getByRole('button', { name: paused ? 'Play title animation' : 'Pause title animation', exact: true });
+          await expect(button).toBeVisible();
+          await expect(button.locator(paused ? '.play-icon' : '.pause-icon')).toBeVisible();
+          await expect(button).not.toBeFocused();
+          expect(await button.evaluate((element) => element.matches(':hover'))).toBe(false);
+          expect(await button.evaluate(controlContrast)).toBeGreaterThanOrEqual(3);
+        }
+      });
+    });
+  }
+
   test.describe(`Title accent in ${colorScheme} mode`, () => {
     test.use({ colorScheme, contextOptions: { reducedMotion: 'reduce' } });
     test('uses yellow on dark backgrounds and readable gold on light backgrounds', async ({ page }) => {
