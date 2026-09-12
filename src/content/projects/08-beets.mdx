@@ -1,0 +1,24 @@
+---
+title: "beets"
+role: "collaborator"
+goal: "Fix bugs and add features to my favorite music tagger"
+description: "Contributing back to the app and plugins that make managing a DJ's music collection possible at scale"
+status: "active"
+logoImage: "beets.png"
+repositoryUrls: ["https://github.com/beetbox/beets", "https://github.com/gtronset/beets-filetote", "https://github.com/Samik081/beets-beatport4"]
+technologyStack: ["Python", "GitHub Actions"]
+startDate: "2025-11-12"
+draft: false
+---
+
+A DJ's music collection gives a tagger plenty of awkward cases: featured artists, compilations, remixes, and several versions of the same track. Beets is my favorite tool for managing that collection, and contributing fixes upstream saves me from repeating the cleanup or carrying local workarounds between upgrades. My merged work spans Beets itself, Filetote, and Beatport4:
+
+- Normalize featured-artist credits on [compilations and guest-artist tracks](https://github.com/beetbox/beets/pull/5943), handle [parenthesized credits](https://github.com/beetbox/beets/pull/6716), and place features before [remix and version qualifiers](https://github.com/beetbox/beets/pull/6159).
+- Keep featured-artist formatting consistent during imports, manual cleanup, and metadata refreshes with `mbsync`.
+- Restore [TIDAL searches after an API change](https://github.com/beetbox/beets/pull/6990) and recover from [malformed Discogs search responses](https://github.com/beetbox/beets/pull/6912) with a bounded retry.
+- Keep Filetote compatible with changes to Beets' [path-format helpers](https://github.com/gtronset/beets-filetote/pull/302) and [multidisc detection](https://github.com/gtronset/beets-filetote/pull/303), while retaining support for older versions.
+- Update Beatport4 to use the [metadata-source interface](https://github.com/Samik081/beets-beatport4/pull/19), [redact account credentials](https://github.com/Samik081/beets-beatport4/pull/32) from configuration output, and [align its Python requirements](https://github.com/Samik081/beets-beatport4/pull/34) with Beets.
+
+Getting a title formatted correctly is only half the job if the next metadata refresh undoes it. I [connected `ftintitle` to Beets' metadata-received events](https://github.com/beetbox/beets/pull/6726) so track and album information is normalized before `mbsync` applies it. Imports and the manual command use the same rewriting logic, tested against artist credits, cached metadata properties, empty titles, and configurations that should leave the data alone. For Filetote, compatibility meant using the newer multidisc pattern collection when available and reconstructing it from older constants otherwise, then testing against the affected Beets versions.
+
+These are contributions to established community projects. For changes better suited to an optional extension, I maintain [my own Beets plugins](/projects/beets-plugins); [docker-beets](/projects/docker-beets) assembles the environment where I use them. They address different parts of the same job: keeping a large music library manageable without making every upgrade a new cleanup project.

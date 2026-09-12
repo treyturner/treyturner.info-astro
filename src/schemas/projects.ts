@@ -36,7 +36,6 @@ export function createProjectSchema<TImage extends z.ZodType>(imageSchema: TImag
         .regex(/^[^/\\]+\.(jpg|svg|png)$/, 'Must be a filename ending in .jpg, .svg, or .png')
         .pipe(z.preprocess((filename) => `/src/assets/logos/projects/${filename}`, imageSchema))
         .optional(),
-      displayOrder: z.number().int().nonnegative().default(0),
       startDate: yyyyMmDdToDateSchema,
       endDate: yyyyMmDdToDateSchema.optional(),
       draft: z.boolean(),

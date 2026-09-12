@@ -98,7 +98,7 @@ test.describe('Projects page', () => {
     await tab.close();
   });
 
-  test('shows only published cards in display order, with title as the tie-breaker', async ({ page }) => {
+  test('shows only published cards in filename order with stable unprefixed URLs', async ({ page }) => {
     await page.goto('/projects');
     await expect(page.locator('.project-card-title')).toHaveText(publishedProjects.map(({ title }) => title));
     await expect(page.locator('.project-card-link')).toHaveCount(publishedProjects.length);

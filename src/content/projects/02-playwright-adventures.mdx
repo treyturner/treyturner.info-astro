@@ -1,0 +1,25 @@
+---
+title: "playwright-adventures"
+role: "solo-dev"
+goal: "Experiment with Playwright features and patterns"
+description: "A browser-automation playground with TypeScript and Python Playwright stacks, shared executable journeys, a local test application, and MCP browser tools."
+status: "active"
+repositoryUrls: ["https://github.com/treyturner/playwright-adventures"]
+logoImage: "playwright.svg"
+technologyStack: ["Playwright", "TypeScript", "Python", "MCP", "Node.js", "GitHub Actions"]
+startDate: "2025-11-27"
+draft: false
+---
+
+Playwright Adventures is where I try out browser-automation patterns before deciding whether to use them elsewhere. Keeping TypeScript and Python implementations side by side lets me compare how each expresses the same user journey, from signing in to checking account details. The repository brings together:
+
+- Two Playwright stacks built around page objects, reusable journeys, and selectors favoring accessible roles, labels, and stable test IDs.
+- Shared executable YAML journeys, including reusable parent flows and generated adapters for both languages.
+- A managed local test application, with the option to target another application that implements the same contract.
+- MCP servers that expose individual browser actions and complete journeys to agents, with the journey specifications available as readable resources.
+
+The shared journeys are executable because two implementations of a written test plan can easily drift. YAML defines the actions, selectors, fixture references, and composition; a generator produces typed specifications and journey IDs for each language. Small runners map those definitions to the respective Playwright APIs. Generation catches unsupported actions, duplicate IDs, missing parents, and inheritance cycles, while build checks catch stale generated files. Text matching uses literal alternatives and explicit options, leaving each runner to construct its own escaped regular expressions.
+
+A small Node.js application supplies the homepage, login, dashboard, and account screens with predictable data. Both smoke-test suites start and stop it automatically unless a compatible external target is configured. It exists solely as a browser-test fixture, which keeps experiments repeatable without adding a production account system to maintain. CI checks the journeys, generated files, and MCP behavior, with an optional run against a live target.
+
+Exposing those capabilities through MCP raises a different set of questions about what an agent should be allowed to do. I check document navigation against an origin allowlist, restrict screenshots to new files in a configured directory, and give predefined journeys fresh browser contexts that close on success or failure. That isn't a complete network sandbox: subresources, fetch requests, and other browser traffic remain outside the navigation policy. Exploring those limits is part of the project, which is a learning environment rather than a hosted product.

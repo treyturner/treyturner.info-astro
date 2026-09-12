@@ -9,23 +9,20 @@ import { createProjectSchema } from '../../src/schemas/projects';
 const schema = createProjectSchema(z.string().min(1));
 
 export function readProjectContent(directory = fileURLToPath(new URL('../../src/content/projects/', import.meta.url))) {
-  const projects = globSync('**/*.mdx', { cwd: directory }).map((file) => {
+  // Sort the source files independently of the site's getPublishedProjects utility.
+  const files = globSync('**/*.mdx', { cwd: directory }).sort((a, b) => a.localeCompare(b, 'en'));
+  const projects = files.map((file) => {
     const { frontmatter, content } = parseFrontmatter(readFileSync(join(directory, file), 'utf8'));
     return {
       ...schema.parse(frontmatter),
       id: frontmatter.slug
         ? String(frontmatter.slug)
-        : file.slice(0, -4).split(sep).join('/').replace(/\/index$/, ''),
+        : file.slice(0, -4).split(sep).join('/').replace(/(^|\/)\d+-/g, '$1').replace(/\/index$/, ''),
       body: content.trim(),
     };
   });
 
-  // Keep the E2E expectation independent from getPublishedProjects, which the site uses.
-  const publishedProjects = projects.filter(({ draft }) => !draft).sort((a, b) =>
-    a.displayOrder - b.displayOrder
-    || a.title.localeCompare(b.title, 'en')
-    || a.id.localeCompare(b.id, 'en'),
-  );
+  const publishedProjects = projects.filter(({ draft }) => !draft);
   const draftProjects = projects.filter(({ draft }) => draft);
   return { publishedProjects, draftProjects };
 }

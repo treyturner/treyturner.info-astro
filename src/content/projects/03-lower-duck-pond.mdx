@@ -1,0 +1,28 @@
+---
+title: "Lower Duck Pond Hosting"
+role: "solo-dev"
+goal: "Build and maintain free, secure, and very real web hosting for the fictional residents of Lower Duck Pond."
+description: "A community-scale hosting platform for the handmade websites of r/HaveWeMet, built around static hosting, tenant isolation, and reproducible infrastructure."
+status: "pre-alpha"
+repositoryUrls: ["https://github.com/lowerduckpond-net/lowerduckpond.net"]
+liveUrl: "https://lowerduckpond.net"
+technologyStack: ["Python", "FastAPI", "OpenTofu", "Ansible", "Caddy", "GitHub Actions"]
+startDate: "2026-08-19"
+draft: false
+---
+
+The residents of r/HaveWeMet are fictional; their websites don't have to be. I started Lower Duck Pond Hosting to give an imaginary business, neighborhood club, election campaign, or municipal department somewhere to exist beyond its posts. I have something closer to GeoCities in mind: handmade pages with their own character, built by people contributing to a shared world.
+
+For the first version, a resident should be able to upload a site without becoming a server administrator. I'm building toward:
+
+- Free static hosting with HTTPS and friendly site names.
+- Validated archive uploads, storage limits, and versioned deployments with rollback.
+- Permanent content addresses for each site, with friendly names that can safely be reused.
+- Site suspension, restoration, archival, and portable exports.
+- Reproducible infrastructure, encrypted backups, and tested recovery.
+
+I'm starting with HTML, CSS, JavaScript, and assets on a single DigitalOcean host, small enough to operate myself. OpenTofu defines the infrastructure, Ansible configures the host, and Python handles the publishing and site-management work. Caddy serves the sites behind Cloudflare; a separate FastAPI application is the foundation for a future public control plane. PHP and SQL hosting would need additional isolation and recovery work before I'd offer them.
+
+Even reusing a site name has consequences here. A browser can retain local storage and service workers after the old site disappears, so giving its address to a new owner risks carrying the old site's behavior along with it. I separated friendly names from permanent, tenant-specific content addresses: the friendly address only redirects, and the address that actually serves uploaded content is never reassigned. Trusted platform services also live on lowerduckpond.net, separate from tenant content on lowerduckpond.com. Route and browser tests check those mappings and boundaries.
+
+The service is still pre-alpha. Infrastructure and host configuration are in place, with recorded acceptance checks for HTTPS, repeatable configuration, backups, restores, and reboot recovery. Static publishing and the site lifecycle are still being built, and production tenant publishing remains disabled until the remaining acceptance gates pass. Self-service accounts and a small community pilot come after that. I'd like residents to trust this with their work, even when the business advertised on the page is entirely made up.

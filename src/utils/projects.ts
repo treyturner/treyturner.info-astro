@@ -29,16 +29,21 @@ export function getRepositoryLink(href: string) {
   return { href, label: `${owner}/${repository.replace(/\.git$/i, '')}`, isGitHub: true };
 }
 
-interface ProjectSummary {
-  id: string;
-  data: Pick<ProjectFrontmatter, 'draft' | 'displayOrder' | 'title'>;
+/** Filename prefixes control presentation, not permanent project URLs. Explicit slugs stay intact. */
+export function getProjectId({ entry, data }: { entry: string; data: Record<string, unknown> }): string {
+  if (data.slug) return String(data.slug);
+  return entry.replace(/\\/g, '/').replace(/(^|\/)\d+-/g, '$1').replace(/\.mdx$/, '').replace(/\/index$/, '');
 }
 
-/** Keep the index and detail routes limited to published projects, including in development. */
+interface ProjectSummary {
+  id: string;
+  filePath?: string;
+  data: Pick<ProjectFrontmatter, 'draft'>;
+}
+
+/** Publish in alphabetical source-path order, independent of titles and stable route IDs. */
 export function getPublishedProjects<E extends ProjectSummary>(entries: E[]): E[] {
   return filterDrafts(entries).sort((a, b) =>
-    a.data.displayOrder - b.data.displayOrder
-    || a.data.title.localeCompare(b.data.title, 'en')
-    || a.id.localeCompare(b.id, 'en')
+    (a.filePath ?? a.id).localeCompare(b.filePath ?? b.id, 'en')
   );
 }

@@ -1,33 +1,67 @@
 import { describe, expect, it } from 'vitest';
-import { getPublishedProjects, getRepositoryLink, projectRoleLabels, projectStatusLabels } from '../../src/utils/projects';
+import { getProjectId, getPublishedProjects, getRepositoryLink, projectRoleLabels, projectStatusLabels } from '../../src/utils/projects';
 
-const entry = (id: string, displayOrder = 0, title = id, draft = false) => ({
+const entry = (id: string, filePath = id, title = id, draft = false) => ({
   id,
-  data: { title, displayOrder, draft },
+  filePath,
+  data: { title, draft },
+});
+
+describe('getProjectId', () => {
+  it.each([
+    ['04-mister-deskflow.mdx', 'mister-deskflow'],
+    ['02-mister-deskflow.mdx', 'mister-deskflow'],
+    ['100-project.mdx', 'project'],
+    ['example-project.mdx', 'example-project'],
+    ['00-group/02-project.mdx', 'group/project'],
+    ['00-group/02-index.mdx', 'group'],
+    ['nested/index.mdx', 'nested'],
+    ['00-group\\02-project.mdx', 'group/project'],
+    ['2026project.mdx', '2026project'],
+    ['project-01.mdx', 'project-01'],
+  ])('derives the stable route for %s', (path, id) => {
+    expect(getProjectId({ entry: path, data: {} })).toBe(id);
+  });
+
+  it('preserves explicit slugs, including their numeric prefixes', () => {
+    expect(getProjectId({ entry: '00-project.mdx', data: { slug: '2026-custom/route' } }))
+      .toBe('2026-custom/route');
+  });
+
+  it('matches Astro slug coercion and empty-slug fallback', () => {
+    expect(getProjectId({ entry: '00-project.mdx', data: { slug: 42 } })).toBe('42');
+    expect(getProjectId({ entry: '00-project.mdx', data: { slug: '' } })).toBe('project');
+  });
 });
 
 describe('getPublishedProjects', () => {
   it('excludes drafts even when they would otherwise sort first', () => {
-    const published = entry('published', 2);
-    expect(getPublishedProjects([entry('draft', 0, 'Draft', true), published])).toEqual([published]);
+    const published = entry('published', '01-published.mdx');
+    expect(getPublishedProjects([entry('draft', '00-draft.mdx', 'Draft', true), published])).toEqual([published]);
   });
 
-  it('sorts by display order before title', () => {
-    const first = entry('zebra', 0);
-    const second = entry('alpha', 1);
-    const third = entry('beta', 2);
+  it('sorts by zero-padded filenames rather than titles or stable route IDs', () => {
+    const first = entry('zebra', '00-zebra.mdx', 'Zebra');
+    const second = entry('alpha', '01-alpha.mdx', 'Alpha');
+    const third = entry('beta', '10-beta.mdx', 'Beta');
     expect(getPublishedProjects([third, second, first])).toEqual([first, second, third]);
   });
 
-  it('sorts equal display orders by title', () => {
-    const first = entry('z', 0, 'Alpha');
-    const second = entry('a', 0, 'Beta');
+  it('sorts unprefixed filenames independently of explicit slugs and titles', () => {
+    const first = entry('z', 'alpha.mdx', 'Zebra');
+    const second = entry('a', 'zebra.mdx', 'Alpha');
     expect(getPublishedProjects([second, first])).toEqual([first, second]);
   });
 
-  it('uses the ID to break ties between identical titles', () => {
-    const first = entry('first', 0, 'Same title');
-    const second = entry('second', 0, 'Same title');
+  it('uses alphabetical rather than numeric sorting for unpadded prefixes', () => {
+    const first = entry('first', '10-first.mdx');
+    const second = entry('second', '2-second.mdx');
+    expect(getPublishedProjects([second, first])).toEqual([first, second]);
+  });
+
+  it('falls back to route IDs when source paths are unavailable', () => {
+    const first = { id: 'alpha', data: { draft: false } };
+    const second = { id: 'beta', data: { draft: false } };
     expect(getPublishedProjects([second, first])).toEqual([first, second]);
   });
 
@@ -39,7 +73,7 @@ describe('getPublishedProjects', () => {
 
   it('does not mutate the source collection or lose entry data', () => {
     const first = { ...entry('first'), body: 'Full MDX content' };
-    const second = entry('second', 1);
+    const second = entry('second');
     const entries = [second, first];
     const result = getPublishedProjects(entries);
     expect(entries).toEqual([second, first]);
@@ -52,7 +86,7 @@ describe('getPublishedProjects', () => {
   });
 
   it('returns an empty list when every project is a draft', () => {
-    expect(getPublishedProjects([entry('draft', 0, 'Draft', true)])).toEqual([]);
+    expect(getPublishedProjects([entry('draft', '00-draft.mdx', 'Draft', true)])).toEqual([]);
   });
 });
 

@@ -1,0 +1,20 @@
+---
+title: "Code Doodles Revival"
+role: "solo-dev"
+goal: "Bring back one of my favorite browser landing pages"
+description: "A containerized revival of codedoodl.es, making its community-created gallery of interactive browser sketches easier to self-host."
+status: "active"
+logoImage: "code-doodles.png"
+repositoryUrls: ["https://github.com/treyturner/codedoodl.es/tree/feat/containerize"]
+liveUrl: "https://doodles.treyturner.info"
+technologyStack: ["Docker", "Node.js", "CoffeeScript", "JavaScript", "WebGL", "Canvas"]
+startDate: "2026-04-27"
+endDate: "2026-04-27"
+draft: false
+---
+
+codedoodl.es was one of my favorite browser landing pages. Its community-created sketches gave me something interesting to look at before getting on with whatever I'd opened the browser to do. The original collaborative creative coding site went offline in 2020, but the 78 WebGL and Canvas sketches were still worth visiting. I wanted to bring them back and make the gallery easy for anyone to host, preserving the individual sketch pages, previous/next/random navigation, author credits, and interaction notes. The artwork and original application are the contributors' work; my part is getting them running elsewhere.
+
+The old build environment was the main obstacle. Gulp and node-sass needed versions that a current Node installation wouldn't satisfy, so I put Node 10.16.0 and Python 2.7.18 in a dedicated build stage, compiled the frontend, and pruned development dependencies. Startup also eagerly imported unused deployment utilities that weren't in the runtime image; moving those imports into the disabled deployment hook fixed that. Enabling gzip handling let the older HTTP client read the compressed archive manifest. The result packages the existing CoffeeScript and Express application without a frontend rewrite, though it still carries that legacy runtime.
+
+The container makes the public URL, listening address, port, and archive URL configurable. The full [doodle archive](https://github.com/fluuuid/codedoodl.es-doodles) needs its own web server, referenced through `DOODLES_URL`; automated image builds publish to GHCR and my Forgejo registry outside pull-request runs. I've deployed a copy, and when I have more time I'd like to use it as a coding-agent playground: new sketches, variations, and small visual programs I can inspect in the browser. That would be a more visual counterpart to my [Playwright experiments](/projects/playwright-adventures). For now, I'm happy to have the gallery back.

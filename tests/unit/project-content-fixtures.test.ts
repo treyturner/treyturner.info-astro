@@ -1,4 +1,4 @@
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -6,6 +6,7 @@ import { glob, type LoaderContext } from 'astro/loaders';
 import { parseFrontmatter } from 'astro/markdown';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { readProjectContent } from '../helpers/project-content';
+import { getProjectId, getPublishedProjects } from '../../src/utils/projects';
 
 let directory: string;
 
@@ -47,14 +48,22 @@ describe('project browser-test content', () => {
     expect(readProjectContent(directory).draftProjects).toEqual([]);
   });
 
-  it('sorts by display order, then title, then ID', () => {
-    writeProject('last.mdx', { displayOrder: 2, title: 'A' });
-    writeProject('second.mdx', { title: 'Same' });
-    writeProject('first.mdx', { title: 'Same' });
+  it('sorts filenames independently of titles and slugs, while excluding drafts', () => {
+    writeProject('10-last.mdx', { title: 'A' });
+    writeProject('02-second.mdx', { title: 'Same', slug: 'custom/second' });
+    writeProject('01-first.mdx', { title: 'Z' });
     writeProject('alpha.mdx', { title: 'Alpha' });
-    writeProject('draft.mdx', { title: 'A', draft: true });
+    writeProject('00-draft.mdx', { title: 'A', draft: true });
     expect(readProjectContent(directory).publishedProjects.map(({ id }) => id))
-      .toEqual(['alpha', 'first', 'second', 'last']);
+      .toEqual(['first', 'custom/second', 'last', 'alpha']);
+  });
+
+  it('changes the order without changing route IDs when a prefix is renamed', () => {
+    writeProject('01-first.mdx');
+    writeProject('02-second.mdx');
+    expect(readProjectContent(directory).publishedProjects.map(({ id }) => id)).toEqual(['first', 'second']);
+    renameSync(join(directory, '02-second.mdx'), join(directory, '00-second.mdx'));
+    expect(readProjectContent(directory).publishedProjects.map(({ id }) => id)).toEqual(['second', 'first']);
   });
 
   it('preserves optional fields, defaults, and arbitrary or empty bodies', () => {
@@ -65,25 +74,27 @@ describe('project browser-test content', () => {
       id: 'article', logoImage: '/src/assets/logos/projects/logo.png',
       body: '# Heading\n\nOne paragraph.', endDate: new Date('2026-02-01T12:00:00Z'),
     });
-    expect(publishedProjects[1]).toMatchObject({ id: 'empty', body: '', displayOrder: 0, technologyStack: [] });
+    expect(publishedProjects[1]).toMatchObject({ id: 'empty', body: '', technologyStack: [] });
     expect(publishedProjects[1].repositoryUrls).toBeUndefined();
   });
 
-  it("matches Astro's default glob loader for explicit slugs and nested index routes", async () => {
-    writeProject('entry.mdx', { slug: 'custom/route' });
-    writeProject('nested/index.mdx');
-    const ids: string[] = [];
+  it('matches the configured Astro loader for filename order, stable IDs, explicit slugs, and nested index routes', async () => {
+    writeProject('00-zebra.mdx');
+    writeProject('01-entry.mdx', { slug: 'custom/route' });
+    writeProject('02-nested/index.mdx');
+    writeProject('03-draft.mdx', { draft: true });
+    const entries: { id: string; filePath: string; data: { draft: boolean } }[] = [];
     const root = pathToFileURL(`${directory}/`);
     const logger = { warn: vi.fn(), error: vi.fn() };
     // Exercise the real ID generator, supplying only the content-store/parser services it needs.
-    await glob({ pattern: '**/*.mdx', base: root }).load({
+    await glob({ pattern: '**/*.mdx', base: root, generateId: getProjectId }).load({
       collection: 'projects',
       config: { root, srcDir: root },
       logger,
       store: {
         keys: () => [],
         get: () => undefined,
-        set: ({ id }: { id: string }) => { ids.push(id); },
+        set: (entry: typeof entries[number]) => { entries.push(entry); },
       },
       parseData: async ({ data }: { data: Record<string, unknown> }) => data,
       generateDigest: (contents: string) => contents,
@@ -96,8 +107,10 @@ describe('project browser-test content', () => {
     } as unknown as LoaderContext);
     expect(logger.warn).not.toHaveBeenCalled();
     expect(logger.error).not.toHaveBeenCalled();
-    expect(ids.sort()).toEqual(['custom/route', 'nested']);
-    expect(readProjectContent(directory).publishedProjects.map(({ id }) => id)).toEqual(ids);
+    expect(getPublishedProjects(entries).map(({ id }) => id)).toEqual(['zebra', 'custom/route', 'nested']);
+    expect(readProjectContent(directory).publishedProjects.map(({ id }) => id))
+      .toEqual(getPublishedProjects(entries).map(({ id }) => id));
+    expect(readProjectContent(directory).draftProjects.map(({ id }) => id)).toEqual(['draft']);
   });
 
   it('handles an empty collection', () => {

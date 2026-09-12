@@ -1,0 +1,26 @@
+---
+title: "MiSTer-deskflow"
+role: "solo-dev"
+goal: "Control retro computer cores over the network using the keyboard and mouse of my regular-use PC."
+description: "A client-only port of Deskflow to 32-bit armhf with some neat extra features."
+status: "active"
+liveUrl: "https://github.com/treyturner/MiSTer-deskflow-dist"
+logoImage: "mister-deskflow.png"
+technologyStack: ["C++", "Forgejo Actions"]
+startDate: "2026-04-01"
+endDate: "2026-06-13"
+draft: false
+---
+
+My MiSTer FPGA sits alongside my regular PC, and I wanted to use both with one keyboard and mouse. Deskflow already shares input between desktop computers over the network. This fork brings MiSTer's retro computer cores into that setup, without needing a desktop windowing system on the MiSTer.
+
+The port is a client-only C++ build for MiSTer's 32-bit ARM Linux environment, receiving input from a standard Deskflow server on Windows, macOS, or Linux. I added a Linux uinput backend to present synthetic keyboard and mouse devices, then built for the stock system's older runtime and bundled the required libraries and keyboard-layout data. A Docker cross-build produces the installable bundle and checks startup under ARM emulation. Once input was working, I added a few things that make moving between the machines more convenient:
+
+- Virtual screen dimensions for known cores, with mouse movement tuned for their different resolutions.
+- Desktop clipboard text pasted into a core as simulated keystrokes.
+- Newly captured MiSTer screenshots sent to the desktop clipboard.
+- Scripted installation and updates, including public releases and Patreon previews through [Patreage](/projects/patreage).
+
+Mouse movement is the part with the most caveats. Deskflow can send absolute coordinates, but MiSTer needs relative device movements, and the backend can't read the core's actual cursor position. It keeps a virtual position instead. When MiSTer's on-screen menu intercepts input, the two can drift apart and leave the cursor stuck against an invisible wall. Relative input with the cursor locked to MiSTer avoids that problem. For ordinary screen-to-screen movement, extra space around the virtual screen and adaptive scaling help, but they don't eliminate absolute-mode desynchronization.
+
+I use the fork in my own setup, where it works great. Public builds are available, and it's picked up five GitHub stars—encouraging for a fairly specific use case. I'd like to hear how it behaves with other people's cores, keyboards, and layouts. For me, it already makes it much easier to explore software libraries I missed during their prime, like those of the Amiga and ZX Spectrum.

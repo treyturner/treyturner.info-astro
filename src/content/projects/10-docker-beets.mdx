@@ -1,0 +1,29 @@
+---
+title: "docker-beets"
+role: "solo-dev"
+goal: "A highly customizable containerization of Beets music tagger"
+description: "A customizable Alpine-based Beets image with plugin source overrides, version-aware patches, and a cache-conscious multi-stage build."
+status: "active"
+logoImage: "beets.png"
+repositoryUrls: ["https://github.com/treyturner/docker-beets"]
+technologyStack: ["Docker", "Python", "Alpine Linux", "GitHub Actions"]
+startDate: "2025-10-18"
+draft: false
+---
+
+I was having a hard time getting the plugins I wanted to work together in the commonly recommended lscr.io Beets image. A plugin might need a native tool, a particular upstream version, or a fix that hadn't reached a release. docker-beets makes those choices part of the image build, including room for [my own plugins](/projects/beets-plugins) and temporary fixes like the ones I work to [contribute upstream](/projects/beets). Customization and build efficiency are most of the project.
+
+The image uses a multi-stage Alpine build: resolve and build Python wheels, apply the Beets patches, then install into a runtime image from the local wheelhouse with `--no-index`. Compilers and development packages stay in the build stages. FFmpeg, Chromaprint, and ImageMagick support the audio and artwork workflows, while configuration and music stay on mounted storage. The entrypoint maps the requested user and group IDs before dropping privileges.
+
+Build arguments are the main way to customize an environment I intend to keep. Startup installation is available for experiments, but needs network access and runs on every start. The controls let me:
+
+- Select a Beets tag or branch and substitute plugin sources, including Git forks.
+- Add Python dependencies and native packages, distinguishing build-only tools from runtime requirements.
+- Apply patches within declared Beets version ranges using PEP 440 ordering, skipping fixes already upstream and rejecting applicable patches that fail to apply.
+- Run individual Beets commands, a shell, or the bundled web plugin with configurable IDs and file-creation permissions.
+
+The expensive work is resolving and building plugin dependencies, so a small Beets patch shouldn't invalidate it. Third-party wheels are built before the patch directory enters the Docker build. An unpatched Beets wheel supplies dependency metadata for resolution; after patching, only its replacement is built with `--no-deps`. The runtime image follows the same order, installing the dependency set before force-reinstalling the patched Beets wheel in a later layer. BuildKit cache mounts and the GitHub Actions layer cache preserve that work across builds.
+
+There is a limit to that shortcut: dependency-changing patches can't safely reuse a wheelhouse resolved from unpatched source. The build rejects applicable patches that touch dependency metadata rather than pretending the cached result is still valid.
+
+CI checks the container's Beets version and file-creation permissions before publishing development images to GHCR, Docker Hub, and my Forgejo registry. Release promotion retags an existing image without rebuilding it, with an optional update to `latest`. Versioned tags keep the chosen Beets version stable, but remain mutable and don't freeze every dependency. Those automated checks are smoke tests; they don't establish that every plugin combination works. The build gives me somewhere explicit to investigate and change a dependency when an upgrade exposes another integration problem.

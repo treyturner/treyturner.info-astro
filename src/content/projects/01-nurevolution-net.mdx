@@ -1,0 +1,30 @@
+---
+title: "nurevolution.net"
+role: "solo-dev"
+goal: "Replace Wordpress and obsolete Podpress plugin with a Nuxt v4 RSS generator and HTML5 episode browser"
+description: "A from-scratch rewrite of my podcast front and backends, providing a practical application for experimenting with Nuxt.js."
+status: "active"
+repositoryUrls: ["https://github.com/treyturner/nurevolution.net"]
+liveUrl: "https://nurevolution.net"
+logoImage: "nuxt.svg"
+technologyStack: ["TypeScript", "Nuxt", "Vue", "GitHub Actions", "Python"]
+startDate: "2026-09-07"
+draft: false
+---
+
+nurevolution studios is the home of a music podcast featuring mixes from me and friends. Its WordPress installation and aging PodPress plugin were due for replacement, but the 55-episode archive was worth keeping intact. I wanted the new site to focus on listening: find a mix, play it, read the tracklist, download it, or subscribe. Like [this website](/projects/treyturner-info), it's a WordPress replacement, but this time I'm learning Nuxt and Vue against something with real history and compatibility requirements.
+
+That history makes the RSS feed one of the more consequential parts of the rewrite. Changing an episode's identity can make a podcast application treat it as a new episode, even if the title and audio are unchanged. I reconciled the WordPress records, captured feed, and media files into a canonical inventory, then built a repeatable importer and validation checks around it. Those checks protect the historical GUIDs, publication dates, enclosure URLs, and associated metadata across the archive. Track timings follow the same rule: preserve what the source recordings establish, and leave tracks untimed when the evidence isn't there.
+
+The replacement uses server-rendered Nuxt and a file-based content catalog shared by the website, read-only APIs, and RSS feed. Metadata, tracklists, and artwork references belong in the repository; the original audio and artwork stay outside Git history and the application image. A single HTML5 audio element stays mounted during internal navigation, so changing pages doesn't interrupt a mix or resume one the listener had paused. Larger screens show adjacent episode and tracklist panels, while mobile uses tabs.
+
+The listener-facing work is fairly compact:
+
+- Browse the full archive, including artwork, descriptions, available tracklists, and shareable episode pages.
+- Keep a mix playing while navigating, with browser-history support and no autoplay on a fresh visit.
+- Download episodes with their original filenames or subscribe through the replacement RSS feed.
+- Follow known legacy episode links to their new pages.
+
+Behind that interface are schema and player tests, browser checks in Chromium, Firefox, and WebKit, and separate checks of the containerized media setup. Small original audio fixtures let tests exercise real decoding and downloads without retrieving the full archive or needing private migration files. Deployment, rollback, capacity, and independent recovery checks were rehearsed in preview before launch.
+
+The redesign is now live at [nurevolution.net](https://nurevolution.net), replacing the old WordPress site. Richer playback controls, interactive tracklists, remembered listening position, and scheduled publishing are still in the works.
