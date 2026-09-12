@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
 
 const cvPath = '/trey-turner-cv.pdf';
+const cvFilename = 'Trey Turner - Automation Engineer, CI-CD & Test Infrastructure.pdf';
 const cvFile = new URL('../../public/trey-turner-cv.pdf', import.meta.url);
 
 test('serves the bundled CV as an unchanged PDF', async ({ request }) => {
@@ -22,7 +23,7 @@ for (const javaScriptEnabled of [true, false]) {
       const link = page.getByRole('link', { name: 'Download CV', exact: true });
       await expect(link).toBeVisible();
       await expect(link).toHaveAttribute('href', cvPath);
-      await expect(link).toHaveAttribute('download', 'Trey-Turner-CV.pdf');
+      await expect(link).toHaveAttribute('download', cvFilename);
       const downloadEvent = page.waitForEvent('download');
       if (javaScriptEnabled) {
         await link.click();
@@ -32,7 +33,7 @@ for (const javaScriptEnabled of [true, false]) {
       }
       const download = await downloadEvent;
       expect(await download.failure()).toBeNull();
-      expect(download.suggestedFilename()).toBe('Trey-Turner-CV.pdf');
+      expect(download.suggestedFilename()).toBe(cvFilename);
       expect((await readFile((await download.path())!)).equals(await readFile(cvFile))).toBe(true);
       await expect(page).toHaveURL(homeUrl);
       expect(page.context().pages()).toHaveLength(1);
@@ -51,11 +52,12 @@ for (const width of [1280, 390, 320]) {
       await expect(icon).toHaveAttribute('aria-hidden', 'true');
       await expect(icon).toHaveAttribute('focusable', 'false');
       const accent = await page.locator('nav [aria-current="page"]').evaluate((element) => getComputedStyle(element).color);
+      const bodyColor = await page.locator('.vcard-tagline').evaluate((element) => getComputedStyle(element).color);
       await expect(link).toHaveCSS('border-style', 'solid');
       await expect(link).toHaveCSS('border-width', '1px');
-      await expect(link).toHaveCSS('border-color', accent);
-      await expect(link).toHaveCSS('color', accent);
-      await expect(icon).toHaveCSS('stroke', accent);
+      await expect(link).toHaveCSS('border-color', bodyColor);
+      await expect(link).toHaveCSS('color', bodyColor);
+      await expect(icon).toHaveCSS('stroke', bodyColor);
       for (const scale of ['100%', '200%']) {
         await page.locator('html').evaluate((element, scale) => { element.style.fontSize = scale; }, scale);
         const box = (await link.boundingBox())!;
@@ -70,6 +72,11 @@ for (const width of [1280, 390, 320]) {
         expect(box.x + box.width / 2).toBeCloseTo(nameBox.x + nameBox.width / 2, 1);
         expect(box.y).toBeGreaterThan(copyBox.y + copyBox.height);
         expect(socialBox.y).toBeGreaterThan(box.y + box.height);
+        const gapAbove = box.y - (copyBox.y + copyBox.height);
+        const gapBelow = socialBox.y - (box.y + box.height);
+        expect(gapBelow).toBeCloseTo(gapAbove, 1);
+        const rem = await page.locator('html').evaluate((element) => parseFloat(getComputedStyle(element).fontSize));
+        expect(gapAbove).toBeCloseTo(2.25 * rem, 1);
         expect(iconBox.x).toBeGreaterThan(labelBox.x + labelBox.width);
         expect(iconBox.y + iconBox.height / 2).toBeCloseTo(labelBox.y + labelBox.height / 2, 1);
         expect(labelBox.x).toBeGreaterThan(box.x);
@@ -79,7 +86,13 @@ for (const width of [1280, 390, 320]) {
       }
       await link.hover();
       await expect(link).toHaveCSS('text-decoration-line', 'none');
+      await expect(link).toHaveCSS('color', accent);
+      await expect(link).toHaveCSS('border-color', accent);
+      await expect(icon).toHaveCSS('stroke', accent);
       await page.mouse.move(0, 0);
+      await expect(link).toHaveCSS('color', bodyColor);
+      await expect(link).toHaveCSS('border-color', bodyColor);
+      await expect(icon).toHaveCSS('stroke', bodyColor);
       await link.focus();
       await page.keyboard.press('Tab');
       await page.keyboard.press('Shift+Tab');
