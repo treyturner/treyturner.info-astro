@@ -53,6 +53,14 @@ Stored in `src/content/`:
 - Move logic into utilities and reusable components
 - Use schemas to validate content early
 
+### Animated Home Title
+
+The home page progressively enhances its canonical `site.json` title with `TypewriterTitle.astro`. `rotatingTitles` supplies the ordered phrases; `titleAnimation` configures typing, deletion, initial delay, inter-title delay, and the completed-title hold (all in milliseconds). No Typed.js or client framework dependency is required.
+
+`titleAnimation.randomTypeDelay` adds a newly sampled, whole-millisecond delay from zero through the configured maximum before each typed character. Between characters this is added to `typeDelay`; for the first character it is added to `startDelay` or `gapDelay`. It never affects deletion or the completed-title hold, and pausing preserves the already sampled delay. Omit it or set it to `0` to disable variation. The homepage's current timings live in `src/data/site.json`. Timing values, including the maximum combined delay, must fit within the browser timer limit.
+
+The pure player in `src/utils/typewriter.ts` types/deletes whole Unicode graphemes and preserves the remaining delay when paused. The custom element owns its lifecycle, cancels timers/listeners when removed, and suspends in hidden documents. A grayscale icon-only play/pause button sits to the right of the longest animated title, outside the text layout so the title and surrounding content retain their positions. The button uses 75% opacity at rest to exceed 3:1 non-text contrast on both page backgrounds and becomes fully opaque on hover or keyboard focus, with an accessible action label and a focus outline. The manual play/pause preference is saved in `localStorage` as `title-animation-paused`, surviving navigation and reloads as well as tab visibility changes, reduced-motion changes, and reconnection of the same element. A page restored from the browser history cache rechecks the saved choice. A fresh paused title displays the first complete rotating title and seeds the player with `initialTitleComplete`. Selecting Play backspaces that title at the configured deletion speed, then continues with the next title, without clearing or retyping the first entry. Pauses during an existing animation retain their exact position and remaining delay. If storage is blocked, the control still works for the current component without persistence. The title has no cursor. Forward typing defaults to 61 ms per character, with deletion and hold timings configured independently. Reduced motion and no-JavaScript access retain the canonical static title and hide the control. Screen readers receive stable text instead of the animated characters. Invisible, accessibility-hidden title copies reserve responsive space so changing words cannot move surrounding content. Colors use yellow in dark mode and darker gold in light mode.
+
 ## Styling
 
 - Plain CSS only

@@ -7,9 +7,7 @@
         "TypeScript",
         "JavaScript",
         "Groovy",
-        "Java",
-        "Ruby",
-        "PHP"
+        "Java"
       ]
     },
     {
@@ -23,12 +21,13 @@
       ]
     },
     {
-      "name": "UI Automation",
+      "name": "Platforms & Tooling",
       "skills": [
-        "Playwright",
-        "Cypress",
-        "Selenium/WebDriver",
-        "webdriver.io"
+        "Docker",
+        "Kubernetes",
+        "Tilt",
+        "TestRail",
+        "SonarCloud"
       ]
     },
     {
@@ -42,15 +41,15 @@
       ]
     },
     {
-      "name": "Platforms & Tooling",
+      "name": "UI Automation",
       "skills": [
-        "Docker",
-        "Kubernetes",
-        "Tilt",
-        "TestRail",
-        "SonarCloud"
+        "Playwright",
+        "Cypress",
+        "Selenium/WebDriver",
+        "webdriver.io"
       ]
     },
+
     {
       "name": "Performance",
       "skills": [

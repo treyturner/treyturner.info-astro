@@ -1,9 +1,26 @@
 {
   "name": "Trey Turner",
   "title": "Software Quality Architect / Staff SDET",
+  "rotatingTitles": [
+    "Automation Engineer",
+    "Software Quality Architect",
+    "Staff SDET",
+    "Technical Team Lead"
+  ],
+  "titleAnimation": {
+    "typeDelay": 35,
+    "randomTypeDelay": 65,
+    "deleteDelay": 30,
+    "holdDelay": 3000,
+    "gapDelay": 800,
+    "startDelay": 1200
+  },
   "tagline": "Building quality into software from the ground up through test automation, CI/CD, and engineering excellence.",
   "social": {
     "github": "https://github.com/treyturner",
-    "linkedin": "https://www.linkedin.com/in/treyeturner/"
+    "linkedin": "https://www.linkedin.com/in/treyeturner/",
+    "patreon": "https://patreon.treyturner.info",
+    "stackoverflow": "https://stackoverflow.com/users/2633158/trey",
+    "spotify": "https://open.spotify.com/user/fracturetrey"
   }
 }
