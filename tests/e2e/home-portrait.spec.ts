@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, chromium } from '@playwright/test';
 
 test('serves a responsive, optimized portrait with reserved dimensions', async ({ page, request }) => {
   await page.goto('/');
@@ -8,13 +8,58 @@ test('serves a responsive, optimized portrait with reserved dimensions', async (
   await expect(portrait).toHaveAttribute('height', '160');
   await expect(portrait).toHaveAttribute('loading', 'eager');
   await expect(portrait).toHaveAttribute('fetchpriority', 'high');
-  await expect(portrait).toHaveAttribute('srcset', /128w.*160w.*256w.*320w/);
+  await expect(portrait).toHaveAttribute('srcset', /128w.*160w.*256w.*320w.*384w.*480w.*512w.*640w.*768w.*960w/);
+  await expect(portrait).toHaveAttribute('sizes', 'clamp(8rem, 20vw, 10rem)');
   await expect.poll(() => portrait.evaluate((image) => (image as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
   const currentSrc = await portrait.evaluate((image) => (image as HTMLImageElement).currentSrc);
   const response = await request.get(currentSrc);
   expect(response.ok()).toBe(true);
   expect(response.headers()['content-type']).toContain('image/webp');
 });
+
+for (const defaultFontSize of [16, 32]) {
+  for (const deviceScaleFactor of [1, 2, 3]) {
+    test(`loads appropriate portrait sources with a ${defaultFontSize}px default font on a ${deviceScaleFactor}x display without JavaScript`, async ({ baseURL }) => {
+      // A CSS font-size override does not change the browser preference used by `sizes`.
+      const browser = await chromium.launch({ args: [`--blink-settings=defaultFontSize=${defaultFontSize}`] });
+      try {
+        for (const width of [390, 700, 1280, 1920]) {
+          // Fresh contexts prevent a cached larger image from masking a bad source selection.
+          const context = await browser.newContext({ baseURL, deviceScaleFactor, javaScriptEnabled: false, viewport: { width, height: 900 } });
+          try {
+            const page = await context.newPage();
+            await page.goto('/');
+            const portrait = page.getByRole('img', { name: 'Trey Turner', exact: true });
+            await expect(portrait).toBeVisible();
+            await expect.poll(() => portrait.evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true);
+            const dimensions = await portrait.evaluate(async (image: HTMLImageElement) => {
+              // Decode the chosen resource without srcset's density correction.
+              const source = new Image();
+              source.src = image.currentSrc;
+              await source.decode();
+              return {
+                fontSize: parseFloat(getComputedStyle(document.documentElement).fontSize),
+                renderedWidth: image.getBoundingClientRect().width,
+                sourceWidth: source.naturalWidth,
+                pixelRatio: window.devicePixelRatio,
+              };
+            });
+            expect(dimensions.fontSize).toBe(defaultFontSize);
+            expect(dimensions.pixelRatio).toBe(deviceScaleFactor);
+            const requiredPixels = dimensions.renderedWidth * deviceScaleFactor;
+            expect(dimensions.sourceWidth).toBeGreaterThanOrEqual(Math.ceil(requiredPixels));
+            // Normal-size displays should still receive a small, appropriate candidate.
+            expect(dimensions.sourceWidth).toBeLessThanOrEqual(Math.ceil(requiredPixels * 1.3));
+          } finally {
+            await context.close();
+          }
+        }
+      } finally {
+        await browser.close();
+      }
+    });
+  }
+}
 
 for (const colorScheme of ['dark', 'light'] as const) {
   for (const width of [1280, 390, 320]) {

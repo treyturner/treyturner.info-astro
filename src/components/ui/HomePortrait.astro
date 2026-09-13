@@ -9,8 +9,8 @@ import portrait from '../../assets/people/trey-turner.jpg';
     alt="Trey Turner"
     width={160}
     height={160}
-    widths={[128, 160, 256, 320]}
-    sizes="(max-width: 640px) 128px, (max-width: 800px) 20vw, 160px"
+    widths={[128, 160, 256, 320, 384, 480, 512, 640, 768, 960]}
+    sizes="clamp(8rem, 20vw, 10rem)"
     format="webp"
     loading="eager"
     fetchpriority="high"
@@ -22,6 +22,7 @@ import portrait from '../../assets/people/trey-turner.jpg';
   .home-portrait {
     position: relative;
     isolation: isolate;
+    /* Keep the image's sizes hint in sync, including enlarged browser text. */
     width: clamp(8rem, 20vw, 10rem);
     max-width: calc(100% - 2rem);
     aspect-ratio: 1;
