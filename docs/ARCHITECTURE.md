@@ -74,6 +74,10 @@ The pure player in `src/utils/typewriter.ts` types/deletes whole Unicode graphem
 
 The home page places an outlined “Download CV” link between the tagline and social icons, with equal 2.25rem gaps above and below the button. Its text, outline, and icon match the body-copy color at rest and use the theme accent on hover. It uses a native same-origin download link, with a decorative download icon to the right, and works without JavaScript. `public/trey-turner-cv.pdf` is served unchanged and downloads as `Trey Turner - Automation Engineer, CI-CD & Test Infrastructure.pdf`; replace that asset to update the CV while keeping the link stable.
 
+### Home Social Links
+
+The home page uses two centered, labeled lists below the CV link. The first contains GitHub, Forgejo, LinkedIn, Patreon, and Stack Overflow in the primary text color. The second contains nurevolution.net (a turntable), TIDAL, Steam, Xbox, Nintendo Switch, and RetroAchievements in the body-copy color. Both use the same 1.75rem icon size, theme-accent hover color, visible keyboard focus, and new-tab links. Compact phone spacing keeps both rows intact at normal text size; enlarged text can wrap without clipping or changing link order. URLs live in `src/data/site.json`; inline SVG sources and licenses are recorded in `src/assets/icons/social/LICENSES.md`.
+
 ## Styling
 
 - Plain CSS only

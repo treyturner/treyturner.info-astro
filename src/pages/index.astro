@@ -4,13 +4,27 @@ import TypewriterTitle from '../components/ui/TypewriterTitle.astro';
 import SocialIcon from '../components/ui/SocialIcon.astro';
 import siteData from '../data/site.json';
 
-const socialLinks = [
+const primaryLinks = [
   { name: 'github', label: 'GitHub', href: siteData.social.github },
+  { name: 'forgejo', label: 'Forgejo', href: siteData.social.forgejo },
   { name: 'linkedin', label: 'LinkedIn', href: siteData.social.linkedin },
   { name: 'patreon', label: 'Patreon', href: siteData.social.patreon },
   { name: 'stackoverflow', label: 'Stack Overflow', href: siteData.social.stackoverflow },
-  { name: 'spotify', label: 'Spotify', href: siteData.social.spotify },
 ] as const;
+
+const interestLinks = [
+  { name: 'turntable', label: 'nurevolution.net', href: siteData.social.nurevolution },
+  { name: 'tidal', label: 'TIDAL', href: siteData.social.tidal },
+  { name: 'steam', label: 'Steam', href: siteData.social.steam },
+  { name: 'xbox', label: 'Xbox', href: siteData.social.xbox },
+  { name: 'nintendoswitch', label: 'Nintendo Switch', href: siteData.social.nintendoswitch },
+  { name: 'retroachievements', label: 'RetroAchievements', href: siteData.social.retroachievements },
+] as const;
+
+const socialRows = [
+  { label: 'Professional and community profiles', className: 'social-row-primary', links: primaryLinks },
+  { label: 'Music and gaming profiles', className: 'social-row-interests', links: interestLinks },
+];
 ---
 
 <BaseLayout>
@@ -25,11 +39,17 @@ const socialLinks = [
       </svg>
     </a>
     <div class="vcard-social">
-      {socialLinks.map(({ name, label, href }) => (
-        <a href={href} target="_blank" rel="noopener noreferrer" class="social-link" title={`${label} (opens in a new tab)`}>
-          <SocialIcon name={name} />
-          <span class="visually-hidden">{label}</span>
-        </a>
+      {socialRows.map(({ label, className, links }) => (
+        <ul class:list={['social-row', className]} aria-label={label}>
+          {links.map(({ name, label, href }) => (
+            <li>
+              <a href={href} target="_blank" rel="noopener noreferrer" class="social-link" title={`${label} (opens in a new tab)`}>
+                <SocialIcon name={name} />
+                <span class="visually-hidden">{label}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
       ))}
     </div>
   </section>
@@ -64,9 +84,22 @@ const socialLinks = [
 
   .vcard-social {
     display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  .social-row {
+    display: flex;
     flex-wrap: wrap;
     gap: var(--spacing-md);
     justify-content: center;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .social-row li {
+    display: flex;
   }
 
   .cv-download {
@@ -138,7 +171,11 @@ const socialLinks = [
   .social-link :global(.patreon-icon) { transform: translateX(0.0625rem); }
   .social-link :global(.stackoverflow-icon) { transform: translateX(-0.0625rem); }
 
-  .social-link:hover {
+  .social-row-interests .social-link {
+    color: var(--color-text-secondary);
+  }
+
+  .social-row .social-link:hover {
     color: var(--color-primary);
     text-decoration: none;
   }
@@ -148,9 +185,14 @@ const socialLinks = [
     outline-offset: 2px;
   }
 
-  /* Keep all five icons together on phones while retaining 48px touch targets. */
+  /* Keep both rows compact on phones, with at least 44px-wide touch targets. */
   @media (max-width: 30rem) {
-    .vcard-social { gap: var(--spacing-sm); }
+    .social-row { gap: var(--spacing-sm); }
     .social-link { width: 3rem; height: 3rem; }
+  }
+
+  @media (max-width: 23.5rem) {
+    .social-row { column-gap: 0; }
+    .social-link { width: 2.75rem; }
   }
 </style>
