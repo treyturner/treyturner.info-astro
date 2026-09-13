@@ -1,7 +1,8 @@
 import { test, expect, type Locator } from '@playwright/test';
 import { readProjectContent } from '../helpers/project-content';
 
-const astroProject = readProjectContent().publishedProjects.find(({ logoImage }) => logoImage?.endsWith('/astro.svg'));
+const { publishedProjects } = readProjectContent();
+const astroProject = publishedProjects.find(({ logoImage }) => logoImage?.endsWith('/astro.svg'));
 
 async function readLogoPixels(logo: Locator) {
   // Sample a screenshot, not a re-rendered SVG, to check the actual embedded image's theme.
@@ -23,6 +24,34 @@ async function readLogoPixels(logo: Locator) {
 }
 
 for (const placement of ['card', 'detail'] as const) {
+  test(`SVG ${placement} logos bypass the long-lived development image cache`, async ({ page, request }) => {
+    const svgProjects = publishedProjects.filter(({ logoImage }) => logoImage?.endsWith('.svg'));
+    test.skip(svgProjects.length === 0, 'No published project uses an SVG logo.');
+
+    for (const { id } of svgProjects) {
+      const path = `/projects/${id}`;
+      await page.goto(placement === 'card' ? '/projects' : path);
+      const logo = placement === 'card'
+        ? page.locator(`.project-card-link[href="${path}"] .project-card-logo`)
+        : page.locator('.project-logo');
+      const src = await logo.getAttribute('src');
+      expect(src).toBeTruthy();
+      const url = new URL(src!, page.url());
+      expect(url.pathname).not.toBe('/_image');
+      expect(url.pathname).toMatch(/\.svg$/);
+      await expect(logo).toHaveAttribute('width', /^[1-9]\d*$/);
+      await expect(logo).toHaveAttribute('height', placement === 'card' ? '48' : '64');
+
+      const response = await request.get(url.href);
+      expect(response.ok()).toBe(true);
+      expect(response.headers()['content-type']).toContain('image/svg+xml');
+      // Production assets have content-hashed URLs; Vite's source URLs must revalidate.
+      if (url.pathname.startsWith('/@fs/') || url.pathname.startsWith('/src/')) {
+        expect(response.headers()['cache-control']).toMatch(/no-cache|no-store|max-age=0/);
+      }
+    }
+  });
+
   for (const systemTheme of ['light', 'dark'] as const) {
     test(`Astro ${placement} logo follows the selected theme with a ${systemTheme} system preference`, async ({ page }) => {
       test.skip(!astroProject, 'No published project uses the Astro logo.');

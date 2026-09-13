@@ -1,8 +1,8 @@
 ---
-import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
 import { projectRoleLabels } from '../../utils/projects';
 import InlineCode from './InlineCode.astro';
+import ProjectLogo from './ProjectLogo.astro';
 import ProjectStatus from './ProjectStatus.astro';
 import ProjectTechnologies from './ProjectTechnologies.astro';
 
@@ -19,7 +19,7 @@ const titleId = `project-${project.id}`;
     <div class="project-card-heading">
       <div class="project-card-header">
         {project.data.logoImage && (
-          <Image class="project-card-logo" src={project.data.logoImage} alt="" height={48} />
+          <ProjectLogo class="project-card-logo" src={project.data.logoImage} height={48} />
         )}
         <h2 class="project-card-title" id={titleId}>{project.data.title}</h2>
       </div>

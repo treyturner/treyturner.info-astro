@@ -1,0 +1,27 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  src: ImageMetadata;
+  height: number;
+  class?: string;
+}
+
+const { src, height, ...attributes } = Astro.props;
+---
+
+{/* SVGs need no resizing; direct asset URLs avoid the dev image endpoint's year-long cache. */}
+{src.format === 'svg' ? (
+  <img
+    {...attributes}
+    src={src.src}
+    width={Math.round(src.width * height / src.height)}
+    height={height}
+    alt=""
+    loading="lazy"
+    decoding="async"
+  />
+) : (
+  <Image {...attributes} src={src} height={height} alt="" />
+)}
