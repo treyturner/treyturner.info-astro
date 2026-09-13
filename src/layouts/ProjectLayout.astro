@@ -4,6 +4,7 @@ import type { CollectionEntry } from 'astro:content';
 import BaseLayout from './BaseLayout.astro';
 import GitHubIcon from '../components/ui/GitHubIcon.astro';
 import InlineCode from '../components/ui/InlineCode.astro';
+import ProjectLogo from '../components/ui/ProjectLogo.astro';
 import ProjectTechnologies from '../components/ui/ProjectTechnologies.astro';
 import { formatYearMonthDay } from '../schemas/common';
 import { getRepositoryLink, projectRoleLabels, projectStatusLabels } from '../utils/projects';
@@ -23,7 +24,7 @@ const repositories = (project.repositoryUrls ?? []).map(getRepositoryLink);
     <header class="project-header">
       <div class="project-title-row">
         {project.logoImage && (
-          <Image class="project-logo" src={project.logoImage} alt="" height={64} />
+          <ProjectLogo class="project-logo" src={project.logoImage} height={64} />
         )}
         <h1>{project.title}</h1>
       </div>
@@ -114,6 +115,7 @@ const repositories = (project.repositoryUrls ?? []).map(getRepositoryLink);
   }
 
   .project-logo {
+    color-scheme: var(--image-color-scheme);
     height: 4rem;
     width: auto;
     max-width: min(25%, 12rem);

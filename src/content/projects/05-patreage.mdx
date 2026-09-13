@@ -1,0 +1,25 @@
+---
+title: "Patreage"
+role: "solo-dev"
+goal: "Supply private GitHub repository access to Patreon subscribers"
+description: "A self-hosted Patreon-to-GitHub access broker for a single creator. Eligible Patrons authenticate in a browser, then use the Bash shell client to access configured private GitHub repositories without receiving raw GitHub tokens."
+status: "active"
+liveUrl: "https://patreon-verification.treyturner.info"
+technologyStack: ["Python", "FastAPI"]
+startDate: "2026-04-10"
+endDate: "2026-05-06"
+draft: false
+---
+
+Patreage grew out of a distribution problem: I wanted Patreon supporters to get preview access to [my MiSTer Deskflow fork](/projects/mister-deskflow) through its installer. Patreon knew who was eligible, GitHub held the private software, and neither supplied the terminal workflow I needed. I built the service to connect those pieces, with room to distribute other tools later.
+
+It's intended for one creator and a configured set of repositories. A Patreon browser sign-in connects the supporter to a Bash client session, while a GitHub App provides limited, read-only repository access without handing raw GitHub tokens to the client. FastAPI, a background worker, and PostgreSQL run together in Docker Compose behind a reverse proxy. The service supports:
+
+- Access rules for paid tiers or explicitly permitted free members.
+- Private Git clone and fetch operations, source archives, release downloads, and read-only file access.
+- A standalone shell client and an embeddable Bash module for installers.
+- Membership rechecks, session revocation, operator diagnostics, and recovery validation after a backup restore.
+
+The difficult question is when to trust the last membership check. Someone might subscribe after signing in, change tiers, or cancel while Patreon is unavailable or rate-limiting requests. I store the membership decision separately from its freshness, and signed webhooks mark it for rechecking. Access requests can trigger a targeted lookup; the worker retries in the background with backoff. A limited grace period preserves previously confirmed access during temporary failures, but invalidated or excessively old decisions require successful verification. Tests against simulated Patreon and GitHub services check those transitions, particularly the difference between a confirmed denial and an upstream failure.
+
+Patreage is live and in service, but it doesn't have users yet. I wish it did. The service and installer integration are ready; what I don't have is feedback from people using them to try the previews. That's the next milestone, not another feature on the access broker.

@@ -19,7 +19,6 @@ const validProject = {
   liveUrl: 'https://example.com/projects/test-results-explorer',
   technologyStack: ['TypeScript', 'Astro'],
   featuredImage: './test-results-explorer.png',
-  displayOrder: 1,
   startDate: '2025-02-01',
   draft: false
 };
@@ -39,7 +38,7 @@ describe('projectSchema', () => {
 
   it('accepts a complete project entry', () => {
     const result = projectSchema.parse(validProject);
-    expect(result.repositoryUrls).toEqual(validProject.repositoryUrls);
+    expect(result).toEqual({ ...validProject, startDate: new Date('2025-02-01T12:00:00Z') });
   });
 
   it('accepts every supported project role', () => {
@@ -62,7 +61,7 @@ describe('projectSchema', () => {
     }
   });
 
-  it('defaults optional collections and publishing fields', () => {
+  it('defaults optional collections', () => {
     const result = projectSchema.parse({
       title: validProject.title,
       role: 'collaborator',
@@ -74,7 +73,6 @@ describe('projectSchema', () => {
     });
 
     expect(result.technologyStack).toEqual([]);
-    expect(result.displayOrder).toBe(0);
     expect(result.repositoryUrls).toBeUndefined();
   });
 
@@ -154,11 +152,6 @@ describe('projectSchema', () => {
 
   it('rejects invalid live URLs', () => {
     expect(projectSchema.safeParse({ ...validProject, liveUrl: 'demo' }).success).toBe(false);
-  });
-
-  it('rejects negative or fractional display order values', () => {
-    expect(projectSchema.safeParse({ ...validProject, displayOrder: -1 }).success).toBe(false);
-    expect(projectSchema.safeParse({ ...validProject, displayOrder: 1.5 }).success).toBe(false);
   });
 
   it('rejects empty technology names and featured-image paths', () => {

@@ -27,6 +27,13 @@ Stored in `src/content/`:
 - `experience/` — JSON
 - `recommendations/` — JSON
 - `homelab/` — MDX
+- `projects/` — MDX
+
+### Project Ordering and URLs
+
+Published projects are ordered alphabetically by source file path, not by their titles or metadata. Use zero-padded filename prefixes such as `00-treyturner-info.mdx`, `01-nurevolution-net.mdx`, and `10-docker-beets.mdx` to arrange the list in the file explorer. Keep the same padding width throughout the collection; this is alphabetical, not numeric sorting.
+
+The project loader removes a leading number and hyphen from each path segment when generating route IDs. For example, `04-mister-deskflow.mdx` still serves `/projects/mister-deskflow`, and changing `04-` to `02-` changes only its position. Unprefixed names and nested index routes remain supported; an explicit `slug` overrides the generated route without affecting filename order. Keep the resulting route IDs unique. Draft entries stay out of both the index and generated detail pages.
 
 ### Experience and Recommendation Links
 
@@ -45,6 +52,8 @@ Stored in `src/content/`:
 - `src/assets/logos/companies/` — company logos used by Experience and Recommendations.
 - `src/assets/logos/projects/` — project logos resolved by the Projects schema.
 - Content keeps filename-only references (`logo` or `logoImage`); each loader supplies the appropriate directory.
+- `ProjectLogo.astro` serves SVGs directly with explicit dimensions, bypassing the image endpoint's year-long development cache. Vite revalidates source assets in development and gives them content-hashed URLs in production. Raster logos still use Astro's image optimization.
+- Project logo images use `--image-color-scheme` to pass the selected site theme to embedded SVGs without changing other browser controls. The Astro SVG uses that scheme to switch its main mark between dark and white while keeping the gradient flame unchanged.
 
 ## Rendering Model
 

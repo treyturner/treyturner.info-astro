@@ -4,6 +4,7 @@ import { blogSchema } from './schemas/blog';
 import { experienceSchema } from './schemas/experience';
 import { homelabSchema } from './schemas/homelab';
 import { projectSchema } from './schemas/projects';
+import { getProjectId } from './utils/projects';
 import { recommendationSchema } from './schemas/recommendations';
 
 export const collections = {
@@ -20,7 +21,7 @@ export const collections = {
     schema: homelabSchema,
   }),
   projects: defineCollection({
-    loader: glob({ pattern: '**/*.mdx', base: './src/content/projects' }),
+    loader: glob({ pattern: '**/*.mdx', base: './src/content/projects', generateId: getProjectId }),
     schema: projectSchema,
   }),
   recommendations: defineCollection({

@@ -1,0 +1,26 @@
+---
+title: "treyturner.info"
+role: "solo-dev"
+goal: "Replace Wordpress with a statically published Astro site hosted by GitHub Pages"
+description: "A from-scratch redesign of my professional website, using modern tools and practices with standards befitting a quality-focused automation engineer."
+status: "active"
+repositoryUrls: ["https://github.com/treyturner/treyturner.info-astro"]
+logoImage: "astro.svg"
+technologyStack: ["TypeScript", "Astro", "MDX", "GitHub Actions"]
+startDate: "2026-03-27"
+draft: false
+---
+
+This is the project you're looking at right now. A site about my work in quality engineering seemed like a good place to practice it, so I replaced WordPress with a site I could version, test, and deploy from a public repository. It also gives me room to explain the projects that don't fit on a résumé.
+
+I went with Astro and TypeScript, with Markdown, MDX, and JSON content living alongside the code. Schemas validate the content, shared components handle its presentation, and GitHub Actions publishes the generated pages to GitHub Pages. There's no CMS or database to keep running, and reading the site doesn't depend on JavaScript. The parts I wanted to make useful beyond a conventional résumé include:
+
+- Experience and recommendations linked in both directions, so readers can see which work a recommendation refers to.
+- Project write-ups with goals, my role, status, technologies, and links to the software.
+- Skills grouped and ordered by recent use, without assigning myself numerical proficiency scores.
+- Light and dark themes, keyboard navigation, reduced-motion support, and a downloadable CV.
+- Draft-aware publishing
+
+Recommendations turned out to need more thought than a name, quote, and company logo. Some people have worked with me in several roles or at different companies, and I wanted to preserve that context without maintaining two versions of it. Recommendation roles now refer directly to experience entries; both pages derive their links and previews from those references. Broken references fail the build, and several matching roles produce one recommendation preview on an experience card.
+
+Working on the site has also supplied its own test cases. A heading that fit on my machine overflowed with the wider system fonts on a CI runner, prompting font-fallback and enlarged-text checks. The animated homepage title needed a persistent pause preference as well as reduced-motion support. Vitest covers the schemas and supporting logic, while Playwright checks the rendered pages, navigation, downloads, themes, and responsive behavior. CI checks for coverage regressions and keeps the browser, coverage, and Allure reports available alongside the code.

@@ -1,0 +1,26 @@
+---
+title: "beets-plugins"
+role: "solo-dev"
+goal: "Build features better suited for a plugin than upstream contribution"
+description: "A monorepo of my independently published Beets plugins: `nohirescd`, preventing hi-res audio from being matched to CD releases, and `tidalv1`, adding Tidal as a source for lyrics and cover art."
+status: "active"
+logoImage: "beets.png"
+repositoryUrls: ["https://github.com/treyturner/beets-plugins"]
+technologyStack: ["Python", "GitHub Actions"]
+startDate: "2026-06-17"
+draft: false
+---
+
+Not every change I want in Beets belongs in an [upstream pull request](/projects/beets). This repository holds two optional plugins for my own cataloging preferences and missing metadata sources. Each has its own package, dependencies, version, and configuration, so neither requires installing the other. Shared automation handles testing, compatibility checks, packaging, and publication to PyPI; I use [docker-beets](/projects/docker-beets) to assemble my wider Beets environment.
+
+## nohirescd
+
+I don't want high-resolution audio matched to a CD release. `nohirescd` applies configurable bit-depth and sample-rate limits to album candidates, and can audit existing library entries against the same rule. Audits accept Beets queries and produce a console summary or an optional CSV report explaining the violations. Flagged albums can then go through Beets' normal reimport workflow. This is a cataloging policy, not proof of where an audio file originally came from.
+
+Enforcing it means checking more than the importer's first suggestions. A manual search or release ID can introduce new candidates, so I filter at both stages and recalculate the recommendation after removing a match. Mixed-media releases need checks against the mapped tracks, not just an album-level label. Reimports select entries by album relationship and stay in album mode, restoring the previous singleton setting afterward even if the operation fails. Tests cover those less direct routes through the importer.
+
+## tidalv1
+
+`tidalv1` adds TIDAL as an artwork and lyrics source for Beets' existing `fetchart` and `lyrics` plugins. It retrieves cover art and synchronized or plain lyrics through their normal source-selection and fallback mechanisms. Account authorization and token refresh are supported, but the legacy v1 lyrics endpoint still requires suitable legacy API client credentials.
+
+Artwork and lyrics requests can share service limits, so API and authentication traffic use one paced HTTP session with bounded retries that honor rate-limit responses. If authentication or a request still fails, the source returns control to Beets so another provider can try. An optional metadata source shouldn't derail an import. Isolated plugin environments, type checks, coverage-regression checks, and a supported-Python test matrix help me keep that behavior intact as Beets and TIDAL change.

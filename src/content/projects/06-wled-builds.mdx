@@ -1,0 +1,29 @@
+---
+title: "WLED and WLED-MM builds"
+role: "solo-dev"
+goal: "Customized builds of WLED and the Moon Modules fork for a variety of LED driver boards I use at home."
+description: "Board-specific WLED and Moon Modules firmware for my home lighting, with containerized builds, automated releases, and fixes for large LED matrices."
+status: "active"
+logoImage: "wled.png"
+repositoryUrls: ["https://github.com/treyturner/wled-builds", "https://github.com/treyturner/wled-mm-builds"]
+technologyStack: ["PlatformIO", "C++", "Bash", "Docker", "GitHub Actions", "ESP32"]
+startDate: "2026-01-22"
+draft: false
+---
+
+Updating the lights at home shouldn't require me to remember which controller needs which pins, peripherals, and memory settings. These two repositories keep those choices in reusable build configurations: one for WLED and one for its Moon Modules fork. They share a build and release process while keeping upstream-specific settings separate.
+
+The hardware is a mix of QuinLED strip controllers, ESP32-S3 matrix boards, and an ESP32-A1S Audio Kit acting as a dedicated audio sender. Some targets have Ethernet or temperature sensors; others drive HUB75 panels. PlatformIO overrides describe those combinations, and a Docker-based toolchain builds a selected upstream tag, branch, or commit through the same Makefile locally and in CI. Across the two repositories, that provides:
+
+- Board-specific firmware for the strips, matrix panels, and audio-reactive lighting I use.
+- Reusable dependency caches, with preparation separated from parallel board builds.
+- Factory images for initial flashing and OTA images for updates.
+- Automated release publishing to GitHub and my Forgejo instance.
+
+A 256-by-64 matrix pushed the mainline WLED build beyond board configuration alone. Supporting a width of 256 meant updating validation, saved dimensions, and the configuration UI together. Another boundary check rejected a matrix using exactly the allowed pixel count. I carried those corrections as a narrow source patch.
+
+Fitting the matrix into memory took a different compromise. Putting the DMA framebuffer in external PSRAM freed internal RAM, but frequent cache flushes made full-frame updates too slow. For the Waveshare target, I kept a four-bit-per-channel DMA framebuffer in internal RAM and moved WLED's separate staging buffer to PSRAM. That leaves the timing-sensitive buffer on the faster path, at the cost of reduced color depth.
+
+I want those patches to be removable when upstream makes them unnecessary. Each is documented with its removal conditions, and the patch step accepts a fix that's already present upstream but stops if an outstanding patch no longer applies cleanly. That gives me something specific to review when updating, rather than silently carrying an increasingly uncertain set of changes.
+
+These are ongoing, unofficial builds for my own lighting setup. WLED and Moon Modules supply the effects and underlying firmware; my work is the hardware configuration, packaging, and targeted fixes. I'm not affiliated with either project or with QuinLED.
