@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import HomePortrait from '../components/ui/HomePortrait.astro';
 import TypewriterTitle from '../components/ui/TypewriterTitle.astro';
 import SocialIcon from '../components/ui/SocialIcon.astro';
 import siteData from '../data/site.json';
@@ -29,6 +30,7 @@ const socialRows = [
 
 <BaseLayout>
   <section class="vcard">
+    <HomePortrait />
     <h1 class="vcard-name">{siteData.name}</h1>
     <TypewriterTitle titles={siteData.rotatingTitles} fallback={siteData.title} timings={siteData.titleAnimation} />
     <p class="vcard-tagline">{siteData.tagline}</p>
@@ -62,7 +64,7 @@ const socialRows = [
     max-width: var(--content-width);
     margin-inline: auto;
     text-align: center;
-    padding: var(--spacing-3xl) 0;
+    padding: var(--spacing-2xl) 0 var(--spacing-3xl);
   }
 
   .vcard-name {

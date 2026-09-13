@@ -62,6 +62,12 @@ The project loader removes a leading number and hyphen from each path segment wh
 - Move logic into utilities and reusable components
 - Use schemas to validate content early
 
+### Home Portrait
+
+`HomePortrait.astro` displays `src/assets/people/trey-turner.jpg` above the home page name in a circular crop, scaling from 128px on phones to 160px on desktop. A decorative CSS circle sits slightly down and left behind the photo, retaining the old site's translucent yellow gradient in both themes. Astro generates responsive WebP images with explicit dimensions and eager loading; the photo and backdrop require no JavaScript.
+
+Strip private metadata from the source portrait before committing it; optimizing the served image does not protect the original in Git. `tests/unit/assets-home-portrait.test.ts` rejects EXIF/XMP, IPTC, comments, and unexpected application segments in the JPEG. Only the ICC profile and Adobe color-transform information are retained to preserve its appearance.
+
 ### Animated Home Title
 
 The home page progressively enhances its canonical `site.json` title with `TypewriterTitle.astro`. `rotatingTitles` supplies the ordered phrases; `titleAnimation` configures typing, deletion, initial delay, inter-title delay, and the completed-title hold (all in milliseconds). No Typed.js or client framework dependency is required.
