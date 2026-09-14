@@ -10,7 +10,7 @@ import portrait from '../../assets/people/trey-turner.jpg';
     width={160}
     height={160}
     widths={[128, 160, 256, 320, 384, 480, 512, 640, 768, 960]}
-    sizes="clamp(8rem, 20vw, 10rem)"
+    sizes="min(clamp(8rem, 20vw, 10rem), max(0px, calc(100vw - 5rem)))"
     format="webp"
     loading="eager"
     fetchpriority="high"
@@ -22,7 +22,7 @@ import portrait from '../../assets/people/trey-turner.jpg';
   .home-portrait {
     position: relative;
     isolation: isolate;
-    /* Keep the image's sizes hint in sync, including enlarged browser text. */
+    /* Keep sizes in sync: the narrow-screen cap also includes 3rem of container padding. */
     width: clamp(8rem, 20vw, 10rem);
     max-width: calc(100% - 2rem);
     aspect-ratio: 1;

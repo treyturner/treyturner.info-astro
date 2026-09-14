@@ -9,7 +9,7 @@ test('serves a responsive, optimized portrait with reserved dimensions', async (
   await expect(portrait).toHaveAttribute('loading', 'eager');
   await expect(portrait).toHaveAttribute('fetchpriority', 'high');
   await expect(portrait).toHaveAttribute('srcset', /128w.*160w.*256w.*320w.*384w.*480w.*512w.*640w.*768w.*960w/);
-  await expect(portrait).toHaveAttribute('sizes', 'clamp(8rem, 20vw, 10rem)');
+  await expect(portrait).toHaveAttribute('sizes', 'min(clamp(8rem, 20vw, 10rem), max(0px, calc(100vw - 5rem)))');
   await expect.poll(() => portrait.evaluate((image) => (image as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
   const currentSrc = await portrait.evaluate((image) => (image as HTMLImageElement).currentSrc);
   const response = await request.get(currentSrc);
@@ -23,7 +23,7 @@ for (const defaultFontSize of [16, 32]) {
       // A CSS font-size override does not change the browser preference used by `sizes`.
       const browser = await chromium.launch({ args: [`--blink-settings=defaultFontSize=${defaultFontSize}`] });
       try {
-        for (const width of [390, 700, 1280, 1920]) {
+        for (const width of [320, 390, 700, 1280, 1920]) {
           // Fresh contexts prevent a cached larger image from masking a bad source selection.
           const context = await browser.newContext({ baseURL, deviceScaleFactor, javaScriptEnabled: false, viewport: { width, height: 900 } });
           try {
@@ -48,6 +48,10 @@ for (const defaultFontSize of [16, 32]) {
             expect(dimensions.pixelRatio).toBe(deviceScaleFactor);
             const requiredPixels = dimensions.renderedWidth * deviceScaleFactor;
             expect(dimensions.sourceWidth).toBeGreaterThanOrEqual(Math.ceil(requiredPixels));
+            if (width === 320 && defaultFontSize === 32) {
+              expect(dimensions.renderedWidth).toBe(160);
+              expect(dimensions.sourceWidth).toBe(160 * deviceScaleFactor);
+            }
             // Normal-size displays should still receive a small, appropriate candidate.
             expect(dimensions.sourceWidth).toBeLessThanOrEqual(Math.ceil(requiredPixels * 1.3));
           } finally {
