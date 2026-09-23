@@ -1,4 +1,4 @@
-# AGENTS.md — Repository Knowledge
+# AGENTS.md - Repository Knowledge
 
 ## Project Overview
 

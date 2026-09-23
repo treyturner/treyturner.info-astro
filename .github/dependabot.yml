@@ -1,6 +1,6 @@
 version: 2
 updates:
-  # npm — Astro site dependencies
+  # npm - Astro site dependencies
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
@@ -32,7 +32,7 @@ updates:
         update-types:
           - "version-update:semver-major"
 
-  # GitHub Actions — keeps SHA-pinned actions current
+  # GitHub Actions - keeps SHA-pinned actions current
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

@@ -15,18 +15,18 @@ Proxmox VE is a free, open-source virtualization platform based on Debian. It co
 
 ### Key Benefits
 
-- **No licensing costs** — full-featured hypervisor at zero cost
-- **Web UI and API** — manage everything from a browser or automate with scripts
-- **Clustering** — built-in high availability across multiple nodes
-- **ZFS support** — enterprise-grade storage with snapshots and replication
+- **No licensing costs** - full-featured hypervisor at zero cost
+- **Web UI and API** - manage everything from a browser or automate with scripts
+- **Clustering** - built-in high availability across multiple nodes
+- **ZFS support** - enterprise-grade storage with snapshots and replication
 
 ## Cluster Layout
 
 My cluster consists of three nodes:
 
-1. **pve-01** — primary node, 64 GB RAM, Ryzen 7 5700G
-2. **pve-02** — secondary node, 32 GB RAM, Ryzen 5 5600G
-3. **pve-03** — lightweight node, 16 GB RAM, Intel N100
+1. **pve-01** - primary node, 64 GB RAM, Ryzen 7 5700G
+2. **pve-02** - secondary node, 32 GB RAM, Ryzen 5 5600G
+3. **pve-03** - lightweight node, 16 GB RAM, Intel N100
 
 Each node runs ZFS on mirrored NVMe drives for local storage, with a shared NFS mount for ISOs and backups.
 

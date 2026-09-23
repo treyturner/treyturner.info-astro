@@ -10,7 +10,7 @@ export async function GET(context: APIContext) {
   const sorted = sortByDate(published);
 
   return rss({
-    title: `${siteData.name} — Blog`,
+    title: `${siteData.name} - Blog`,
     description: siteData.tagline,
     site: context.site!.toString(),
     items: sorted.map((post) => ({

@@ -23,11 +23,11 @@ Stored in `src/data/`:
 
 Stored in `src/content/`:
 
-- `blog/` — MDX
-- `experience/` — JSON
-- `recommendations/` — JSON
-- `homelab/` — MDX
-- `projects/` — MDX
+- `blog/` - MDX
+- `experience/` - JSON
+- `recommendations/` - JSON
+- `homelab/` - MDX
+- `projects/` - MDX
 
 ### Project Ordering and URLs
 
@@ -49,8 +49,8 @@ The project loader removes a leading number and hyphen from each path segment wh
 
 ### Logo Assets
 
-- `src/assets/logos/companies/` — company logos used by Experience and Recommendations.
-- `src/assets/logos/projects/` — project logos resolved by the Projects schema.
+- `src/assets/logos/companies/` - company logos used by Experience and Recommendations.
+- `src/assets/logos/projects/` - project logos resolved by the Projects schema.
 - Content keeps filename-only references (`logo` or `logoImage`); each loader supplies the appropriate directory.
 - `ProjectLogo.astro` serves SVGs directly with explicit dimensions, bypassing the image endpoint's year-long development cache. Vite revalidates source assets in development and gives them content-hashed URLs in production. Raster logos still use Astro's image optimization.
 - Project logo images use `--image-color-scheme` to pass the selected site theme to embedded SVGs without changing other browser controls. The Astro SVG uses that scheme to switch its main mark between dark and white while keeping the gradient flame unchanged.
