@@ -70,7 +70,7 @@ Coverage must not regress relative to `main`.
 
 ## Iteration Overview
 
-### Iteration 1 — Foundation
+### Iteration 1 - Foundation
 
 Scope:
 
@@ -89,7 +89,7 @@ Scope:
   - Annotate run with clickable links to test reports
   - Pending success of the above, publish the site to GitHub Pages with the custom URL <https://astro.treyturner.info>
 
-### Iteration 2 — Content Collections & Core Pages
+### Iteration 2 - Content Collections & Core Pages
 
 Scope:
 
@@ -100,7 +100,7 @@ Scope:
 - Work Experience page
 - Recommendations page
 
-### Iteration 3 — Blog System
+### Iteration 3 - Blog System
 
 Scope:
 
@@ -109,7 +109,7 @@ Scope:
 - blog detail pages
 - RSS feed
 
-### Iteration 4 — Homelab, SEO, E2E Completeness
+### Iteration 4 - Homelab, SEO, E2E Completeness
 
 Scope:
 

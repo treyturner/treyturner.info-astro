@@ -1,6 +1,6 @@
-# treyturner.info — Astro
+# treyturner.info - Astro
 
-Personal site built with [Astro](https://astro.build/). Deployed as a static site to GitHub Pages at [astro.treyturner.info](https://astro.treyturner.info).
+Personal site built with [Astro](https://astro.build/). Deployed as a static site to GitHub Pages at [treyturner.info](https://treyturner.info).
 
 ## Stack
 
@@ -51,7 +51,7 @@ Same-origin Coder access does not require CORS configuration. With `CORS_ORIGINS
 
 ## Test strategy
 
-### Unit tests — Vitest
+### Unit tests - Vitest
 
 Location: `tests/unit/` (and any `src/**/*.test.ts`)
 
@@ -69,7 +69,7 @@ Vitest covers schema validation, utility functions, SEO helpers, and data valida
 | `utils-seo`               | SEO metadata helpers                   |
 | `utils-theme`             | Theme utility helpers                  |
 
-**Coverage thresholds** (enforced by Vitest): 80% lines, branches, functions, and statements across all `src/**/*.ts` files. Astro templates, pages, and content config are excluded — meaningful coverage belongs on the imported logic.
+**Coverage thresholds** (enforced by Vitest): 80% lines, branches, functions, and statements across all `src/**/*.ts` files. Astro templates, pages, and content config are excluded - meaningful coverage belongs on the imported logic.
 
 **Run unit tests:**
 
@@ -84,7 +84,7 @@ npm run test:coverage
 # HTML report: coverage/lcov-report/index.html
 ```
 
-### E2E tests — Playwright
+### E2E tests - Playwright
 
 Location: `tests/e2e/`
 
@@ -132,7 +132,7 @@ Remove the TypeScript ignore entry once both tools support TypeScript 7, then ru
 
 ## CI workflow
 
-[.github/workflows/ci.yml](.github/workflows/ci.yml) — single `CI` job, runs on every push to `main` and on pull requests targeting `main`.
+[.github/workflows/ci.yml](.github/workflows/ci.yml) - single `CI` job, runs on every push to `main` and on pull requests targeting `main`.
 
 Steps in order:
 
@@ -145,10 +145,10 @@ Steps in order:
 7. **Build** (`npm run build`)
 8. **Install Playwright browsers** (Chromium + system deps)
 9. **E2E tests** (`npm run test:e2e`)
-10. **Coverage regression check** — on PRs, builds base branch in a worktree and compares coverage summaries
+10. **Coverage regression check** - on PRs, builds base branch in a worktree and compares coverage summaries
 11. **Allure report generation** (always, if results directory exists)
-12. **Upload artifacts** (coverage report, Playwright report, Allure report — retained 7 days)
-13. **S3 uploads** (MinIO-backed; skipped for Dependabot runs) — reports uploaded under `s3://test-reports/treyturner.info-astro/<timestamp>/`
+12. **Upload artifacts** (coverage report, Playwright report, Allure report - retained 7 days)
+13. **S3 uploads** (MinIO-backed; skipped for Dependabot runs) - reports uploaded under `s3://test-reports/treyturner.info-astro/<timestamp>/`
 14. **Job summary** with direct links to all three hosted reports
 
 ## Docs

@@ -21,7 +21,7 @@ if (!basePath || !currentPath) {
 }
 
 if (!existsSync(basePath)) {
-  console.log('No base coverage found — skipping regression check, thresholds still enforced');
+  console.log('No base coverage found - skipping regression check, thresholds still enforced');
   process.exit(0);
 }
 

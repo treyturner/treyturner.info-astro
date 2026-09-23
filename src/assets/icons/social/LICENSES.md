@@ -4,14 +4,14 @@ These are local copies, rendered inline by `SocialIcon.astro`. Brand names and m
 remain the property of their respective owners. The SVG paths are unchanged;
 root attributes are normalized for the site's colors and accessible link labels.
 
-## Simple Icons — CC0 1.0
+## Simple Icons - CC0 1.0
 
 `forgejo.svg`, `tidal.svg`, and `retroachievements.svg` come from
 [Simple Icons at 4ba1924](https://github.com/simple-icons/simple-icons/tree/4ba19240849175ab4b855a732ab98c0f87cfb714/icons).
 They are distributed under [CC0 1.0 Universal](https://github.com/simple-icons/simple-icons/blob/4ba19240849175ab4b855a732ab98c0f87cfb714/LICENSE.md).
 CC0 does not grant trademark rights.
 
-## Bootstrap Icons — MIT
+## Bootstrap Icons - MIT
 
 `steam.svg`, `xbox.svg`, and `nintendo-switch.svg` come from
 [Bootstrap Icons v1.13.1](https://github.com/twbs/icons/tree/v1.13.1/icons).
@@ -38,7 +38,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-## Tabler Icons — MIT
+## Tabler Icons - MIT
 
 `turntable.svg` is the Vinyl icon from
 [Tabler Icons v3.46.0](https://github.com/tabler/tabler-icons/blob/v3.46.0/icons/outline/vinyl.svg).

@@ -82,7 +82,7 @@ jobs:
           if [ -d allure-results ]; then
             npx allure generate allure-results -o allure-report --clean
           else
-            echo "::warning::allure-results/ directory not found — skipping report generation"
+            echo "::warning::allure-results/ directory not found - skipping report generation"
           fi
 
       - name: Upload coverage report
@@ -133,7 +133,7 @@ jobs:
           if [ -d coverage ]; then
             aws s3 cp --recursive --endpoint-url "${{ vars.S3_URL }}" coverage/ "${S3_PREFIX}/"
           else
-            echo "::warning::coverage/ directory not found — skipping S3 upload"
+            echo "::warning::coverage/ directory not found - skipping S3 upload"
           fi
 
       - name: Upload Playwright report to S3
@@ -147,7 +147,7 @@ jobs:
           if [ -d playwright-report ]; then
             aws s3 cp --recursive --endpoint-url "${{ vars.S3_URL }}" playwright-report/ "${S3_PREFIX}/"
           else
-            echo "::warning::playwright-report/ directory not found — skipping S3 upload"
+            echo "::warning::playwright-report/ directory not found - skipping S3 upload"
           fi
 
       - name: Upload Allure report to S3
@@ -161,7 +161,7 @@ jobs:
           if [ -d allure-report ]; then
             aws s3 cp --recursive --endpoint-url "${{ vars.S3_URL }}" allure-report/ "${S3_PREFIX}/"
           else
-            echo "::warning::allure-report/ directory not found — skipping S3 upload"
+            echo "::warning::allure-report/ directory not found - skipping S3 upload"
           fi
 
       - name: Add report links to job summary
