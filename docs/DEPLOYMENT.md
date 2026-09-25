@@ -6,15 +6,11 @@ This site is deployed as a static Astro site to GitHub Pages.
 
 ## Blue/Green Rollout
 
-Current production Wordpress site remains live at:
+The old production Wordpress site is now retired.
+
+The new Astro site is now deployed to:
 
 - `treyturner.info`
-
-New Astro site is deployed first to:
-
-- `astro.treyturner.info`
-
-When ready, DNS can be updated to cut over the apex domain.
 
 ## GitHub Pages Notes
 
@@ -27,21 +23,8 @@ When ready, DNS can be updated to cut over the apex domain.
 
 Current Pages custom domain target:
 
-- `astro.treyturner.info`
+- `treyturner.info`
 
 Expected repo file:
 
 - `public/CNAME`
-
-Current CNAME contents:
-
-    astro.treyturner.info
-
-## Cutover Plan
-
-When ready to replace the old site:
-
-1. update `public/CNAME` to `treyturner.info`
-2. update DNS to point apex domain to GitHub Pages
-3. verify HTTPS/certificate issuance
-4. validate pages and canonical URLs after cutover

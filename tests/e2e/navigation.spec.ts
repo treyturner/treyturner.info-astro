@@ -166,7 +166,7 @@ test.describe('SEO meta tags on all pages', () => {
       const canonical = page.locator('link[rel="canonical"]');
       const href = await canonical.getAttribute('href');
       expect(href).toBeTruthy();
-      expect(href).toContain('astro.treyturner.info');
+      expect(href).toContain('treyturner.info');
     }
   });
 

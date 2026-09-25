@@ -25,7 +25,7 @@ if (process.env.WS_HOST) {
 
 export default defineConfig({
   integrations: [mdx()],
-  site: 'https://astro.treyturner.info',
+  site: 'https://treyturner.info',
   server: { allowedHosts },
   vite: {
     server: {
