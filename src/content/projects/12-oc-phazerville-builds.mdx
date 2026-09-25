@@ -1,0 +1,29 @@
+---
+title: "O_C Phazerville builds"
+role: "solo-dev"
+goal: "0-day firmware for one of my more flexible Eurorack modules"
+description: "Automated builds of Ornament & Crime custom firmware for Teensy 3.2 in VOR and non-VOR flavors."
+status: "active"
+repositoryUrls: ["https://github.com/treyturner/O_C-Phazerville"]
+liveUrl: "https://github.com/treyturner/O_C-Phazerville/releases"
+logoImage: "oc-phazerville.png"
+technologyStack: ["GitHub Actions", "C++"]
+startDate: "2026-09-02"
+endDate: "2026-09-03"
+draft: false
+---
+
+Ornament & Crime can fill several jobs in a Eurorack patch, and changing its firmware changes the tools available. I use Phazerville, whose Hemisphere interface runs two small applications side by side. This fork keeps my chosen combinations available for Teensy 3.2 hardware, with automated builds when new upstream releases arrive.
+
+The constraint is 256 KiB of flash. Choosing the applications is part of building the firmware, and even a modest addition can push an otherwise useful combination over the limit. I settled on two selections, each built for standard hardware and for modules with Variable Output Range (VOR) circuitry:
+
+- A fuller Hemisphere selection with the extra applet pack and eight presets. It leaves out Wave-Edit, Game of Life, Ponglet, and Tuner; the VOR version also omits Scope.
+- A leaner Hemisphere selection that makes room for Captain MIDI and Automatonnetz, while retaining Wave-Edit.
+
+I measured the flash and RAM cost of individual options and recorded the results in the README. In the documented builds, the fuller VOR image has just 888 bytes of flash left. That makes the sizing table useful when deciding what else can fit, though combinations still need to be compiled because applications can share code and storage. A local build script produces all four firmware files through PlatformIO.
+
+Getting the code to fit was only part of supporting the older board. I added Teensy 3.2 compatibility fixes and a display mode that avoids DMA transfers for reliability on open-source Teensy modules. The display and voltage outputs share a communication bus, so the non-DMA path needs careful timing. These builds refresh the display and process applications once every eight core timer interrupts, leaving more time for the main loop at the cost of a lower application processing rate. An optional diagnostic build shows startup checkpoints on the display and serial connection to help locate boot failures.
+
+The release workflow checks upstream daily and skips versions it has already handled. When a build is needed, it merges the selected upstream source with the fork's changes, compiles the four variants, and publishes the `.hex` files to GitHub Releases. Filenames identify the hardware, application selection, upstream version, build number, and source revision. I can also request a particular upstream tag, branch, or commit for a manual build.
+
+Phazerville's developers and the earlier Ornament & Crime and Hemisphere projects provide the musical applications. My contribution is maintaining these firmware selections, addressing the Teensy 3.2 constraints, and making the resulting builds easy to identify and download. It keeps a flexible module useful within the limits of the hardware I have.
