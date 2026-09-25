@@ -285,7 +285,7 @@ test.describe('Project detail pages', () => {
       await expect(activeLink).toHaveText('Projects');
       await expect(activeLink).toHaveAttribute('aria-current', 'location');
       await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
-        'href', new RegExp(`^https://astro\\.treyturner\\.info/projects/${id}/?$`),
+        'href', new RegExp(`^https://treyturner\\.info/projects/${id}/?$`),
       );
       const description = await page.locator('meta[name="description"]').getAttribute('content');
       expect(description).toBeTruthy();

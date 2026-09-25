@@ -6,7 +6,7 @@ import siteData from '../../data/site.json';
 interface Props extends SEOProps {}
 
 const props = Astro.props;
-const siteURL = Astro.site?.toString().replace(/\/$/, '') || 'https://astro.treyturner.info';
+const siteURL = Astro.site?.toString().replace(/\/$/, '') || 'https://treyturner.info';
 const pageCanonical = props.canonicalURL || `${siteURL}${Astro.url.pathname}`;
 
 const meta = buildSEOMeta({ ...props, canonicalURL: pageCanonical }, {
