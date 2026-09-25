@@ -1,0 +1,24 @@
+---
+title: "docker-dcss"
+role: "solo-dev"
+goal: "Containerize a browser-enabled build of one of my favorite roguelikes"
+description: "A standalone, containerized, webtile-enabled build of the classic turn-based CRPG Dungeon Crawl Stone Soup."
+status: "active"
+repositoryUrls: ["https://github.com/treyturner/docker-dcss"]
+liveUrl: "https://dcss.treyturner.info"
+logoImage: "dcss.webp"
+technologyStack: ["Docker", "Alpine", "C++"]
+startDate: "2026-03-18"
+endDate: "2026-03-27"
+draft: false
+---
+
+Dungeon Crawl Stone Soup is one of my favorite roguelikes, and its WebTiles interface makes it playable in a browser. I wanted a server I could put alongside the other services I host, with the game, web server, and dependencies packaged together. `docker-dcss` builds that package from an upstream release, ready to run with Docker.
+
+The build compiles Crawl's C++ source with WebTiles enabled on Alpine Linux, including a compatibility adjustment for Alpine's C library. It also prepares the Python dependencies for the bundled web server before assembling the runtime image. A build can select a release tag or resolve the latest upstream release automatically. The selected version travels with the image and appears in the browser lobby, which offers regular, seeded, Descent, tutorial, and Sprint games.
+
+Most of the setup happens when the container starts. A Bash entrypoint translates environment variables into the web server's configuration and game definitions. That covers listening ports, reverse-proxy support, connection limits, account registration, and optional HTTPS and password-reset email. It means I can change how an instance is hosted without maintaining a separate copy of Crawl's server configuration.
+
+Getting the storage paths right took several revisions. Crawl's save directory, the account database, player settings, recordings, and game records all need to survive a replacement container. The default layout puts them under one mounted `/data` directory. I also replaced the player-initialization script's hardcoded settings path and made startup create the version-specific database cache directory. Those details determine whether a container update leaves players with their accounts and progress intact.
+
+GitHub Actions builds development images and checks that both the recorded release tag and the executable's reported version match the intended release. Passing images are distributed through Docker Hub, GHCR, and my Forgejo registry. A separate workflow assigns release tags to those uploaded images, with an explicit choice to advance `latest`. Browser sessions and save recovery are outside the scope of those automated version checks. I can keep running a chosen release while the next one is available for testing.
