@@ -20,17 +20,17 @@
   },
   "dependencies": {
     "@astrojs/check": "^0.9.10",
-    "@astrojs/mdx": "^8.0.1",
+    "@astrojs/mdx": "^8.0.2",
     "@astrojs/rss": "^4.0.19",
-    "astro": "^7.3.3",
+    "astro": "^7.3.5",
     "typescript": "^6.0.3"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",
     "@types/node": "^25.9.8",
-    "@typescript-eslint/eslint-plugin": "^8.70.0",
+    "@typescript-eslint/eslint-plugin": "^8.70.1",
     "@typescript-eslint/parser": "^8.57.2",
-    "@vitest/coverage-v8": "^5.0.1",
+    "@vitest/coverage-v8": "^5.0.2",
     "allure-commandline": "^2.46.1",
     "allure-vitest": "^3.12.2",
     "eslint": "^10.11.0",
