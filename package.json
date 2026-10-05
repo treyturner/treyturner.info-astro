@@ -27,12 +27,12 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",
-    "@types/node": "^25.9.8",
-    "@typescript-eslint/eslint-plugin": "^8.70.1",
+    "@types/node": "^25.9.9",
+    "@typescript-eslint/eslint-plugin": "^8.71.0",
     "@typescript-eslint/parser": "^8.57.2",
-    "@vitest/coverage-v8": "^5.0.2",
+    "@vitest/coverage-v8": "^5.0.3",
     "allure-commandline": "^2.46.1",
-    "allure-vitest": "^3.12.2",
+    "allure-vitest": "^3.13.0",
     "eslint": "^10.11.0",
     "eslint-plugin-astro": "^3.2.1",
     "vitest": "^5.0.0"
