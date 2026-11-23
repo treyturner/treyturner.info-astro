@@ -20,19 +20,19 @@
   },
   "dependencies": {
     "@astrojs/check": "^0.9.12",
-    "@astrojs/mdx": "^8.1.5",
+    "@astrojs/mdx": "^8.1.6",
     "@astrojs/rss": "^4.0.19",
-    "astro": "^7.4.11",
+    "astro": "^7.4.13",
     "typescript": "^6.0.3"
   },
   "devDependencies": {
-    "@playwright/test": "^1.65.0",
+    "@playwright/test": "^1.65.1",
     "@types/node": "^25.9.9",
     "@typescript-eslint/eslint-plugin": "^8.73.0",
     "@typescript-eslint/parser": "^8.73.0",
-    "@vitest/coverage-v8": "^5.1.0",
+    "@vitest/coverage-v8": "^5.1.1",
     "allure-commandline": "^2.46.1",
-    "allure-vitest": "^3.14.0",
+    "allure-vitest": "^3.15.0",
     "eslint": "^10.15.0",
     "eslint-plugin-astro": "^3.2.1",
     "vitest": "^5.0.0"
